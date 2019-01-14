@@ -21,7 +21,6 @@ class Home extends Component {
       .then(res => res.json())
       .then((body) => {
         const topFive = body.items.filter((_, i) => i < 5);
-        console.log(l, topFive);
         this.setState(prevState => ({
           popularRepos: [...prevState.popularRepos, ...topFive],
         }));

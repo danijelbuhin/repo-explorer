@@ -16,7 +16,8 @@ class Home extends Component {
     topics.forEach((l) => {
       promises.push(this.fetchPopularRepos(l));
     });
-    axios.all(promises)
+    axios
+      .all(promises)
       .then(() => {
         this.setState(({ popularRepos }) => ({
           isLoading: false,

@@ -9,7 +9,6 @@ class Home extends Component {
   views = db.collection('views');
 
   state = {
-    value: '',
     popularViews: [],
     popularRepos: [],
     isLoading: true,
@@ -47,25 +46,22 @@ class Home extends Component {
     })
   )
 
-  handleSearch = (e) => {
-    const { value } = this.state;
-    if (e.keyCode === 13) {
-      this.views.doc(value).get().then((doc) => {
-        if (doc.exists) {
-          this.views.doc(value).set({
-            value,
-            views: doc.data().views + 1,
-            viewed_at: moment().toDate().getTime(),
-          });
-        } else {
-          this.views.doc(value).set({
-            value,
-            views: 1,
-            viewed_at: moment().toDate().getTime(),
-          });
-        }
-      });
-    }
+  handleView = (params) => {
+    this.views.doc(String(params.id)).get().then((doc) => {
+      if (doc.exists) {
+        this.views.doc(String(params.id)).set({
+          ...params,
+          views: doc.data().views + 1,
+          viewed_at: moment().toDate().getTime(),
+        });
+      } else {
+        this.views.doc(String(params.id)).set({
+          ...params,
+          views: 1,
+          viewed_at: moment().toDate().getTime(),
+        });
+      }
+    });
   }
 
   fetchPopularRepos(topic) {
@@ -84,7 +80,7 @@ class Home extends Component {
   }
 
   render() {
-    const { isLoading, hasError, popularRepos, value, popularViews } = this.state;
+    const { isLoading, hasError, popularRepos, popularViews } = this.state;
     if (isLoading) {
       return <div>Loading...</div>;
     }
@@ -95,7 +91,20 @@ class Home extends Component {
       <div>
         <h2>Popular:</h2>
         {popularRepos.filter((_, i) => i < 5).map(repo => (
-          <div key={repo.id} style={{ borderBottom: '1px solid black' }}>
+          <div
+            key={repo.id}
+            role="presentation"
+            style={{ borderBottom: '1px solid black' }}
+            onClick={() => {
+              this.handleView({
+                id: repo.id,
+                name: repo.name,
+                full_name: repo.full_name,
+                avatar_url: repo.owner.avatar_url,
+                stargazers_count: repo.stargazers_count,
+              });
+            }}
+          >
             <img
               src={repo.owner.avatar_url}
               alt={repo.name}
@@ -105,19 +114,16 @@ class Home extends Component {
           </div>
         ))}
         <h2>Most viewed repos:</h2>
-        <input
-          value={value}
-          onChange={(e) => {
-            this.setState({ value: e.target.value });
-          }}
-          onKeyUp={this.handleSearch}
-        />
-        <hr />
         {popularViews.map(view => (
           <div key={view.id}>
-            {view.value} - {view.views}
+            <img
+              src={view.avatar_url}
+              alt={view.name}
+              style={{ width: 36, height: 36, marginRight: 10, borderRadius: '100%' }}
+            />
+            {view.full_name} - {view.views}
             <br />
-            Latest viewed at: {`${moment(view.viewed).format('DD MMM YYYY, HH:mm:ss')}h`}
+            Latest viewed at: {`${moment(view.viewed_at).format('DD MMM YYYY, HH:mm:ss')}h`}
           </div>
         ))}
       </div>

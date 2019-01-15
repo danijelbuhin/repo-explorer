@@ -7,6 +7,7 @@ class Home extends Component {
   state = {
     popularRepos: [],
     isLoading: true,
+    hasError: false,
   }
 
   componentDidMount() {
@@ -15,14 +16,16 @@ class Home extends Component {
     topics.forEach((l) => {
       promises.push(this.fetchPopularRepos(l));
     });
-    axios.all(promises).then(() => {
-      this.setState(({ popularRepos }) => ({
-        isLoading: false,
-        popularRepos: popularRepos
-          .filter((repo, i, self) => i === self.findIndex(t => t.id === repo.id))
-          .sort((a, b) => b.stargazers_count - a.stargazers_count),
-      }));
-    });
+    axios.all(promises)
+      .then(() => {
+        this.setState(({ popularRepos }) => ({
+          isLoading: false,
+          popularRepos: popularRepos
+            .filter((repo, i, self) => i === self.findIndex(t => t.id === repo.id))
+            .sort((a, b) => b.stargazers_count - a.stargazers_count),
+        }));
+      })
+      .catch(() => this.setState(() => ({ isLoading: false, hasError: true })));
   }
 
   fetchPopularRepos(topic) {
@@ -41,9 +44,12 @@ class Home extends Component {
   }
 
   render() {
-    const { isLoading, popularRepos } = this.state;
+    const { isLoading, hasError, popularRepos } = this.state;
     if (isLoading) {
       return <div>Loading...</div>;
+    }
+    if (hasError) {
+      return <div>An error has occured.</div>;
     }
     return (
       <div>

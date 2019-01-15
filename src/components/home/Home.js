@@ -2,9 +2,14 @@ import React, { Component } from 'react';
 import axios from 'axios';
 
 import withAppContext from '../shared/app/withAppContext';
+import db from '../../utils/firebase';
 
 class Home extends Component {
+  searches = db.collection('searches');
+
   state = {
+    value: '',
+    popularSearches: [],
     popularRepos: [],
     isLoading: true,
     hasError: false,
@@ -17,16 +22,48 @@ class Home extends Component {
       promises.push(this.fetchPopularRepos(l));
     });
     axios
-      .all(promises)
+      .all([...promises, this.handleSearchesUpdate()])
       .then(() => {
-        this.setState(({ popularRepos }) => ({
+        this.setState(({ popularRepos, popularSearches }) => ({
           isLoading: false,
           popularRepos: popularRepos
             .filter((repo, i, self) => i === self.findIndex(t => t.id === repo.id))
             .sort((a, b) => b.stargazers_count - a.stargazers_count),
+          popularSearches,
         }));
       })
       .catch(() => this.setState(() => ({ isLoading: false, hasError: true })));
+  }
+
+  handleSearchesUpdate = () => {
+    this.searches.orderBy('searches', 'desc').limit(3).get().then(({ docs }) => {
+      const searches = [];
+      docs.forEach(doc => searches.push({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      this.setState({ popularSearches: searches });
+    });
+  }
+
+  handleSearch = (e) => {
+    const { value } = this.state;
+    if (e.keyCode === 13) {
+      this.searches.doc(value).get().then((doc) => {
+        console.log(doc);
+        if (doc.exists) {
+          this.searches.doc(value).set({
+            value,
+            searches: doc.data().searches + 1,
+          });
+        } else {
+          this.searches.doc(value).set({
+            value,
+            searches: 1,
+          });
+        }
+      });
+    }
   }
 
   fetchPopularRepos(topic) {
@@ -45,7 +82,7 @@ class Home extends Component {
   }
 
   render() {
-    const { isLoading, hasError, popularRepos } = this.state;
+    const { isLoading, hasError, popularRepos, value, popularSearches } = this.state;
     if (isLoading) {
       return <div>Loading...</div>;
     }
@@ -54,7 +91,8 @@ class Home extends Component {
     }
     return (
       <div>
-        {popularRepos.map(repo => (
+        <h2>Popular:</h2>
+        {popularRepos.filter((_, i) => i < 5).map(repo => (
           <div key={repo.id} style={{ borderBottom: '1px solid black' }}>
             <img
               src={repo.owner.avatar_url}
@@ -62,6 +100,21 @@ class Home extends Component {
               style={{ width: 36, height: 36, marginRight: 10, borderRadius: '100%' }}
             />
             {repo.full_name} - {repo.stargazers_count} - {repo.language || `#${repo.topics[0]}` || 'N/A'}
+          </div>
+        ))}
+        <h2>Searches:</h2>
+        <input
+          value={value}
+          onChange={(e) => {
+            this.setState({ value: e.target.value });
+          }}
+          onKeyUp={this.handleSearch}
+        />
+        <hr />
+        {popularSearches.map(search => (
+          <div key={search.id}>
+            {search.value} - {search.searches}
+            {console.log(search)}
           </div>
         ))}
       </div>

@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import moment from 'moment';
 
 import withAppContext from '../shared/app/withAppContext';
 import db from '../../utils/firebase';
 
 class Home extends Component {
-  searches = db.collection('searches');
+  views = db.collection('views');
 
   state = {
     value: '',
-    popularSearches: [],
+    popularViews: [],
     popularRepos: [],
     isLoading: true,
     hasError: false,
@@ -24,42 +25,43 @@ class Home extends Component {
     axios
       .all([...promises, this.handleSearchesUpdate()])
       .then(() => {
-        this.setState(({ popularRepos, popularSearches }) => ({
+        this.setState(({ popularRepos, popularViews }) => ({
           isLoading: false,
           popularRepos: popularRepos
             .filter((repo, i, self) => i === self.findIndex(t => t.id === repo.id))
             .sort((a, b) => b.stargazers_count - a.stargazers_count),
-          popularSearches,
+          popularViews,
         }));
       })
       .catch(() => this.setState(() => ({ isLoading: false, hasError: true })));
   }
 
   handleSearchesUpdate = () => {
-    this.searches.orderBy('searches', 'desc').limit(3).get().then(({ docs }) => {
-      const searches = [];
-      docs.forEach(doc => searches.push({
+    return this.views.orderBy('views', 'desc').limit(3).get().then(({ docs }) => {
+      const views = [];
+      docs.forEach(doc => views.push({
         id: doc.id,
         ...doc.data(),
       }));
-      this.setState({ popularSearches: searches });
+      this.setState({ popularViews: views });
     });
   }
 
   handleSearch = (e) => {
     const { value } = this.state;
     if (e.keyCode === 13) {
-      this.searches.doc(value).get().then((doc) => {
-        console.log(doc);
+      this.views.doc(value).get().then((doc) => {
         if (doc.exists) {
-          this.searches.doc(value).set({
+          this.views.doc(value).set({
             value,
-            searches: doc.data().searches + 1,
+            views: doc.data().views + 1,
+            viewed_at: moment().toDate().getTime(),
           });
         } else {
-          this.searches.doc(value).set({
+          this.views.doc(value).set({
             value,
-            searches: 1,
+            views: 1,
+            viewed_at: moment().toDate().getTime(),
           });
         }
       });
@@ -82,7 +84,7 @@ class Home extends Component {
   }
 
   render() {
-    const { isLoading, hasError, popularRepos, value, popularSearches } = this.state;
+    const { isLoading, hasError, popularRepos, value, popularViews } = this.state;
     if (isLoading) {
       return <div>Loading...</div>;
     }
@@ -102,7 +104,7 @@ class Home extends Component {
             {repo.full_name} - {repo.stargazers_count} - {repo.language || `#${repo.topics[0]}` || 'N/A'}
           </div>
         ))}
-        <h2>Searches:</h2>
+        <h2>Most viewed repos:</h2>
         <input
           value={value}
           onChange={(e) => {
@@ -111,10 +113,11 @@ class Home extends Component {
           onKeyUp={this.handleSearch}
         />
         <hr />
-        {popularSearches.map(search => (
-          <div key={search.id}>
-            {search.value} - {search.searches}
-            {console.log(search)}
+        {popularViews.map(view => (
+          <div key={view.id}>
+            {view.value} - {view.views}
+            <br />
+            Latest viewed at: {`${moment(view.viewed).format('DD MMM YYYY, HH:mm:ss')}h`}
           </div>
         ))}
       </div>

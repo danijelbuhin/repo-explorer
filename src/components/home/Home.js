@@ -36,16 +36,16 @@ class Home extends Component {
       .catch(() => this.setState(() => ({ isLoading: false, hasError: true })));
   }
 
-  handleSearchesUpdate = () => {
-    return this.views.orderBy('views', 'desc').limit(3).get().then(({ docs }) => {
+  handleSearchesUpdate = () => (
+    this.views.orderBy('views', 'desc').limit(3).get().then(({ docs }) => {
       const views = [];
       docs.forEach(doc => views.push({
         id: doc.id,
         ...doc.data(),
       }));
       this.setState({ popularViews: views });
-    });
-  }
+    })
+  )
 
   handleSearch = (e) => {
     const { value } = this.state;

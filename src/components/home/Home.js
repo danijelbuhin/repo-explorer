@@ -10,28 +10,30 @@ class Home extends Component {
   }
 
   componentDidMount() {
-    const languages = ['ruby', 'php', 'javascript', 'java', 'python'];
+    const topics = ['ruby', 'php', 'javascript', 'java', 'python', 'go', 'typescript'];
     const promises = [];
-    languages.forEach((l) => {
+    topics.forEach((l) => {
       promises.push(this.fetchPopularRepos(l));
     });
     axios.all(promises).then(() => {
       this.setState(({ popularRepos }) => ({
         isLoading: false,
-        popularRepos: popularRepos.sort((a, b) => b.stargazers_count - a.stargazers_count),
+        popularRepos: popularRepos
+          .filter((repo, i, self) => i === self.findIndex(t => t.id === repo.id))
+          .sort((a, b) => b.stargazers_count - a.stargazers_count),
       }));
     });
   }
 
-  fetchPopularRepos(language) {
+  fetchPopularRepos(topic) {
     return axios
-      .get(`https://api.github.com/search/repositories?q=topic:${language}&client_id=edc304d4e5871143c167&client_secret=39e5f4613d7c4c23e96b7ad2f0b2b7546e05fb19&sort=stars&order=desc`, {
+      .get(`https://api.github.com/search/repositories?q=topic:${topic}&client_id=edc304d4e5871143c167&client_secret=39e5f4613d7c4c23e96b7ad2f0b2b7546e05fb19&sort=stars&order=desc`, {
         headers: {
           Accept: 'application/vnd.github.mercy-preview+json',
         },
       })
       .then(({ data }) => {
-        const topFive = data.items.filter(item => item.language).filter((_, i) => i < 5);
+        const topFive = data.items.filter((_, i) => i < 5);
         this.setState(prevState => ({
           popularRepos: [...prevState.popularRepos, ...topFive],
         }));
@@ -41,13 +43,18 @@ class Home extends Component {
   render() {
     const { isLoading, popularRepos } = this.state;
     if (isLoading) {
-      return <div>Loading..</div>;
+      return <div>Loading...</div>;
     }
     return (
       <div>
         {popularRepos.map(repo => (
-          <div key={repo.name} style={{ borderBottom: '1px solid black' }}>
-            {repo.name} - {repo.stargazers_count} - {repo.language}
+          <div key={repo.id} style={{ borderBottom: '1px solid black' }}>
+            <img
+              src={repo.owner.avatar_url}
+              alt={repo.name}
+              style={{ width: 36, height: 36, marginRight: 10, borderRadius: '100%' }}
+            />
+            {repo.full_name} - {repo.stargazers_count} - {repo.language || `#${repo.topics[0]}` || 'N/A'}
           </div>
         ))}
       </div>

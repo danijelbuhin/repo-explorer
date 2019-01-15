@@ -33,7 +33,7 @@ class Home extends Component {
         },
       })
       .then(({ data }) => {
-        const topFive = data.items.filter((_, i) => i < 5);
+        const topFive = data.items.filter((_, i) => i < 10);
         this.setState(prevState => ({
           popularRepos: [...prevState.popularRepos, ...topFive],
         }));

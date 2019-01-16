@@ -46,41 +46,49 @@ const RateLimit = ({
       search,
       core,
       isLoading,
+      latest_usage,
     },
   },
 }) => (
-  <div
-    style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      position: 'relative',
-    }}
-  >
-    {isLoading && (
-      <SpinnerWrapper>
-        <Spinner />
-      </SpinnerWrapper>
-    )}
-    <div>
-      Search Rate Limit:
-      <ul>
-        <li><strong>Limit: </strong> {search.limit}</li>
-        <li><strong>Remaining: </strong> {search.remaining}</li>
-        <li>
-          <strong>Reset time: </strong>
-          {`${moment(search.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
-        </li>
-      </ul>
-    </div>
-    <div>
-      Core Rate Limit:
-      <ul>
-        <li><strong>Limit: </strong> {core.limit}</li>
-        <li><strong>Remaining: </strong> {core.remaining}</li>
-        <li><strong>Reset time: </strong>
-          {`${moment(core.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
-        </li>
-      </ul>
+  <div>
+    <h2>Rate limit</h2>
+    <p>
+      <strong>Latest usage: </strong>
+      {`${moment(latest_usage * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
+    </p>
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        position: 'relative',
+      }}
+    >
+      {isLoading && (
+        <SpinnerWrapper>
+          <Spinner />
+        </SpinnerWrapper>
+      )}
+      <div>
+        Search Rate Limit:
+        <ul>
+          <li><strong>Limit: </strong> {search.limit}</li>
+          <li><strong>Remaining: </strong> {search.remaining}</li>
+          <li>
+            <strong>Reset time: </strong>
+            {`${moment(search.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
+          </li>
+        </ul>
+      </div>
+      <div>
+        Core Rate Limit:
+        <ul>
+          <li><strong>Limit: </strong> {core.limit}</li>
+          <li><strong>Remaining: </strong> {core.remaining}</li>
+          <li><strong>Reset time: </strong>
+            {`${moment(core.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 );
@@ -88,6 +96,7 @@ const RateLimit = ({
 RateLimit.propTypes = {
   appContext: PropTypes.shape({
     rateLimit: PropTypes.shape({
+      latest_usage: PropTypes.number,
       isLoading: PropTypes.bool,
       search: PropTypes.object,
       core: PropTypes.object,

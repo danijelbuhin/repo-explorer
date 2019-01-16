@@ -1,6 +1,7 @@
 import React, { Component, createContext } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
+import moment from 'moment';
 
 export const AppContext = createContext();
 export const { Consumer, Provider } = AppContext;
@@ -15,6 +16,7 @@ class AppProvider extends Component {
       core: {},
       search: {},
       isLoading: false,
+      latest_usage: 0,
     },
   }
 
@@ -36,6 +38,7 @@ class AppProvider extends Component {
             core,
             search,
             isLoading: false,
+            latest_usage: moment().unix(),
           },
         }));
       });

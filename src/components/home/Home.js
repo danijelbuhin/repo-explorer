@@ -16,13 +16,8 @@ class Home extends Component {
   }
 
   componentDidMount() {
-    const topics = ['ruby', 'php', 'javascript', 'java', 'python', 'go', 'typescript'];
-    const promises = [];
-    topics.forEach((l) => {
-      promises.push(this.fetchPopularRepos(l));
-    });
     axios
-      .all([...promises, this.handleSearchesUpdate()])
+      .all([this.fetchRepos(), this.fetchViews()])
       .then(() => {
         this.setState(({ popularRepos, popularViews }) => ({
           isLoading: false,
@@ -35,7 +30,7 @@ class Home extends Component {
       .catch(() => this.setState(() => ({ isLoading: false, hasError: true })));
   }
 
-  handleSearchesUpdate = () => (
+  fetchViews = () => (
     this.views.orderBy('views', 'desc').limit(3).get().then(({ docs }) => {
       const views = [];
       docs.forEach(doc => views.push({
@@ -64,11 +59,18 @@ class Home extends Component {
     });
   }
 
-  fetchPopularRepos(topic) {
+  fetchRepos() {
     return axios
-      .get(`https://api.github.com/search/repositories?q=topic:${topic}&client_id=edc304d4e5871143c167&client_secret=39e5f4613d7c4c23e96b7ad2f0b2b7546e05fb19&sort=stars&order=desc`, {
+      .get('https://api.github.com/search/repositories', {
         headers: {
           Accept: 'application/vnd.github.mercy-preview+json',
+        },
+        params: {
+          client_secret: '39e5f4613d7c4c23e96b7ad2f0b2b7546e05fb19',
+          client_id: 'edc304d4e5871143c167',
+          q: 'stars:>=50000',
+          sort: 'stars',
+          order: 'desc',
         },
       })
       .then(({ data }) => {
@@ -90,7 +92,7 @@ class Home extends Component {
     return (
       <div>
         <h2>Popular:</h2>
-        {popularRepos.filter((_, i) => i < 5).map(repo => (
+        {popularRepos.map(repo => (
           <div
             key={repo.id}
             role="presentation"

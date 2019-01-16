@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import moment from 'moment';
 
 import withAppContext from '../shared/app/withAppContext';
-import db from '../../utils/firebase';
+
+import db from '../../services/firebase';
+
+import RateLimit from '../shared/rate-limit/RateLimit';
 
 class Home extends Component {
   views = db.collection('views');
@@ -16,26 +20,19 @@ class Home extends Component {
   }
 
   componentDidMount() {
-    const topics = ['ruby', 'php', 'javascript', 'java', 'python', 'go', 'typescript'];
-    const promises = [];
-    topics.forEach((l) => {
-      promises.push(this.fetchPopularRepos(l));
-    });
     axios
-      .all([...promises, this.handleSearchesUpdate()])
+      .all([this.fetchRepos(), this.fetchViews()])
       .then(() => {
         this.setState(({ popularRepos, popularViews }) => ({
           isLoading: false,
-          popularRepos: popularRepos
-            .filter((repo, i, self) => i === self.findIndex(t => t.id === repo.id))
-            .sort((a, b) => b.stargazers_count - a.stargazers_count),
+          popularRepos,
           popularViews,
         }));
       })
       .catch(() => this.setState(() => ({ isLoading: false, hasError: true })));
   }
 
-  handleSearchesUpdate = () => (
+  fetchViews = () => (
     this.views.orderBy('views', 'desc').limit(3).get().then(({ docs }) => {
       const views = [];
       docs.forEach(doc => views.push({
@@ -64,17 +61,13 @@ class Home extends Component {
     });
   }
 
-  fetchPopularRepos(topic) {
-    return axios
-      .get(`https://api.github.com/search/repositories?q=topic:${topic}&client_id=edc304d4e5871143c167&client_secret=39e5f4613d7c4c23e96b7ad2f0b2b7546e05fb19&sort=stars&order=desc`, {
-        headers: {
-          Accept: 'application/vnd.github.mercy-preview+json',
-        },
-      })
-      .then(({ data }) => {
-        const topFive = data.items.filter((_, i) => i < 10);
-        this.setState(prevState => ({
-          popularRepos: [...prevState.popularRepos, ...topFive],
+  fetchRepos = () => {
+    const { fetchPopularRepos } = this.props.appContext;
+    return fetchPopularRepos()
+      .then(({ items }) => {
+        const topResults = items.filter((_, i) => i < 15);
+        this.setState(() => ({
+          popularRepos: topResults,
         }));
       });
   }
@@ -87,10 +80,14 @@ class Home extends Component {
     if (hasError) {
       return <div>An error has occured.</div>;
     }
+    console.log(this.props);
     return (
       <div>
+        <RateLimit />
         <h2>Popular:</h2>
-        {popularRepos.filter((_, i) => i < 5).map(repo => (
+        <button onClick={this.props.appContext.fetchPopularRepos} type="button">Refetch</button>
+        <button onClick={this.props.appContext.fetchRepo} type="button">Fetch repo</button>
+        {popularRepos.map(repo => (
           <div
             key={repo.id}
             role="presentation"
@@ -130,5 +127,12 @@ class Home extends Component {
     );
   }
 }
+
+Home.propTypes = {
+  appContext: PropTypes.shape({
+    fetchPopularRepos: PropTypes.func,
+    fetchRepo: PropTypes.func,
+  }).isRequired,
+};
 
 export default withAppContext(Home);

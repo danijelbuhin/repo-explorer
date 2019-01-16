@@ -9,7 +9,7 @@ export default createGlobalStyle`
   body {
     height: 100%;
 
-    margin: 0;
+    margin: 10px;
 
     font-family: 'Consolas', sans-serif;
     font-size: 14px;

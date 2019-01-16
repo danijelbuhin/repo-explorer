@@ -14,6 +14,7 @@ class AppProvider extends Component {
     rateLimit: {
       core: {},
       search: {},
+      isLoading: false,
     },
   }
 
@@ -21,20 +22,24 @@ class AppProvider extends Component {
     this.fetchRateLimit();
   }
 
-  fetchRateLimit = () => axios
-    .get('https://api.github.com/rate_limit', {
-      params: {
-        ...tokens,
-      },
-    })
-    .then(({ data: { resources: { core, search } } }) => {
-      this.setState(() => ({
-        rateLimit: {
-          core,
-          search,
+  fetchRateLimit = () => {
+    this.setState(({ rateLimit }) => ({ rateLimit: { ...rateLimit, isLoading: true } }));
+    return axios
+      .get('https://api.github.com/rate_limit', {
+        params: {
+          ...tokens,
         },
-      }));
-    });
+      })
+      .then(({ data: { resources: { core, search } } }) => {
+        this.setState(() => ({
+          rateLimit: {
+            core,
+            search,
+            isLoading: false,
+          },
+        }));
+      });
+  }
 
   fetchPopularRepos = () => axios
     .get('https://api.github.com/search/repositories', {

@@ -49,14 +49,27 @@ const RateLimit = ({
     },
   },
 }) => (
-  <div style={{ display: 'inline-flex', alignItems: 'center', position: 'relative' }}>
-    { isLoading && <SpinnerWrapper><Spinner /></SpinnerWrapper> }
+  <div
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      position: 'relative',
+    }}
+  >
+    {isLoading && (
+      <SpinnerWrapper>
+        <Spinner />
+      </SpinnerWrapper>
+    )}
     <div>
       Search Rate Limit:
       <ul>
         <li><strong>Limit: </strong> {search.limit}</li>
         <li><strong>Remaining: </strong> {search.remaining}</li>
-        <li><strong>Reset: </strong> {`${moment(search.reset).format('DD MMM YYYY, HH:mm:ss')}h`}</li>
+        <li>
+          <strong>Reset time: </strong>
+          {`${moment(search.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
+        </li>
       </ul>
     </div>
     <div>
@@ -64,7 +77,9 @@ const RateLimit = ({
       <ul>
         <li><strong>Limit: </strong> {core.limit}</li>
         <li><strong>Remaining: </strong> {core.remaining}</li>
-        <li><strong>Reset: </strong> {`${moment(core.reset).format('DD MMM YYYY, HH:mm:ss')}h`}</li>
+        <li><strong>Reset time: </strong>
+          {`${moment(core.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
+        </li>
       </ul>
     </div>
   </div>

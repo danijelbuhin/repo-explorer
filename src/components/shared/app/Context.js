@@ -5,6 +5,7 @@ import moment from 'moment';
 
 export const AppContext = createContext();
 export const { Consumer, Provider } = AppContext;
+
 const tokens = {
   client_secret: '39e5f4613d7c4c23e96b7ad2f0b2b7546e05fb19',
   client_id: 'edc304d4e5871143c167',
@@ -18,6 +19,7 @@ class AppProvider extends Component {
       isLoading: false,
       latest_usage: 0,
     },
+    user: null,
   }
 
   componentDidMount() {
@@ -83,21 +85,33 @@ class AppProvider extends Component {
       return err;
     });
 
-  render() {
-    const { rateLimit } = this.state;
-    return (
-      <Provider
-        value={{
-          rateLimit,
-          fetchRateLimit: this.fetchRateLimit,
-          fetchPopularRepos: this.fetchPopularRepos,
-          fetchRepo: this.fetchRepo,
-        }}
-      >
-        {this.props.children}
-      </Provider>
-    );
-  }
+    authenticate = (code) => {
+      axios
+        .get(`https://repo-explorer-auth.herokuapp.com/authenticate/${code}`)
+        .then(({ data: { token } }) => {
+          console.log('res', token);
+          this.setState({ user: { token } });
+        })
+        .catch(err => console.log('auth', err));
+    }
+
+    render() {
+      const { rateLimit, user } = this.state;
+      return (
+        <Provider
+          value={{
+            rateLimit,
+            fetchRateLimit: this.fetchRateLimit,
+            fetchPopularRepos: this.fetchPopularRepos,
+            fetchRepo: this.fetchRepo,
+            authenticate: this.authenticate,
+            user,
+          }}
+        >
+          {this.props.children}
+        </Provider>
+      );
+    }
 }
 
 AppProvider.propTypes = {

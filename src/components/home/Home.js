@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import moment from 'moment';
+import qs from 'qs';
 
 import withAppContext from '../shared/app/withAppContext';
 
@@ -20,6 +21,10 @@ class Home extends Component {
   }
 
   componentDidMount() {
+    const authCode = qs.parse(this.props.location.search, { ignoreQueryPrefix: true }).code;
+    if (authCode) {
+      this.props.appContext.authenticate(authCode);
+    }
     axios
       .all([this.fetchRepos(), this.fetchViews()])
       .then(() => {
@@ -72,6 +77,10 @@ class Home extends Component {
       });
   }
 
+  authenticate = () => {
+    window.location.href = 'https://github.com/login/oauth/authorize?client_id=edc304d4e5871143c167&client_secret=39e5f4613d7c4c23e96b7ad2f0b2b7546e05fb19';
+  }
+
   render() {
     const { isLoading, hasError, popularRepos, popularViews } = this.state;
     if (isLoading) {
@@ -84,6 +93,7 @@ class Home extends Component {
     return (
       <div>
         <RateLimit />
+        <button onClick={this.authenticate} type="button">Authenticate</button>
         <h2>Popular:</h2>
         <button onClick={this.props.appContext.fetchPopularRepos} type="button">Refetch</button>
         <button onClick={this.props.appContext.fetchRepo} type="button">Fetch repo</button>
@@ -132,6 +142,10 @@ Home.propTypes = {
   appContext: PropTypes.shape({
     fetchPopularRepos: PropTypes.func,
     fetchRepo: PropTypes.func,
+    authenticate: PropTypes.func,
+  }).isRequired,
+  location: PropTypes.shape({
+    search: PropTypes.string,
   }).isRequired,
 };
 

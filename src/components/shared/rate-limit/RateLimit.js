@@ -25,6 +25,9 @@ const Spinner = styled.div`
   height: 30px;
 
   border-top: 1px solid #335abb;
+  border-bottom: 1px solid transparent;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
   border-radius: 100%;
   background: transparent;
 
@@ -48,10 +51,23 @@ const RateLimit = ({
       isLoading,
       latest_usage,
     },
+    user,
+    isAuthenticated,
+    authenticate,
+    logOut,
   },
 }) => (
   <div>
-    <h2>Rate limit</h2>
+    <h2>Hello {isAuthenticated ? user.name : 'Guest'}, you{'\''}re using {user ? 'your own' : 'shared'} rate limit</h2>
+    {isAuthenticated && (
+      <button onClick={logOut} type="button">Log out</button>
+    )}
+    {!isAuthenticated && (
+      <p>
+        <button onClick={authenticate} type="button">Authenticate with github</button> {' '}
+        to get your own limits.
+      </p>
+    )}
     <p>
       <strong>Latest usage: </strong>
       {`${moment(latest_usage * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}

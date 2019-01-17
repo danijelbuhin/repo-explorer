@@ -80,7 +80,6 @@ class Home extends Component {
     if (hasError) {
       return <div>An error has occured.</div>;
     }
-    console.log(this.props);
     return (
       <div>
         <RateLimit />

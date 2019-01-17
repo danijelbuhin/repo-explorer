@@ -40,6 +40,7 @@ class AppProvider extends Component {
       console.log(err);
     }
     this.fetchRateLimit();
+    this.onAuthStateChange();
   }
 
   fetchRateLimit = () => {
@@ -157,35 +158,48 @@ class AppProvider extends Component {
     });
   }
 
-    logOut = () => {
-      auth().signOut().then(() => {
+  onAuthStateChange = () => {
+    auth().onAuthStateChanged((user) => {
+      if (user) {
+        console.log(user);
+        this.setState({ isAuthenticated: true });
+      } else {
+        console.log('user signed out');
         window.localStorage.removeItem('rx-user-id');
         window.localStorage.removeItem('rx-user-token');
-        this.setState({ user: { }, token: null });
-        this.fetchRateLimit();
-      });
-    }
+        this.setState({ isAuthenticated: false });
+      }
+    });
+  }
 
-    render() {
-      const { rateLimit, user } = this.state;
-      console.log(user);
-      return (
-        <Provider
-          value={{
-            rateLimit,
-            user,
-            isAuthenticated: Object.keys(user).length !== 0,
-            fetchRateLimit: this.fetchRateLimit,
-            fetchPopularRepos: this.fetchPopularRepos,
-            fetchRepo: this.fetchRepo,
-            authenticate: this.authenticate,
-            logOut: this.logOut,
-          }}
-        >
-          {this.props.children}
-        </Provider>
-      );
-    }
+  logOut = () => {
+    auth().signOut().then(() => {
+      window.localStorage.removeItem('rx-user-id');
+      window.localStorage.removeItem('rx-user-token');
+      this.setState({ user: { }, token: null });
+      this.fetchRateLimit();
+    });
+  }
+
+  render() {
+    const { isAuthenticated, rateLimit, user } = this.state;
+    return (
+      <Provider
+        value={{
+          rateLimit,
+          user,
+          isAuthenticated,
+          fetchRateLimit: this.fetchRateLimit,
+          fetchPopularRepos: this.fetchPopularRepos,
+          fetchRepo: this.fetchRepo,
+          authenticate: this.authenticate,
+          logOut: this.logOut,
+        }}
+      >
+        {this.props.children}
+      </Provider>
+    );
+  }
 }
 
 AppProvider.propTypes = {

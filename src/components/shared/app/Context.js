@@ -161,10 +161,8 @@ class AppProvider extends Component {
   onAuthStateChange = () => {
     auth().onAuthStateChanged((user) => {
       if (user) {
-        console.log(user);
         this.setState({ isAuthenticated: true });
       } else {
-        console.log('user signed out');
         window.localStorage.removeItem('rx-user-id');
         window.localStorage.removeItem('rx-user-token');
         this.setState({ isAuthenticated: false });

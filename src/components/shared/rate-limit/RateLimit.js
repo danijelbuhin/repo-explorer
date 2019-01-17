@@ -25,6 +25,9 @@ const Spinner = styled.div`
   height: 30px;
 
   border-top: 1px solid #335abb;
+  border-bottom: 1px solid transparent;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
   border-radius: 100%;
   background: transparent;
 

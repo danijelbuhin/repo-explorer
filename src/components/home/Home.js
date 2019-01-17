@@ -77,10 +77,6 @@ class Home extends Component {
       });
   }
 
-  authenticate = () => {
-    window.location.href = 'https://github.com/login/oauth/authorize?client_id=edc304d4e5871143c167&client_secret=39e5f4613d7c4c23e96b7ad2f0b2b7546e05fb19';
-  }
-
   render() {
     const { isLoading, hasError, popularRepos, popularViews } = this.state;
     if (isLoading) {
@@ -89,11 +85,9 @@ class Home extends Component {
     if (hasError) {
       return <div>An error has occured.</div>;
     }
-    console.log(this.props);
     return (
       <div>
         <RateLimit />
-        <button onClick={this.authenticate} type="button">Authenticate</button>
         <h2>Popular:</h2>
         <button onClick={this.props.appContext.fetchPopularRepos} type="button">Refetch</button>
         <button onClick={this.props.appContext.fetchRepo} type="button">Fetch repo</button>

@@ -19,19 +19,33 @@ class AppProvider extends Component {
       isLoading: false,
       latest_usage: 0,
     },
-    user: null,
+    user: {
+      token: null,
+    },
   }
 
   componentDidMount() {
+    try {
+      const token = window.localStorage.getItem('rx-user-token');
+      if (token) {
+        this.setState({ user: { token } });
+      }
+    } catch (err) {
+      console.log(err);
+    }
     this.fetchRateLimit();
   }
 
   fetchRateLimit = () => {
+    const { client_id, client_secret } = tokens;
+    const { token } = this.state.user;
     this.setState(({ rateLimit }) => ({ rateLimit: { ...rateLimit, isLoading: true } }));
     return axios
       .get('https://api.github.com/rate_limit', {
         params: {
-          ...tokens,
+          client_id: token ? undefined : client_id,
+          client_secret: token ? undefined : client_secret,
+          access_token: token ? token : undefined,
         },
       })
       .then(({ data: { resources: { core, search } } }) => {
@@ -46,44 +60,56 @@ class AppProvider extends Component {
       });
   }
 
-  fetchPopularRepos = () => axios
-    .get('https://api.github.com/search/repositories', {
-      headers: {
-        Accept: 'application/vnd.github.mercy-preview+json',
-      },
-      params: {
-        ...tokens,
-        q: 'stars:>=50000',
-        sort: 'stars',
-        order: 'desc',
-      },
-    })
-    .then(({ data }) => {
-      this.fetchRateLimit();
-      return data;
-    })
-    .catch((err) => {
-      this.fetchRateLimit();
-      return err;
-    });
+  fetchPopularRepos = () => {
+    const { client_id, client_secret } = tokens;
+    const { token } = this.state.user;
+    return axios
+      .get('https://api.github.com/search/repositories', {
+        headers: {
+          Accept: 'application/vnd.github.mercy-preview+json',
+        },
+        params: {
+          client_id: token ? undefined : client_id,
+          client_secret: token ? undefined : client_secret,
+          access_token: token ? token : undefined,
+          q: 'stars:>=50000',
+          sort: 'stars',
+          order: 'desc',
+        },
+      })
+      .then(({ data }) => {
+        this.fetchRateLimit();
+        return data;
+      })
+      .catch((err) => {
+        this.fetchRateLimit();
+        return err;
+      });
+  }
 
-  fetchRepo = () => axios
-    .get('https://api.github.com/repos/facebook/react', {
-      headers: {
-        Accept: 'application/vnd.github.mercy-preview+json',
-      },
-      params: {
-        ...tokens,
-      },
-    })
-    .then(({ data }) => {
-      this.fetchRateLimit();
-      return data;
-    })
-    .catch((err) => {
-      this.fetchRateLimit();
-      return err;
-    });
+  fetchRepo = () => {
+    const { client_id, client_secret } = tokens;
+    const { token } = this.state.user;
+    return axios
+      .get('https://api.github.com/repos/facebook/react', {
+        headers: {
+          Accept: 'application/vnd.github.mercy-preview+json',
+        },
+        params: {
+          client_id: token ? undefined : client_id,
+          client_secret: token ? undefined : client_secret,
+          access_token: token ? token : undefined,
+        },
+      })
+      .then(({ data }) => {
+        this.fetchRateLimit();
+        return data;
+      })
+      .catch((err) => {
+        this.fetchRateLimit();
+        return err;
+      });
+  }
 
     authenticate = (code) => {
       axios
@@ -91,6 +117,7 @@ class AppProvider extends Component {
         .then(({ data: { token } }) => {
           console.log('res', token);
           this.setState({ user: { token } });
+          window.localStorage.setItem('rx-user-token', token);
         })
         .catch(err => console.log('auth', err));
     }

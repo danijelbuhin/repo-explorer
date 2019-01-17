@@ -40,6 +40,10 @@ const Spinner = styled.div`
   }
 `;
 
+const authenticate = () => {
+  window.location.href = 'https://github.com/login/oauth/authorize?client_id=edc304d4e5871143c167&client_secret=39e5f4613d7c4c23e96b7ad2f0b2b7546e05fb19';
+};
+
 const RateLimit = ({
   appContext: {
     rateLimit: {
@@ -48,10 +52,11 @@ const RateLimit = ({
       isLoading,
       latest_usage,
     },
+    user,
   },
 }) => (
   <div>
-    <h2>Rate limit</h2>
+    <h2>Rate limit: {user.token ? 'Your personal rate' : 'Shared rate limit'}</h2>
     <p>
       <strong>Latest usage: </strong>
       {`${moment(latest_usage * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
@@ -90,6 +95,13 @@ const RateLimit = ({
         </ul>
       </div>
     </div>
+    <br />
+    {!user.token && (
+      <p>
+        <button onClick={authenticate} type="button">Authenticate</button> {' '}
+        to get your own limits.
+      </p>
+    )}
   </div>
 );
 

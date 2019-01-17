@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import moment from 'moment';
 
+import db, { auth } from '../../../services/firebase';
+
 export const AppContext = createContext();
 export const { Consumer, Provider } = AppContext;
 
@@ -12,6 +14,8 @@ const tokens = {
 };
 
 class AppProvider extends Component {
+  users = db.collection('users');
+
   state = {
     rateLimit: {
       core: {},
@@ -19,16 +23,18 @@ class AppProvider extends Component {
       isLoading: false,
       latest_usage: 0,
     },
-    user: {
-      token: null,
-    },
+    user: {},
+    token: null,
   }
 
   componentDidMount() {
     try {
+      const id = window.localStorage.getItem('rx-user-id');
       const token = window.localStorage.getItem('rx-user-token');
-      if (token) {
-        this.setState({ user: { token } });
+      if (id) {
+        this.users.doc(id).get().then((user) => {
+          this.setState({ user: { ...user.data() }, token });
+        });
       }
     } catch (err) {
       console.log(err);
@@ -38,7 +44,7 @@ class AppProvider extends Component {
 
   fetchRateLimit = () => {
     const { client_id, client_secret } = tokens;
-    const { token } = this.state.user;
+    const { token } = this.state;
     this.setState(({ rateLimit }) => ({ rateLimit: { ...rateLimit, isLoading: true } }));
     return axios
       .get('https://api.github.com/rate_limit', {
@@ -62,7 +68,7 @@ class AppProvider extends Component {
 
   fetchPopularRepos = () => {
     const { client_id, client_secret } = tokens;
-    const { token } = this.state.user;
+    const { token } = this.state;
     return axios
       .get('https://api.github.com/search/repositories', {
         headers: {
@@ -89,7 +95,7 @@ class AppProvider extends Component {
 
   fetchRepo = () => {
     const { client_id, client_secret } = tokens;
-    const { token } = this.state.user;
+    const { token } = this.state;
     return axios
       .get('https://api.github.com/repos/facebook/react', {
         headers: {
@@ -111,28 +117,69 @@ class AppProvider extends Component {
       });
   }
 
-    authenticate = (code) => {
-      axios
-        .get(`https://repo-explorer-auth.herokuapp.com/authenticate/${code}`)
-        .then(({ data: { token } }) => {
-          console.log('res', token);
-          this.setState({ user: { token } });
-          window.localStorage.setItem('rx-user-token', token);
-        })
-        .catch(err => console.log('auth', err));
+  authenticate = () => {
+    auth().signInWithPopup(new auth.GithubAuthProvider()).then((result) => {
+      this.users.doc(result.user.uid).get().then((user) => {
+        if (user.exists) {
+          window.localStorage.setItem('rx-user-id', result.user.uid);
+          window.localStorage.setItem('rx-user-token', result.credential.accessToken);
+          this.setState(() => ({
+            user: {
+              ...user.data(),
+            },
+            token: result.credential.accessToken,
+          }), () => this.fetchRateLimit());
+        } else {
+          this.users.doc(result.user.uid).set({
+            name: result.additionalUserInfo.profile.name,
+            email: result.additionalUserInfo.profile.email,
+            avatar: result.additionalUserInfo.profile.avatar_url,
+            blog: result.additionalUserInfo.profile.blog,
+            bio: result.additionalUserInfo.profile.bio,
+            favorites: [],
+          }).then(() => {
+            window.localStorage.setItem('rx-user-id', result.user.uid);
+            window.localStorage.setItem('rx-user-token', result.credential.accessToken);
+            this.setState(() => ({
+              user: {
+                name: result.additionalUserInfo.profile.name,
+                email: result.additionalUserInfo.profile.email,
+                avatar: result.additionalUserInfo.profile.avatar_url,
+                blog: result.additionalUserInfo.profile.blog,
+                bio: result.additionalUserInfo.profile.bio,
+                favorites: [],
+              },
+              token: result.credential.accessToken,
+            }), () => this.fetchRateLimit());
+          });
+        }
+      });
+    });
+  }
+
+    logOut = () => {
+      auth().signOut().then(() => {
+        window.localStorage.removeItem('rx-user-id');
+        window.localStorage.removeItem('rx-user-token');
+        this.setState({ user: { }, token: null });
+        this.fetchRateLimit();
+      });
     }
 
     render() {
       const { rateLimit, user } = this.state;
+      console.log(user);
       return (
         <Provider
           value={{
             rateLimit,
+            user,
+            isAuthenticated: Object.keys(user).length !== 0,
             fetchRateLimit: this.fetchRateLimit,
             fetchPopularRepos: this.fetchPopularRepos,
             fetchRepo: this.fetchRepo,
             authenticate: this.authenticate,
-            user,
+            logOut: this.logOut,
           }}
         >
           {this.props.children}

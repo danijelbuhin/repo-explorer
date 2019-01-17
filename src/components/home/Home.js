@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import moment from 'moment';
-import qs from 'qs';
 
 import withAppContext from '../shared/app/withAppContext';
 
@@ -21,10 +20,6 @@ class Home extends Component {
   }
 
   componentDidMount() {
-    const authCode = qs.parse(this.props.location.search, { ignoreQueryPrefix: true }).code;
-    if (authCode) {
-      this.props.appContext.authenticate(authCode);
-    }
     axios
       .all([this.fetchRepos(), this.fetchViews()])
       .then(() => {
@@ -136,10 +131,6 @@ Home.propTypes = {
   appContext: PropTypes.shape({
     fetchPopularRepos: PropTypes.func,
     fetchRepo: PropTypes.func,
-    authenticate: PropTypes.func,
-  }).isRequired,
-  location: PropTypes.shape({
-    search: PropTypes.string,
   }).isRequired,
 };
 

@@ -11,6 +11,8 @@ export default createGlobalStyle`
 
     margin: 10px;
 
+    background: #FDFDFE;
+
     font-family: 'Consolas', sans-serif;
     font-size: 14px;
     line-height: 1.5;

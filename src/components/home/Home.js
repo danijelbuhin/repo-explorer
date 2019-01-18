@@ -10,9 +10,66 @@ import db from '../../services/firebase';
 import repoColors from '../../utils/repoColors.json';
 
 import RateLimit from '../shared/rate-limit/RateLimit';
+import { ReactComponent as StarSVG } from './assets/Star.svg';
+
+const RepoList = styled.div`
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+`;
+
+const Repo = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  width: 18%;
+  margin: 10px 1%;
+  padding: 15px 33px;
+
+  background: #FFFFFF;
+
+  border: 1px solid rgba(212, 221, 237, 0.25);
+  border-radius: 3px;
+  box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
+`;
+
+const Image = styled.img`
+  width: 48px;
+  height: 48px;
+
+  margin-bottom: 10px;
+  border-radius: 100%;
+`;
+
+const Name = styled.span`
+  font-size: 14px;
+  text-align: center;
+
+  white-space: nowrap; 
+  max-width: 200px; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  margin-bottom: 20px;
+`;
+
+const Count = styled.strong`
+  font-size: 18px;
+  margin-bottom: 20px;
+
+  svg {
+    display: inline-block;
+    vertical-align: text-bottom;
+  }
+`;
+
+const Text = styled.span`
+  font-size: 12px;
+`;
 
 const Language = styled.div`
-  display: inline-block;
   padding: 2px 4px;
 
   color: #fff;
@@ -108,47 +165,49 @@ class Home extends Component {
       <div>
         <RateLimit />
         <h2>Popular:</h2>
-        <button onClick={this.props.appContext.fetchPopularRepos} type="button">Refetch</button>
-        <button onClick={this.props.appContext.fetchRepo} type="button">Fetch repo</button>
-        {popularRepos.map(repo => (
-          <div
-            key={repo.id}
-            role="presentation"
-            style={{ borderBottom: '1px solid black', marginBottom: '10px', padding: '10px 0' }}
-            onClick={() => {
-              this.handleView({
-                id: repo.id,
-                name: repo.name,
-                full_name: repo.full_name,
-                avatar_url: repo.owner.avatar_url,
-                stargazers_count: repo.stargazers_count,
-              });
-            }}
-          >
-            <img
-              src={repo.owner.avatar_url}
-              alt={repo.name}
-              style={{ width: 36, height: 36, marginRight: 10, borderRadius: '100%' }}
-            />
-            {repo.full_name} - {repo.stargazers_count} <br />
-            {repo.language && <Language color={repoColors[repo.language].color}>{repo.language}</Language>}
-            {!repo.language && <Tag>#{repo.topics[0]}</Tag>}
-            {!repo.language && repo.topics.length < 1 && 'N/A'}
-          </div>
-        ))}
+        <RepoList>
+          {popularRepos.map(repo => (
+            <Repo
+              key={repo.id}
+              onClick={() => {
+                this.handleView({
+                  id: repo.id,
+                  name: repo.name,
+                  full_name: repo.full_name,
+                  avatar_url: repo.owner.avatar_url,
+                  stargazers_count: repo.stargazers_count,
+                });
+              }}
+            >
+              <Image
+                src={repo.owner.avatar_url}
+                alt={repo.name}
+              />
+              <Name>{repo.full_name}</Name>
+              <Count><StarSVG /> {repo.stargazers_count}</Count>
+              {repo.language && <Language color={repoColors[repo.language].color}>{repo.language.toLowerCase()}</Language>}
+              {!repo.language && <Tag>#{repo.topics[0].toLowerCase()}</Tag>}
+              {!repo.language && repo.topics.length < 1 && 'N/A'}
+            </Repo>
+          ))}
+        </RepoList>
         <h2>Most viewed repos:</h2>
-        {popularViews.map(view => (
-          <div key={view.id}>
-            <img
-              src={view.avatar_url}
-              alt={view.name}
-              style={{ width: 36, height: 36, marginRight: 10, borderRadius: '100%' }}
-            />
-            {view.full_name} - {view.views}
-            <br />
-            Latest viewed at: {`${moment(view.viewed_at).format('DD MMM YYYY, HH:mm:ss')}h`}
-          </div>
-        ))}
+        <RepoList>
+          {popularViews.map(repo => (
+            <Repo key={repo.id}>
+              <Image
+                src={repo.avatar_url}
+                alt={repo.name}
+              />
+              <Name>{repo.full_name}</Name>
+              <Count>{repo.views}</Count>
+              <Text>
+                <strong>Latest view: </strong>
+                {`${moment(repo.viewed_at).format('DD MMM YYYY, HH:mm:ss')}h`}
+              </Text>
+            </Repo>
+          ))}
+        </RepoList>
       </div>
     );
   }

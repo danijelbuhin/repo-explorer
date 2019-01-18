@@ -17,6 +17,8 @@ class AppProvider extends Component {
   users = db.collection('users');
 
   state = {
+    isLoading: true,
+    hasError: false,
     rateLimit: {
       core: {},
       search: {},
@@ -31,9 +33,14 @@ class AppProvider extends Component {
     try {
       const id = window.localStorage.getItem('rx-user-id');
       const token = window.localStorage.getItem('rx-user-token');
-      if (id) {
+      if (id && token) {
         this.users.doc(id).get().then((user) => {
-          this.setState({ user: { ...user.data() }, token });
+          this.setState({
+            user: { ...user.data() },
+            token,
+            isLoading: false,
+            hasError: false,
+          });
         });
       }
     } catch (err) {
@@ -180,7 +187,19 @@ class AppProvider extends Component {
   }
 
   render() {
-    const { isAuthenticated, rateLimit, user } = this.state;
+    const {
+      isAuthenticated,
+      rateLimit,
+      user,
+      isLoading,
+      hasError,
+    } = this.state;
+    if (isLoading) {
+      return <div>Checking user authentication...</div>;
+    }
+    if (hasError) {
+      return <div>Critical error occured.</div>;
+    }
     return (
       <Provider
         value={{

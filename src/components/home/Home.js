@@ -7,10 +7,11 @@ import styled from 'styled-components';
 import withAppContext from '../shared/app/withAppContext';
 
 import db from '../../services/firebase';
-import repoColors from '../../utils/repoColors.json';
 
 import RateLimit from '../shared/rate-limit/RateLimit';
+import Repo from '../shared/repo/Repo';
 import { ReactComponent as StarSVG } from './assets/Star.svg';
+import { ReactComponent as EyeSVG } from './assets/Eye.svg';
 
 const RepoList = styled.div`
   display: flex;
@@ -18,76 +19,11 @@ const RepoList = styled.div`
   flex-wrap: wrap;
 `;
 
-const Repo = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  width: 18%;
-  margin: 10px 1%;
-  padding: 15px 33px;
-
-  background: #FFFFFF;
-
-  border: 1px solid rgba(212, 221, 237, 0.25);
-  border-radius: 3px;
-  box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
-`;
-
-const Image = styled.img`
-  width: 48px;
-  height: 48px;
-
-  margin-bottom: 10px;
-  border-radius: 100%;
-`;
-
-const Name = styled.span`
-  font-size: 14px;
+const LastViewText = styled.span`
   text-align: center;
-
-  white-space: nowrap; 
-  max-width: 200px; 
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  margin-bottom: 20px;
-`;
-
-const Count = styled.strong`
-  font-size: 18px;
-  margin-bottom: 20px;
-
-  svg {
-    display: inline-block;
-    vertical-align: text-bottom;
+  strong {
+    display: block;
   }
-`;
-
-const Text = styled.span`
-  font-size: 12px;
-`;
-
-const Language = styled.div`
-  padding: 2px 4px;
-
-  color: #fff;
-  text-shadow: 0px 2px 1px rgba(0,0,0,0.2);
-
-  background: ${({ color }) => color ? color : '#f7f7f7'};
-  border-radius: 3px;
-`;
-
-const Tag = styled.div`
-  display: inline-block;
-  padding: 2px 4px;
-
-  color: #0366d6; 
-  background-color: #f1f8ff;
-
-  border-radius: 3px;
-  white-space: nowrap;
 `;
 
 class Home extends Component {
@@ -114,7 +50,7 @@ class Home extends Component {
   }
 
   fetchViews = () => (
-    this.views.orderBy('views', 'desc').limit(3).get().then(({ docs }) => {
+    this.views.orderBy('views', 'desc').limit(5).get().then(({ docs }) => {
       const views = [];
       docs.forEach(doc => views.push({
         id: doc.id,
@@ -169,6 +105,12 @@ class Home extends Component {
           {popularRepos.map(repo => (
             <Repo
               key={repo.id}
+              avatar={repo.owner.avatar_url}
+              name={repo.full_name}
+              count={repo.stargazers_count}
+              countIcon={<StarSVG />}
+              language={repo.language}
+              topic={repo.topics[0]}
               onClick={() => {
                 this.handleView({
                   id: repo.id,
@@ -178,34 +120,25 @@ class Home extends Component {
                   stargazers_count: repo.stargazers_count,
                 });
               }}
-            >
-              <Image
-                src={repo.owner.avatar_url}
-                alt={repo.name}
-              />
-              <Name>{repo.full_name}</Name>
-              <Count><StarSVG /> {repo.stargazers_count}</Count>
-              {repo.language && <Language color={repoColors[repo.language].color}>{repo.language.toLowerCase()}</Language>}
-              {!repo.language && <Tag>#{repo.topics[0].toLowerCase()}</Tag>}
-              {!repo.language && repo.topics.length < 1 && 'N/A'}
-            </Repo>
+            />
           ))}
         </RepoList>
         <h2>Most viewed repos:</h2>
         <RepoList>
           {popularViews.map(repo => (
-            <Repo key={repo.id}>
-              <Image
-                src={repo.avatar_url}
-                alt={repo.name}
-              />
-              <Name>{repo.full_name}</Name>
-              <Count>{repo.views}</Count>
-              <Text>
-                <strong>Latest view: </strong>
-                {`${moment(repo.viewed_at).format('DD MMM YYYY, HH:mm:ss')}h`}
-              </Text>
-            </Repo>
+            <Repo
+              key={repo.id}
+              avatar={repo.avatar_url}
+              name={repo.full_name}
+              count={repo.views}
+              countIcon={<EyeSVG />}
+              text={(
+                <LastViewText>
+                  <strong>Latest view: </strong>
+                  {`${moment(repo.viewed_at).format('DD MMM YYYY, HH:mm:ss')}h`}
+                </LastViewText>
+              )}
+            />
           ))}
         </RepoList>
       </div>

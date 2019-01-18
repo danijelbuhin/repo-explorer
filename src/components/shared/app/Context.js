@@ -5,6 +5,8 @@ import moment from 'moment';
 
 import db, { auth } from '../../../services/firebase';
 
+import Loader from '../loader/Loader';
+
 export const AppContext = createContext();
 export const { Consumer, Provider } = AppContext;
 
@@ -197,7 +199,7 @@ class AppProvider extends Component {
       hasError,
     } = this.state;
     if (isLoading) {
-      return <div>Checking user authentication...</div>;
+      return <Loader text="Checking user authentication" />;
     }
     if (hasError) {
       return <div>Critical error occured.</div>;

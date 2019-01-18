@@ -10,8 +10,10 @@ import db from '../../services/firebase';
 
 import RateLimit from '../shared/rate-limit/RateLimit';
 import Repo from '../shared/repo/Repo';
+import Loader from '../shared/loader/Loader';
 import { ReactComponent as StarSVG } from './assets/Star.svg';
 import { ReactComponent as EyeSVG } from './assets/Eye.svg';
+import { ReactComponent as LogoSVG } from '../../assets/Logo.svg';
 
 const RepoList = styled.div`
   display: flex;
@@ -92,13 +94,16 @@ class Home extends Component {
   render() {
     const { isLoading, hasError, popularRepos, popularViews } = this.state;
     if (isLoading) {
-      return <div>Loading...</div>;
+      return <Loader text="Fetching repositories" />;
     }
     if (hasError) {
       return <div>An error has occured.</div>;
     }
     return (
       <div>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '40px 0' }}>
+          <LogoSVG />
+        </div>
         <RateLimit />
         <h2>Popular:</h2>
         <RepoList>
@@ -119,6 +124,7 @@ class Home extends Component {
                   avatar_url: repo.owner.avatar_url,
                   stargazers_count: repo.stargazers_count,
                 });
+                this.props.appContext.fetchRepo();
               }}
             />
           ))}

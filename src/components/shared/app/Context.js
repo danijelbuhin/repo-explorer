@@ -42,6 +42,8 @@ class AppProvider extends Component {
             hasError: false,
           });
         });
+      } else {
+        this.setState({ isLoading: false });
       }
     } catch (err) {
       console.log(err);

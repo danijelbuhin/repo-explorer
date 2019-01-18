@@ -4,6 +4,7 @@ import moment from 'moment';
 import styled from 'styled-components';
 
 import withAppContext from '../app/withAppContext';
+import percentToColor from '../../../utils/percentToColor';
 
 const SpinnerWrapper = styled.div`
   position: absolute;
@@ -88,7 +89,12 @@ const RateLimit = ({
         Search Rate Limit:
         <ul>
           <li><strong>Limit: </strong> {search.limit}</li>
-          <li><strong>Remaining: </strong> {search.remaining}</li>
+          <li>
+            <strong>Remaining: </strong>
+            <span style={{ padding: '2px 4px', background: percentToColor((search.remaining / search.limit) * 100) }}>
+              {search.remaining}
+            </span>
+          </li>
           <li>
             <strong>Reset time: </strong>
             {`${moment(search.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
@@ -99,7 +105,11 @@ const RateLimit = ({
         Core Rate Limit:
         <ul>
           <li><strong>Limit: </strong> {core.limit}</li>
-          <li><strong>Remaining: </strong> {core.remaining}</li>
+          <li><strong>Remaining: </strong>
+            <span style={{ padding: '2px 4px', background: percentToColor((core.remaining / core.limit) * 100) }}>
+              {core.remaining}
+            </span>
+          </li>
           <li><strong>Reset time: </strong>
             {`${moment(core.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
           </li>

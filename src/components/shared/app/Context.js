@@ -5,6 +5,8 @@ import moment from 'moment';
 
 import db, { auth } from '../../../services/firebase';
 
+import Loader from '../loader/Loader';
+
 export const AppContext = createContext();
 export const { Consumer, Provider } = AppContext;
 
@@ -17,6 +19,8 @@ class AppProvider extends Component {
   users = db.collection('users');
 
   state = {
+    isLoading: true,
+    hasError: false,
     rateLimit: {
       core: {},
       search: {},
@@ -31,10 +35,17 @@ class AppProvider extends Component {
     try {
       const id = window.localStorage.getItem('rx-user-id');
       const token = window.localStorage.getItem('rx-user-token');
-      if (id) {
+      if (id && token) {
         this.users.doc(id).get().then((user) => {
-          this.setState({ user: { ...user.data() }, token });
+          this.setState({
+            user: { ...user.data() },
+            token,
+            isLoading: false,
+            hasError: false,
+          });
         });
+      } else {
+        this.setState({ isLoading: false });
       }
     } catch (err) {
       console.log(err);
@@ -180,7 +191,19 @@ class AppProvider extends Component {
   }
 
   render() {
-    const { isAuthenticated, rateLimit, user } = this.state;
+    const {
+      isAuthenticated,
+      rateLimit,
+      user,
+      isLoading,
+      hasError,
+    } = this.state;
+    if (isLoading) {
+      return <Loader text="Checking user authentication" />;
+    }
+    if (hasError) {
+      return <div>Critical error occured.</div>;
+    }
     return (
       <Provider
         value={{

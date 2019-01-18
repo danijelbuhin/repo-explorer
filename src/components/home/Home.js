@@ -2,12 +2,31 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import moment from 'moment';
+import styled from 'styled-components';
 
 import withAppContext from '../shared/app/withAppContext';
 
 import db from '../../services/firebase';
 
 import RateLimit from '../shared/rate-limit/RateLimit';
+import Repo from '../shared/repo/Repo';
+import Loader from '../shared/loader/Loader';
+import { ReactComponent as StarSVG } from './assets/Star.svg';
+import { ReactComponent as EyeSVG } from './assets/Eye.svg';
+import { ReactComponent as LogoSVG } from '../../assets/Logo.svg';
+
+const RepoList = styled.div`
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+`;
+
+const LastViewText = styled.span`
+  text-align: center;
+  strong {
+    display: block;
+  }
+`;
 
 class Home extends Component {
   views = db.collection('views');
@@ -33,7 +52,7 @@ class Home extends Component {
   }
 
   fetchViews = () => (
-    this.views.orderBy('views', 'desc').limit(3).get().then(({ docs }) => {
+    this.views.orderBy('views', 'desc').limit(5).get().then(({ docs }) => {
       const views = [];
       docs.forEach(doc => views.push({
         id: doc.id,
@@ -75,53 +94,59 @@ class Home extends Component {
   render() {
     const { isLoading, hasError, popularRepos, popularViews } = this.state;
     if (isLoading) {
-      return <div>Loading...</div>;
+      return <Loader text="Fetching repositories" />;
     }
     if (hasError) {
       return <div>An error has occured.</div>;
     }
     return (
       <div>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '40px 0' }}>
+          <LogoSVG />
+        </div>
         <RateLimit />
         <h2>Popular:</h2>
-        <button onClick={this.props.appContext.fetchPopularRepos} type="button">Refetch</button>
-        <button onClick={this.props.appContext.fetchRepo} type="button">Fetch repo</button>
-        {popularRepos.map(repo => (
-          <div
-            key={repo.id}
-            role="presentation"
-            style={{ borderBottom: '1px solid black' }}
-            onClick={() => {
-              this.handleView({
-                id: repo.id,
-                name: repo.name,
-                full_name: repo.full_name,
-                avatar_url: repo.owner.avatar_url,
-                stargazers_count: repo.stargazers_count,
-              });
-            }}
-          >
-            <img
-              src={repo.owner.avatar_url}
-              alt={repo.name}
-              style={{ width: 36, height: 36, marginRight: 10, borderRadius: '100%' }}
+        <RepoList>
+          {popularRepos.map(repo => (
+            <Repo
+              key={repo.id}
+              avatar={repo.owner.avatar_url}
+              name={repo.full_name}
+              count={repo.stargazers_count}
+              countIcon={<StarSVG />}
+              language={repo.language}
+              topic={repo.topics[0]}
+              onClick={() => {
+                this.handleView({
+                  id: repo.id,
+                  name: repo.name,
+                  full_name: repo.full_name,
+                  avatar_url: repo.owner.avatar_url,
+                  stargazers_count: repo.stargazers_count,
+                });
+                this.props.appContext.fetchRepo();
+              }}
             />
-            {repo.full_name} - {repo.stargazers_count} - {repo.language || `#${repo.topics[0]}` || 'N/A'}
-          </div>
-        ))}
+          ))}
+        </RepoList>
         <h2>Most viewed repos:</h2>
-        {popularViews.map(view => (
-          <div key={view.id}>
-            <img
-              src={view.avatar_url}
-              alt={view.name}
-              style={{ width: 36, height: 36, marginRight: 10, borderRadius: '100%' }}
+        <RepoList>
+          {popularViews.map(repo => (
+            <Repo
+              key={repo.id}
+              avatar={repo.avatar_url}
+              name={repo.full_name}
+              count={repo.views}
+              countIcon={<EyeSVG />}
+              text={(
+                <LastViewText>
+                  <strong>Latest view: </strong>
+                  {`${moment(repo.viewed_at).format('DD MMM YYYY, HH:mm:ss')}h`}
+                </LastViewText>
+              )}
             />
-            {view.full_name} - {view.views}
-            <br />
-            Latest viewed at: {`${moment(view.viewed_at).format('DD MMM YYYY, HH:mm:ss')}h`}
-          </div>
-        ))}
+          ))}
+        </RepoList>
       </div>
     );
   }

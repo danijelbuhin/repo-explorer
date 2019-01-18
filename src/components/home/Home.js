@@ -2,12 +2,36 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import moment from 'moment';
+import styled from 'styled-components';
 
 import withAppContext from '../shared/app/withAppContext';
 
 import db from '../../services/firebase';
+import repoColors from '../../utils/repoColors.json';
 
 import RateLimit from '../shared/rate-limit/RateLimit';
+
+const Language = styled.div`
+  display: inline-block;
+  padding: 2px 4px;
+
+  color: #fff;
+  text-shadow: 0px 2px 1px rgba(0,0,0,0.2);
+
+  background: ${({ color }) => color ? color : '#f7f7f7'};
+  border-radius: 3px;
+`;
+
+const Tag = styled.div`
+  display: inline-block;
+  padding: 2px 4px;
+
+  color: #0366d6; 
+  background-color: #f1f8ff;
+
+  border-radius: 3px;
+  white-space: nowrap;
+`;
 
 class Home extends Component {
   views = db.collection('views');
@@ -90,7 +114,7 @@ class Home extends Component {
           <div
             key={repo.id}
             role="presentation"
-            style={{ borderBottom: '1px solid black' }}
+            style={{ borderBottom: '1px solid black', marginBottom: '10px', padding: '10px 0' }}
             onClick={() => {
               this.handleView({
                 id: repo.id,
@@ -106,7 +130,10 @@ class Home extends Component {
               alt={repo.name}
               style={{ width: 36, height: 36, marginRight: 10, borderRadius: '100%' }}
             />
-            {repo.full_name} - {repo.stargazers_count} - {repo.language || `#${repo.topics[0]}` || 'N/A'}
+            {repo.full_name} - {repo.stargazers_count} <br />
+            {repo.language && <Language color={repoColors[repo.language].color}>{repo.language}</Language>}
+            {!repo.language && <Tag>#{repo.topics[0]}</Tag>}
+            {!repo.language && repo.topics.length < 1 && 'N/A'}
           </div>
         ))}
         <h2>Most viewed repos:</h2>

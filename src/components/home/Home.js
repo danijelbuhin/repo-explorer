@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import withAppContext from '../shared/app/withAppContext';
 
 import db from '../../services/firebase';
+import paginate from '../../utils/paginate';
 
 import RateLimit from '../shared/rate-limit/RateLimit';
 import Repo from '../shared/repo/Repo';
@@ -14,6 +15,7 @@ import Loader from '../shared/loader/Loader';
 import { ReactComponent as StarSVG } from './assets/Star.svg';
 import { ReactComponent as EyeSVG } from './assets/Eye.svg';
 import { ReactComponent as LogoSVG } from '../../assets/Logo.svg';
+import Pagination from '../shared/pagination/Pagination';
 
 const RepoList = styled.div`
   display: flex;
@@ -36,6 +38,7 @@ class Home extends Component {
     popularRepos: [],
     isLoading: true,
     hasError: false,
+    page: 1,
   }
 
   componentDidMount() {
@@ -84,15 +87,28 @@ class Home extends Component {
     const { fetchPopularRepos } = this.props.appContext;
     return fetchPopularRepos()
       .then(({ items }) => {
-        const topResults = items.filter((_, i) => i < 15);
         this.setState(() => ({
-          popularRepos: topResults,
+          popularRepos: items,
         }));
       });
   }
 
+  onPageNext = () => {
+    this.setState(({ page }) => ({ page: page + 1 }));
+  }
+
+  onPagePrevious = () => {
+    this.setState(({ page }) => ({ page: page - 1 }));
+  }
+
   render() {
-    const { isLoading, hasError, popularRepos, popularViews } = this.state;
+    const {
+      page,
+      isLoading,
+      hasError,
+      popularRepos,
+      popularViews,
+    } = this.state;
     if (isLoading) {
       return <Loader text="Fetching repositories" />;
     }
@@ -107,7 +123,7 @@ class Home extends Component {
         <RateLimit />
         <h2>Popular:</h2>
         <RepoList>
-          {popularRepos.map(repo => (
+          {paginate(popularRepos, 15, page).map(repo => (
             <Repo
               key={repo.id}
               avatar={repo.owner.avatar_url}
@@ -128,6 +144,12 @@ class Home extends Component {
               }}
             />
           ))}
+          <Pagination
+            total={popularRepos.length}
+            page={page}
+            onPageNext={this.onPageNext}
+            onPagePrevious={this.onPagePrevious}
+          />
         </RepoList>
         <h2>Most viewed repos:</h2>
         <RepoList>

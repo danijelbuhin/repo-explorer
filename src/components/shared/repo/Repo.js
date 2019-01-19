@@ -18,7 +18,14 @@ const Wrapper = styled.div`
 
   border: 1px solid rgba(212, 221, 237, 0.25);
   border-radius: 3px;
-  box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
+
+  transition: all .2s ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
+    transform: translate3d(0, -5px, 0);
+  }
 `;
 
 const Image = styled.img`
@@ -26,7 +33,7 @@ const Image = styled.img`
   height: 48px;
 
   margin-bottom: 10px;
-  border-radius: 100%;
+  border-radius: 3px;
 `;
 
 const Name = styled.span`

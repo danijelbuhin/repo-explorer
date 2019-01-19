@@ -30,6 +30,14 @@ const LastViewText = styled.span`
   }
 `;
 
+const ListTitle = styled.h2`
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+
+  border-bottom: 1px solid #F4F6F9;
+  color: #3A4044;
+`;
+
 class Home extends Component {
   views = db.collection('views');
 
@@ -121,7 +129,7 @@ class Home extends Component {
           <LogoSVG />
         </div>
         <RateLimit />
-        <h2>Popular:</h2>
+        <ListTitle>Popular repositories:</ListTitle>
         <RepoList>
           {paginate(popularRepos, 15, page).map(repo => (
             <Repo
@@ -151,7 +159,7 @@ class Home extends Component {
             onPagePrevious={this.onPagePrevious}
           />
         </RepoList>
-        <h2>Most viewed repos:</h2>
+        <ListTitle>Most viewed repos:</ListTitle>
         <RepoList>
           {popularViews.map(repo => (
             <Repo

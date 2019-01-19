@@ -90,9 +90,10 @@ class AppProvider extends Component {
           client_id: token ? undefined : client_id,
           client_secret: token ? undefined : client_secret,
           access_token: token ? token : undefined,
-          q: 'stars:>=50000',
+          q: 'stars:>=30000',
           sort: 'stars',
           order: 'desc',
+          per_page: 100,
         },
       })
       .then(({ data }) => {

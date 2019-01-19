@@ -10,6 +10,11 @@ const Wrapper = styled.div`
   align-items: center;
 
   width: 100%;
+
+  margin-top: 10px;
+  padding-top: 10px;
+
+  border-top: 1px solid #F4F6F9;
 `;
 
 const ArrowRight = styled(ArrowSVG)`
@@ -23,9 +28,11 @@ const ArrowRight = styled(ArrowSVG)`
   cursor: pointer;
   user-select: none;
 
-  &:hover {
-    box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
-  }
+  ${({ disabled }) => !disabled && `
+    &:hover {
+      box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
+    }
+  `};
 
   transition: all .2s ease-in-out;
 
@@ -49,9 +56,11 @@ const ArrowLeft = styled(ArrowSVG)`
   cursor: pointer;
   user-select: none;
 
-  &:hover {
-    box-shadow: 0px -2px 4px rgba(212, 221, 237, 0.25);
-  }
+  ${({ disabled }) => !disabled && `
+    &:hover {
+      box-shadow: 0px -2px 4px rgba(212, 221, 237, 0.25);
+    }
+  `};
 
   transition: all .2s ease-in-out;
 

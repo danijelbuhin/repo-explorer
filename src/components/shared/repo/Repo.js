@@ -4,7 +4,34 @@ import styled from 'styled-components';
 
 import repoColors from '../../../utils/repoColors.json';
 
+import { ReactComponent as HeartSVG } from './assets/Heart.svg';
+
+const Heart = styled(HeartSVG)`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+
+  z-index: 5;
+
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1);
+
+  path {
+    transition: all .3s ease-in-out;
+  }
+
+  &:hover {
+    path {
+      fill: #FF2A9D;
+    }
+  }
+`;
+
 const Wrapper = styled.div`
+  position: relative;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -25,6 +52,11 @@ const Wrapper = styled.div`
   &:hover {
     box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
     transform: translate3d(0, -5px, 0);
+
+    ${Heart} {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
   }
 `;
 
@@ -101,6 +133,7 @@ const Repo = ({
   <Wrapper
     {...rest}
   >
+    <Heart />
     <Image
       src={avatar}
       alt={name}

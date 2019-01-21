@@ -18,8 +18,8 @@ const Wrapper = styled.div`
 `;
 
 const ArrowRight = styled(ArrowSVG)`
-  width: 55px;
-  height: 55px;
+  width: 48px;
+  height: 48px;
 
   border-radius: 100%;
   border: 1px solid rgba(212, 221, 237, 0.25);
@@ -44,8 +44,8 @@ const ArrowRight = styled(ArrowSVG)`
 `;
 
 const ArrowLeft = styled(ArrowSVG)`
-  width: 55px;
-  height: 55px;
+  width: 48px;
+  height: 48px;
 
   margin-right: 10px;
 
@@ -69,6 +69,14 @@ const ArrowLeft = styled(ArrowSVG)`
 
     transition: all .2s ease-in-out;
   }
+`;
+
+export const Details = styled.div`
+  margin-right: 10px;
+  padding: 10px 0;
+
+  font-size: 14px;
+  text-align: center;
 `;
 
 class Pagination extends Component {
@@ -99,9 +107,13 @@ class Pagination extends Component {
     const {
       page,
       total,
+      limit,
     } = this.props;
     return (
       <Wrapper>
+        <Details>
+          Showing <strong>{((page * limit) - limit) + 1}</strong> to <strong>{page * Math.min(limit, total)}</strong> of <strong>{total}</strong> entries.
+        </Details>
         <ArrowLeft onClick={this.onPagePrevious} disabled={page === 1} />
         <ArrowRight onClick={this.onPageNext} disabled={page === Math.ceil(total / 15)} />
       </Wrapper>
@@ -110,10 +122,15 @@ class Pagination extends Component {
 }
 
 Pagination.propTypes = {
+  limit: PropTypes.number,
   page: PropTypes.number.isRequired,
   total: PropTypes.number.isRequired,
   onPageNext: PropTypes.func.isRequired,
   onPagePrevious: PropTypes.func.isRequired,
+};
+
+Pagination.defaultProps = {
+  limit: 15,
 };
 
 export default Pagination;

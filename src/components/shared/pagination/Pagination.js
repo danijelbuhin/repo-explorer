@@ -75,16 +75,8 @@ export const Details = styled.div`
   margin-right: 10px;
   padding: 10px 0;
 
-  color: #AEB6CB;
-
   font-size: 14px;
   text-align: center;
-
-  span {
-    color: #AEB6CB;
-
-    font-weight: 700;
-  }
 `;
 
 class Pagination extends Component {
@@ -120,7 +112,7 @@ class Pagination extends Component {
     return (
       <Wrapper>
         <Details>
-          Showing <span>{((page * limit) - limit) + 1}</span> to <span>{page * Math.min(limit, total)}</span> of <span>{total}</span> entries.
+          Showing <strong>{((page * limit) - limit) + 1}</strong> to <strong>{page * Math.min(limit, total)}</strong> of <strong>{total}</strong> entries.
         </Details>
         <ArrowLeft onClick={this.onPagePrevious} disabled={page === 1} />
         <ArrowRight onClick={this.onPageNext} disabled={page === Math.ceil(total / 15)} />

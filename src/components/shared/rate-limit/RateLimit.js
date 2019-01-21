@@ -5,6 +5,9 @@ import styled from 'styled-components';
 
 import withAppContext from '../app/withAppContext';
 import percentToColor from '../../../utils/percentToColor';
+import generatePercentage from '../../../utils/generatePercentage';
+
+import GaugeChart from './gauge-chart/GaugeChart';
 
 const SpinnerWrapper = styled.div`
   position: absolute;
@@ -86,34 +89,34 @@ const RateLimit = ({
         </SpinnerWrapper>
       )}
       <div>
-        Search Rate Limit:
-        <ul>
-          <li><strong>Limit: </strong> {search.limit}</li>
-          <li>
-            <strong>Remaining: </strong>
-            <span style={{ padding: '2px 4px', background: percentToColor((search.remaining / search.limit) * 100) }}>
-              {search.remaining}
-            </span>
-          </li>
-          <li>
+        Search API usage:
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <GaugeChart
+            color={percentToColor((search.remaining / search.limit) * 100)}
+            percentage={generatePercentage(search.remaining, search.limit)}
+            upValue={search.remaining}
+            downValue={search.limit}
+          />
+          <span>
             <strong>Reset time: </strong>
             {`${moment(search.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
-          </li>
-        </ul>
-      </div>
-      <div>
-        Core Rate Limit:
-        <ul>
-          <li><strong>Limit: </strong> {core.limit}</li>
-          <li><strong>Remaining: </strong>
-            <span style={{ padding: '2px 4px', background: percentToColor((core.remaining / core.limit) * 100) }}>
-              {core.remaining}
+          </span>
+        </div>
+        <div>
+          Core API usage:
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <GaugeChart
+              color={percentToColor((core.remaining / core.limit) * 100)}
+              percentage={generatePercentage(core.remaining, core.limit)}
+              upValue={core.remaining}
+              downValue={core.limit}
+            />
+            <span>
+              <strong>Reset time: </strong>
+              {`${moment(core.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
             </span>
-          </li>
-          <li><strong>Reset time: </strong>
-            {`${moment(core.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
     </div>
   </div>

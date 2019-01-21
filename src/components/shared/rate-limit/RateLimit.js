@@ -89,7 +89,6 @@ const RateLimit = ({
         </SpinnerWrapper>
       )}
       <div>
-        Search API usage:
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <GaugeChart
             color={percentToColor((search.remaining / search.limit) * 100)}
@@ -97,13 +96,13 @@ const RateLimit = ({
             upValue={search.remaining}
             downValue={search.limit}
           />
-          <span>
+          <span style={{ marginLeft: 10 }}>
+            <strong>Search API usage</strong><br />
             <strong>Reset time: </strong>
             {`${moment(search.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
           </span>
         </div>
         <div>
-          Core API usage:
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <GaugeChart
               color={percentToColor((core.remaining / core.limit) * 100)}
@@ -111,7 +110,8 @@ const RateLimit = ({
               upValue={core.remaining}
               downValue={core.limit}
             />
-            <span>
+            <span style={{ marginLeft: 10 }}>
+              <strong>Core API usage</strong><br />
               <strong>Reset time: </strong>
               {`${moment(core.reset * 1000).format('DD MMM YYYY, HH:mm:ss')}h`}
             </span>

@@ -22,10 +22,12 @@ const Details = styled.div`
 `;
 
 const UpperNumber = styled.span`
+  padding: 0 5px;
   border-bottom: 1px solid #DFE3E9;
 `;
 
 const LowerNumber = styled.span`
+  padding: 0 5px;
   
 `;
 
@@ -56,7 +58,6 @@ const GaugeChart = ({
 }) => (
   <Wrapper>
     <Details>
-      {console.log(color)}
       <UpperNumber>
         {upValue}
       </UpperNumber>

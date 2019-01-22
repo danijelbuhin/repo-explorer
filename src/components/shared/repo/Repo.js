@@ -129,7 +129,7 @@ const Repo = ({
   topic,
   text,
   bookmarkRepo,
-  repoId,
+  id,
   ...rest
 }) => (
   <Wrapper
@@ -144,7 +144,7 @@ const Repo = ({
           count,
           language,
           topic,
-          repoId,
+          id,
         });
       }}
     />
@@ -165,7 +165,7 @@ Repo.propTypes = {
   avatar: PropTypes.string,
   language: PropTypes.string,
   topic: PropTypes.string,
-  repoId: PropTypes.number,
+  id: PropTypes.number,
   count: PropTypes.number,
   countIcon: PropTypes.node,
   text: PropTypes.node,
@@ -177,7 +177,7 @@ Repo.defaultProps = {
   avatar: '',
   language: '',
   topic: '',
-  repoId: 0,
+  id: 0,
   count: 0,
   countIcon: null,
   text: null,

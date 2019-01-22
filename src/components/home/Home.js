@@ -107,10 +107,18 @@ class Home extends Component {
       alert('You have to be signed in to bookmark the repository.');
       return;
     }
-    db.collection('users').doc(appContext.user.id).get().then((user) => {
-      if (user.exists) {
-        db.collection('users').doc(appContext.user.id).update({
-          favorites: [...user.data().favorites, repo],
+    const user = db.collection('users').doc(appContext.user.id);
+    user.get().then((u) => {
+      if (u.exists) {
+        // clean this shit
+        if (u.data().favorites.filter(_repo => _repo.id === repo.id)[0] && u.data().favorites.filter(_repo => _repo.id === repo.id)[0].id === repo.id) {
+          user.update({
+            favorites: u.data().favorites.filter(_r => _r.id !== repo.id),
+          });
+          return;
+        }
+        user.update({
+          favorites: [...u.data().favorites, repo],
         });
       }
     });
@@ -156,7 +164,7 @@ class Home extends Component {
               language={repo.language}
               topic={repo.topics[0]}
               bookmarkRepo={this.bookmarkRepo}
-              repoId={repo.id}
+              id={repo.id}
               onClick={() => {
                 this.handleView({
                   id: repo.id,

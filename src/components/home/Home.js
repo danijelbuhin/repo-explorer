@@ -101,6 +101,29 @@ class Home extends Component {
       });
   }
 
+  bookmarkRepo = (repo) => {
+    const { appContext } = this.props;
+    if (!appContext.isAuthenticated) {
+      alert('You have to be signed in to bookmark the repository.');
+      return;
+    }
+    const user = db.collection('users').doc(appContext.user.id);
+    user.get().then((u) => {
+      if (u.exists) {
+        // clean this shit
+        if (u.data().favorites.filter(_repo => _repo.id === repo.id)[0] && u.data().favorites.filter(_repo => _repo.id === repo.id)[0].id === repo.id) {
+          user.update({
+            favorites: u.data().favorites.filter(_r => _r.id !== repo.id),
+          });
+          return;
+        }
+        user.update({
+          favorites: [...u.data().favorites, repo],
+        });
+      }
+    });
+  }
+
   onPageNext = () => {
     this.setState(({ page }) => ({ page: page + 1 }));
   }
@@ -140,6 +163,8 @@ class Home extends Component {
               countIcon={<StarSVG />}
               language={repo.language}
               topic={repo.topics[0]}
+              bookmarkRepo={this.bookmarkRepo}
+              id={repo.id}
               onClick={() => {
                 this.handleView({
                   id: repo.id,

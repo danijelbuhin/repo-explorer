@@ -4,9 +4,9 @@ import styled from 'styled-components';
 
 import repoColors from '../../../utils/repoColors.json';
 
-import { ReactComponent as HeartSVG } from './assets/Heart.svg';
+import { ReactComponent as BookmarkSVG } from './assets/Bookmark.svg';
 
-const Heart = styled(HeartSVG)`
+const Bookmark = styled(BookmarkSVG)`
   position: absolute;
   top: 5px;
   right: 5px;
@@ -53,7 +53,7 @@ const Wrapper = styled.div`
     box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
     transform: translate3d(0, -5px, 0);
 
-    ${Heart} {
+    ${Bookmark} {
       opacity: 1;
       transform: translate3d(0, 0, 0);
     }
@@ -128,12 +128,26 @@ const Repo = ({
   language,
   topic,
   text,
+  bookmarkRepo,
+  repoId,
   ...rest
 }) => (
   <Wrapper
     {...rest}
   >
-    <Heart />
+    <Bookmark
+      onClick={(e) => {
+        e.stopPropagation();
+        bookmarkRepo({
+          name,
+          avatar,
+          count,
+          language,
+          topic,
+          repoId,
+        });
+      }}
+    />
     <Image
       src={avatar}
       alt={name}
@@ -151,9 +165,11 @@ Repo.propTypes = {
   avatar: PropTypes.string,
   language: PropTypes.string,
   topic: PropTypes.string,
+  repoId: PropTypes.number,
   count: PropTypes.number,
   countIcon: PropTypes.node,
   text: PropTypes.node,
+  bookmarkRepo: PropTypes.func,
 };
 
 Repo.defaultProps = {
@@ -161,9 +177,11 @@ Repo.defaultProps = {
   avatar: '',
   language: '',
   topic: '',
+  repoId: 0,
   count: 0,
   countIcon: null,
   text: null,
+  bookmarkRepo: () => {},
 };
 
 export default Repo;

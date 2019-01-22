@@ -149,6 +149,7 @@ class AppProvider extends Component {
             avatar: result.additionalUserInfo.profile.avatar_url,
             blog: result.additionalUserInfo.profile.blog,
             bio: result.additionalUserInfo.profile.bio,
+            id: result.user.uid,
             favorites: [],
           }).then(() => {
             window.localStorage.setItem('rx-user-id', result.user.uid);
@@ -160,6 +161,7 @@ class AppProvider extends Component {
                 avatar: result.additionalUserInfo.profile.avatar_url,
                 blog: result.additionalUserInfo.profile.blog,
                 bio: result.additionalUserInfo.profile.bio,
+                id: result.user.uid,
                 favorites: [],
               },
               token: result.credential.accessToken,

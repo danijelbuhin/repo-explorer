@@ -7,7 +7,7 @@ import withAppContext from '../app/withAppContext';
 import percentToColor from '../../../utils/percentToColor';
 import generatePercentage from '../../../utils/generatePercentage';
 
-import GaugeChart from './gauge-chart/GaugeChart';
+import GaugeChart from '../gauge-chart/GaugeChart';
 
 const SpinnerWrapper = styled.div`
   position: absolute;

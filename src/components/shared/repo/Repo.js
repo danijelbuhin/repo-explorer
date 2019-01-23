@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { toast } from 'react-toastify';
 
 import repoColors from '../../../utils/repoColors.json';
+import withAppContext from '../app/withAppContext';
 
 import { ReactComponent as BookmarkSVG } from './assets/Bookmark.svg';
 
@@ -22,7 +24,7 @@ const Bookmark = styled(BookmarkSVG)`
     transition: all .3s ease-in-out;
   }
 
-  &:hover {
+  &:hover, &.is-bookmarked {
     path {
       fill: #FF2A9D;
     }
@@ -120,45 +122,108 @@ const Tag = styled.div`
   white-space: nowrap;
 `;
 
-const Repo = ({
-  name,
-  avatar,
-  count,
-  countIcon,
-  language,
-  topic,
-  text,
-  bookmarkRepo,
-  id,
-  ...rest
-}) => (
-  <Wrapper
-    {...rest}
-  >
-    <Bookmark
-      onClick={(e) => {
-        e.stopPropagation();
-        bookmarkRepo({
-          name,
-          avatar,
-          count,
-          language,
-          topic,
-          id,
+class Repo extends Component {
+  state = {
+    isBookmarked: false,
+  }
+
+  componentDidMount() {
+    const { appContext: { user } } = this.props;
+    const bookmarked = user.favorites.filter(repo => repo.id === this.props.id)[0];
+    if (bookmarked) {
+      this.setState({ isBookmarked: true, }) // eslint-disable-line
+    }
+  }
+
+  componentDidUpdate({ appContext }) {
+    const { appContext: { user } } = this.props;
+    if (appContext.user.favorites.length !== user.favorites.length) {
+      const bookmarked = user.favorites.filter(repo => repo.id === this.props.id)[0];
+      if (bookmarked) {
+        this.setState({ isBookmarked: true, }) // eslint-disable-line
+        return;
+      }
+      this.setState({ isBookmarked: false, }) // eslint-disable-line
+    }
+  }
+
+  bookmarkRepo = (repo) => {
+    const { appContext } = this.props;
+    if (!appContext.isAuthenticated) {
+      alert('You have to be signed in to bookmark the repository.');
+      return;
+    }
+    const { favorites } = appContext.user;
+    const bookmarked = favorites.filter(_repo => _repo.id === repo.id)[0];
+    if (bookmarked && bookmarked.id === repo.id) {
+      appContext.updateUser('favorites', favorites.filter(_r => _r.id !== repo.id)).then(() => {
+        toast('👍 Repo removed from bookmarks!', {
+          position: 'bottom-center',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
         });
-      }}
-    />
-    <Image
-      src={avatar}
-      alt={name}
-    />
-    <Name>{name}</Name>
-    <Count>{countIcon} <Number>{count}</Number></Count>
-    {language && <Language color={repoColors[language].color}>{language.toLowerCase()}</Language>}
-    {!language && topic && <Tag>#{topic.toLowerCase()}</Tag>}
-    {text && <Text>{text}</Text>}
-  </Wrapper>
-);
+      });
+      return;
+    }
+    appContext.updateUser('favorites', [...favorites, repo]).then(() => {
+      toast('👍 Repo added to bookmarks!', {
+        position: 'bottom-center',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    });
+  }
+
+  render() {
+    const {
+      name,
+      avatar,
+      count,
+      countIcon,
+      language,
+      topic,
+      text,
+      id,
+      ...rest
+    } = this.props;
+    const { isBookmarked } = this.state;
+    return (
+      <Wrapper
+        {...rest}
+      >
+        <Bookmark
+          className={isBookmarked ? 'is-bookmarked' : ''}
+          onClick={(e) => {
+            e.stopPropagation();
+            this.bookmarkRepo({
+              name,
+              avatar,
+              count,
+              language,
+              topic,
+              id,
+            });
+          }}
+        />
+        <Image
+          src={avatar}
+          alt={name}
+        />
+        <Name>{name}</Name>
+        <Count>{countIcon} <Number>{count}</Number></Count>
+        {language && <Language color={repoColors[language].color}>{language.toLowerCase()}</Language>}
+        {!language && topic && <Tag>#{topic.toLowerCase()}</Tag>}
+        {text && <Text>{text}</Text>}
+      </Wrapper>
+    );
+  }
+}
 
 Repo.propTypes = {
   name: PropTypes.string,
@@ -170,6 +235,7 @@ Repo.propTypes = {
   countIcon: PropTypes.node,
   text: PropTypes.node,
   bookmarkRepo: PropTypes.func,
+  appContext: PropTypes.object.isRequired,
 };
 
 Repo.defaultProps = {
@@ -184,4 +250,4 @@ Repo.defaultProps = {
   bookmarkRepo: () => {},
 };
 
-export default Repo;
+export default withAppContext(Repo);

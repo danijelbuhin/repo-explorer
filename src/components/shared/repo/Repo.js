@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { toast } from 'react-toastify';
 
 import repoColors from '../../../utils/repoColors.json';
 import withAppContext from '../app/withAppContext';
@@ -155,10 +156,28 @@ class Repo extends Component {
     const { favorites } = appContext.user;
     const bookmarked = favorites.filter(_repo => _repo.id === repo.id)[0];
     if (bookmarked && bookmarked.id === repo.id) {
-      appContext.updateUser('favorites', favorites.filter(_r => _r.id !== repo.id));
+      appContext.updateUser('favorites', favorites.filter(_r => _r.id !== repo.id)).then(() => {
+        toast('👍 Repo removed from bookmarks!', {
+          position: 'bottom-center',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      });
       return;
     }
-    appContext.updateUser('favorites', [...favorites, repo]);
+    appContext.updateUser('favorites', [...favorites, repo]).then(() => {
+      toast('👍 Repo added to bookmarks!', {
+        position: 'bottom-center',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    });
   }
 
   render() {

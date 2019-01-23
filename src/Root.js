@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { ToastContainer } from 'react-toastify';
 
 import AppProvider from './components/shared/app/Context';
 import Router from './components/shared/app/Router';
@@ -9,6 +10,7 @@ class App extends Component {
     return (
       <AppProvider>
         <Router />
+        <ToastContainer />
       </AppProvider>
     );
   }

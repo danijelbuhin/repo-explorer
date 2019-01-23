@@ -66,7 +66,7 @@ class Home extends Component {
     this.views.orderBy('views', 'desc').limit(5).get().then(({ docs }) => {
       const views = [];
       docs.forEach(doc => views.push({
-        id: doc.id,
+        id: doc.data().id,
         ...doc.data(),
       }));
       this.setState({ popularViews: views });
@@ -169,6 +169,7 @@ class Home extends Component {
               name={repo.full_name}
               count={repo.views}
               countIcon={<EyeSVG />}
+              id={repo.id}
               text={(
                 <LastViewText>
                   <strong>Latest view: </strong>

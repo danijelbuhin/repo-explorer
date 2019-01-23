@@ -127,26 +127,6 @@ class Repo extends Component {
     isBookmarked: false,
   }
 
-  componentDidMount() {
-    const { appContext: { user } } = this.props;
-    const bookmarked = user.favorites.filter(repo => repo.id === this.props.id)[0];
-    if (bookmarked) {
-      this.setState({ isBookmarked: true, }) // eslint-disable-line
-    }
-  }
-
-  componentDidUpdate({ appContext }) {
-    const { appContext: { user } } = this.props;
-    if (appContext.user.favorites.length !== user.favorites.length) {
-      const bookmarked = user.favorites.filter(repo => repo.id === this.props.id)[0];
-      if (bookmarked) {
-        this.setState({ isBookmarked: true, }) // eslint-disable-line
-        return;
-      }
-      this.setState({ isBookmarked: false, }) // eslint-disable-line
-    }
-  }
-
   bookmarkRepo = (repo) => {
     const { appContext } = this.props;
     if (!appContext.isAuthenticated) {

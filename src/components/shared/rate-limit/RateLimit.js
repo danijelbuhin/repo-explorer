@@ -62,7 +62,7 @@ const RateLimit = ({
   },
 }) => (
   <div style={{ border: '1px solid #000', padding: 10 }}>
-    <h2>Hello {isAuthenticated ? user.name : 'Guest'}, you{'\''}re using {isAuthenticated ? 'your own' : 'shared'} rate limit</h2>
+    <h2>Hello {isAuthenticated ? user && user.name : 'Guest'}, you{'\''}re using {isAuthenticated ? 'your own' : 'shared'} rate limit</h2>
     {isAuthenticated && (
       <button onClick={logOut} type="button">Log out</button>
     )}

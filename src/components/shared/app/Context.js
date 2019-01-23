@@ -27,8 +27,9 @@ class AppProvider extends Component {
       isLoading: false,
       latest_usage: 0,
     },
-    user: {},
+    user: null,
     token: null,
+    isAuthenticated: false,
   }
 
   componentDidMount() {
@@ -156,7 +157,7 @@ class AppProvider extends Component {
             token: result.credential.accessToken,
           }), () => this.fetchRateLimit());
         } else {
-          this.users.doc(result.user.uid).set({
+          const newUser = {
             name: result.additionalUserInfo.profile.name,
             email: result.additionalUserInfo.profile.email,
             avatar: result.additionalUserInfo.profile.avatar_url,
@@ -164,19 +165,12 @@ class AppProvider extends Component {
             bio: result.additionalUserInfo.profile.bio,
             id: result.user.uid,
             favorites: [],
-          }).then(() => {
+          };
+          this.users.doc(result.user.uid).set(newUser).then(() => {
             window.localStorage.setItem('rx-user-id', result.user.uid);
             window.localStorage.setItem('rx-user-token', result.credential.accessToken);
             this.setState(() => ({
-              user: {
-                name: result.additionalUserInfo.profile.name,
-                email: result.additionalUserInfo.profile.email,
-                avatar: result.additionalUserInfo.profile.avatar_url,
-                blog: result.additionalUserInfo.profile.blog,
-                bio: result.additionalUserInfo.profile.bio,
-                id: result.user.uid,
-                favorites: [],
-              },
+              user: newUser,
               token: result.credential.accessToken,
             }), () => this.fetchRateLimit());
           });
@@ -201,7 +195,7 @@ class AppProvider extends Component {
     auth().signOut().then(() => {
       window.localStorage.removeItem('rx-user-id');
       window.localStorage.removeItem('rx-user-token');
-      this.setState({ user: { }, token: null });
+      this.setState({ user: null, token: null });
       this.fetchRateLimit();
     });
   }

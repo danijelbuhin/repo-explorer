@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import repoColors from '../../../utils/repoColors.json';
+import db from '../../../services/firebase';
+import withAppContext from '../app/withAppContext';
 
 import { ReactComponent as BookmarkSVG } from './assets/Bookmark.svg';
 
@@ -120,45 +122,72 @@ const Tag = styled.div`
   white-space: nowrap;
 `;
 
-const Repo = ({
-  name,
-  avatar,
-  count,
-  countIcon,
-  language,
-  topic,
-  text,
-  bookmarkRepo,
-  id,
-  ...rest
-}) => (
-  <Wrapper
-    {...rest}
-  >
-    <Bookmark
-      onClick={(e) => {
-        e.stopPropagation();
-        bookmarkRepo({
-          name,
-          avatar,
-          count,
-          language,
-          topic,
-          id,
+class Repo extends Component {
+  bookmarkRepo = (repo) => {
+    const { appContext } = this.props;
+    if (!appContext.isAuthenticated) {
+      alert('You have to be signed in to bookmark the repository.');
+      return;
+    }
+    const user = db.collection('users').doc(appContext.user.id);
+    user.get().then((u) => {
+      if (u.exists) {
+        // clean this shit
+        if (u.data().favorites.filter(_repo => _repo.id === repo.id)[0] && u.data().favorites.filter(_repo => _repo.id === repo.id)[0].id === repo.id) {
+          user.update({
+            favorites: u.data().favorites.filter(_r => _r.id !== repo.id),
+          });
+          return;
+        }
+        user.update({
+          favorites: [...u.data().favorites, repo],
         });
-      }}
-    />
-    <Image
-      src={avatar}
-      alt={name}
-    />
-    <Name>{name}</Name>
-    <Count>{countIcon} <Number>{count}</Number></Count>
-    {language && <Language color={repoColors[language].color}>{language.toLowerCase()}</Language>}
-    {!language && topic && <Tag>#{topic.toLowerCase()}</Tag>}
-    {text && <Text>{text}</Text>}
-  </Wrapper>
-);
+      }
+    });
+  }
+
+  render() {
+    const {
+      name,
+      avatar,
+      count,
+      countIcon,
+      language,
+      topic,
+      text,
+      id,
+      ...rest
+    } = this.props;
+    return (
+      <Wrapper
+        {...rest}
+      >
+        <Bookmark
+          onClick={(e) => {
+            e.stopPropagation();
+            this.bookmarkRepo({
+              name,
+              avatar,
+              count,
+              language,
+              topic,
+              id,
+            });
+          }}
+        />
+        <Image
+          src={avatar}
+          alt={name}
+        />
+        <Name>{name}</Name>
+        <Count>{countIcon} <Number>{count}</Number></Count>
+        {language && <Language color={repoColors[language].color}>{language.toLowerCase()}</Language>}
+        {!language && topic && <Tag>#{topic.toLowerCase()}</Tag>}
+        {text && <Text>{text}</Text>}
+      </Wrapper>
+    );
+  }
+}
 
 Repo.propTypes = {
   name: PropTypes.string,
@@ -170,6 +199,7 @@ Repo.propTypes = {
   countIcon: PropTypes.node,
   text: PropTypes.node,
   bookmarkRepo: PropTypes.func,
+  appContext: PropTypes.object.isRequired,
 };
 
 Repo.defaultProps = {
@@ -184,4 +214,4 @@ Repo.defaultProps = {
   bookmarkRepo: () => {},
 };
 
-export default Repo;
+export default withAppContext(Repo);

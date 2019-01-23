@@ -130,7 +130,14 @@ class Repo extends Component {
   bookmarkRepo = (repo) => {
     const { appContext } = this.props;
     if (!appContext.isAuthenticated) {
-      alert('You have to be signed in to bookmark the repository.');
+      toast('⚠️ You have to be signed in to bookmark the repository!', {
+        position: 'bottom-center',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       return;
     }
     const { favorites } = appContext.user;

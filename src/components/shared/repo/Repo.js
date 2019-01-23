@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import repoColors from '../../../utils/repoColors.json';
-import db from '../../../services/firebase';
 import withAppContext from '../app/withAppContext';
 
 import { ReactComponent as BookmarkSVG } from './assets/Bookmark.svg';
@@ -24,7 +23,7 @@ const Bookmark = styled(BookmarkSVG)`
     transition: all .3s ease-in-out;
   }
 
-  &:hover {
+  &:hover, &.is-bookmarked {
     path {
       fill: #FF2A9D;
     }
@@ -123,27 +122,43 @@ const Tag = styled.div`
 `;
 
 class Repo extends Component {
+  state = {
+    isBookmarked: false,
+  }
+
+  componentDidMount() {
+    const { appContext: { user } } = this.props;
+    const bookmarked = user.favorites.filter(repo => repo.id === this.props.id)[0];
+    if (bookmarked) {
+      this.setState({ isBookmarked: true, }) // eslint-disable-line
+    }
+  }
+
+  componentDidUpdate({ appContext }) {
+    const { appContext: { user } } = this.props;
+    if (appContext.user.favorites.length !== user.favorites.length) {
+      const bookmarked = user.favorites.filter(repo => repo.id === this.props.id)[0];
+      if (bookmarked) {
+        this.setState({ isBookmarked: true, }) // eslint-disable-line
+        return;
+      }
+      this.setState({ isBookmarked: false, }) // eslint-disable-line
+    }
+  }
+
   bookmarkRepo = (repo) => {
     const { appContext } = this.props;
     if (!appContext.isAuthenticated) {
       alert('You have to be signed in to bookmark the repository.');
       return;
     }
-    const user = db.collection('users').doc(appContext.user.id);
-    user.get().then((u) => {
-      if (u.exists) {
-        // clean this shit
-        if (u.data().favorites.filter(_repo => _repo.id === repo.id)[0] && u.data().favorites.filter(_repo => _repo.id === repo.id)[0].id === repo.id) {
-          user.update({
-            favorites: u.data().favorites.filter(_r => _r.id !== repo.id),
-          });
-          return;
-        }
-        user.update({
-          favorites: [...u.data().favorites, repo],
-        });
-      }
-    });
+    const { favorites } = appContext.user;
+    const bookmarked = favorites.filter(_repo => _repo.id === repo.id)[0];
+    if (bookmarked && bookmarked.id === repo.id) {
+      appContext.updateUser('favorites', favorites.filter(_r => _r.id !== repo.id));
+      return;
+    }
+    appContext.updateUser('favorites', [...favorites, repo]);
   }
 
   render() {
@@ -158,11 +173,13 @@ class Repo extends Component {
       id,
       ...rest
     } = this.props;
+    const { isBookmarked } = this.state;
     return (
       <Wrapper
         {...rest}
       >
         <Bookmark
+          className={isBookmarked ? 'is-bookmarked' : ''}
           onClick={(e) => {
             e.stopPropagation();
             this.bookmarkRepo({

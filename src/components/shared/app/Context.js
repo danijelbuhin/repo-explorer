@@ -130,6 +130,19 @@ class AppProvider extends Component {
       });
   }
 
+  updateUser = (field, value) => {
+    const { user } = this.state;
+    return this.users.doc(user.id).update({ [field]: value }).then(() => {
+      this.users.doc(user.id).get().then((u) => {
+        this.setState(() => ({
+          user: {
+            ...u.data(),
+          },
+        }));
+      });
+    });
+  }
+
   authenticate = () => {
     auth().signInWithPopup(new auth.GithubAuthProvider()).then((result) => {
       this.users.doc(result.user.uid).get().then((user) => {
@@ -217,6 +230,7 @@ class AppProvider extends Component {
           fetchPopularRepos: this.fetchPopularRepos,
           fetchRepo: this.fetchRepo,
           authenticate: this.authenticate,
+          updateUser: this.updateUser,
           logOut: this.logOut,
         }}
       >

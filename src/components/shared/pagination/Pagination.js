@@ -84,9 +84,10 @@ class Pagination extends Component {
     const {
       page,
       total,
+      limit,
       onPageNext,
     } = this.props;
-    if (page === Math.ceil(total / 15)) {
+    if (page === Math.ceil(total / limit)) {
       return;
     }
     onPageNext();
@@ -111,11 +112,11 @@ class Pagination extends Component {
     } = this.props;
     return (
       <Wrapper>
-        <Details>
-          Showing <strong>{((page * limit) - limit) + 1}</strong> to <strong>{page * Math.min(limit, total)}</strong> of <strong>{total}</strong> entries.
-        </Details>
         <ArrowLeft onClick={this.onPagePrevious} disabled={page === 1} />
-        <ArrowRight onClick={this.onPageNext} disabled={page === Math.ceil(total / 15)} />
+        <Details>
+          {page} / {Math.ceil(total / limit)}
+        </Details>
+        <ArrowRight onClick={this.onPageNext} disabled={page === Math.ceil(total / limit)} />
       </Wrapper>
     );
   }

@@ -123,10 +123,6 @@ const Tag = styled.div`
 `;
 
 class Repo extends Component {
-  state = {
-    isBookmarked: false,
-  }
-
   bookmarkRepo = (repo) => {
     const { appContext } = this.props;
     if (!appContext.isAuthenticated) {
@@ -177,9 +173,12 @@ class Repo extends Component {
       topic,
       text,
       id,
+      appContext: {
+        user,
+      },
       ...rest
     } = this.props;
-    const { isBookmarked } = this.state;
+    const isBookmarked = user && Boolean(user.favorites.filter(_repo => _repo.id === id)[0]);
     return (
       <Wrapper
         {...rest}

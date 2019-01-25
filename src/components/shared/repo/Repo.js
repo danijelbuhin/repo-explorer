@@ -32,7 +32,7 @@ const Bookmark = styled(BookmarkSVG)`
   }
 `;
 
-const Wrapper = styled.div`
+export const Wrapper = styled.div`
   position: relative;
 
   display: flex;

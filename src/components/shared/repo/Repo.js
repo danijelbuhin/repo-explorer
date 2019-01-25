@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { toast } from 'react-toastify';
+import { Tooltip } from 'react-tippy';
 
 import repoColors from '../../../utils/repoColors.json';
 import withAppContext from '../app/withAppContext';
@@ -31,7 +32,7 @@ const Bookmark = styled(BookmarkSVG)`
   }
 `;
 
-const Wrapper = styled.div`
+export const Wrapper = styled.div`
   position: relative;
 
   display: flex;
@@ -183,20 +184,26 @@ class Repo extends Component {
       <Wrapper
         {...rest}
       >
-        <Bookmark
-          className={isBookmarked ? 'is-bookmarked' : ''}
-          onClick={(e) => {
-            e.stopPropagation();
-            this.bookmarkRepo({
-              name,
-              avatar,
-              count,
-              language,
-              topic,
-              id,
-            });
-          }}
-        />
+        <Tooltip
+          title={isBookmarked ? 'Remove from your bookmarks' : 'Add to your bookmarks'}
+          theme="light"
+          style={{ position: 'absolute', top: '5px', right: '5px' }}
+        >
+          <Bookmark
+            className={isBookmarked ? 'is-bookmarked' : ''}
+            onClick={(e) => {
+              e.stopPropagation();
+              this.bookmarkRepo({
+                name,
+                avatar,
+                count,
+                language,
+                topic,
+                id,
+              });
+            }}
+          />
+        </Tooltip>
         <Image
           src={avatar}
           alt={name}

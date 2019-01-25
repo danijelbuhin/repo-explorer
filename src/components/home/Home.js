@@ -10,7 +10,7 @@ import db from '../../services/firebase';
 import paginate from '../../utils/paginate';
 
 import RateLimit from '../shared/rate-limit/RateLimit';
-import Repo from '../shared/repo/Repo';
+import Repo, { Wrapper as RepoWrapper } from '../shared/repo/Repo';
 import Loader from '../shared/loader/Loader';
 import { ReactComponent as StarSVG } from './assets/Star.svg';
 import { ReactComponent as EyeSVG } from './assets/Eye.svg';
@@ -21,6 +21,22 @@ const RepoList = styled.div`
   display: flex;
   align-items: stretch;
   flex-wrap: wrap;
+
+  ${RepoWrapper} {
+    width: 100%;
+    @media (min-width: 420px) {
+      width: 48%;
+    }
+    @media (min-width: 768px) {
+      width: 31%;
+    }
+    @media (min-width: 900px) {
+      width: 23%;
+    }
+    @media (min-width: 1200px) {
+      width: 18%;
+    }
+  }
 `;
 
 const LastViewText = styled.span`
@@ -131,7 +147,7 @@ class Home extends Component {
         <RateLimit />
         <ListTitle>Popular repositories:</ListTitle>
         <RepoList>
-          {paginate(popularRepos, 15, page).map(repo => (
+          {paginate(popularRepos, 10, page).map(repo => (
             <Repo
               key={repo.id}
               avatar={repo.owner.avatar_url}
@@ -156,6 +172,7 @@ class Home extends Component {
           <Pagination
             total={popularRepos.length}
             page={page}
+            limit={10}
             onPageNext={this.onPageNext}
             onPagePrevious={this.onPagePrevious}
           />

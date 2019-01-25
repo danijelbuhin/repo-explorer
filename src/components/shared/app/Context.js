@@ -20,7 +20,6 @@ class AppProvider extends Component {
 
   state = {
     isLoading: true,
-    hasError: false,
     rateLimit: {
       core: {},
       search: {},
@@ -30,6 +29,7 @@ class AppProvider extends Component {
     user: null,
     token: null,
     isAuthenticated: false,
+    isAuthenticating: false,
   }
 
   componentDidMount() {
@@ -37,14 +37,34 @@ class AppProvider extends Component {
       const id = window.localStorage.getItem('rx-user-id');
       const token = window.localStorage.getItem('rx-user-token');
       if (id && token) {
-        this.users.doc(id).get().then((user) => {
-          this.setState({
-            user: { ...user.data() },
-            token,
-            isLoading: false,
-            hasError: false,
+        axios
+          .get('https://api.github.com/user', {
+            params: { access_token: token },
+          })
+          .then(() => {
+            this.users.doc(id).get().then((user) => {
+              this.setState({
+                user: { ...user.data() },
+                token,
+                isLoading: false,
+                isAuthenticated: true,
+                isAuthenticating: false,
+              });
+            });
+          })
+          .catch(({ response }) => {
+            if (response.data.message === 'Bad credentials') {
+              window.localStorage.removeItem('rx-user-id');
+              window.localStorage.removeItem('rx-user-token');
+              this.setState({
+                user: null,
+                isAuthenticated: false,
+                isLoading: false,
+                isAuthenticating: false,
+              });
+              auth().signOut();
+            }
           });
-        });
       } else {
         this.setState({ isLoading: false });
       }
@@ -52,7 +72,6 @@ class AppProvider extends Component {
       console.log(err);
     }
     this.fetchRateLimit();
-    this.onAuthStateChange();
   }
 
   fetchRateLimit = () => {
@@ -145,33 +164,45 @@ class AppProvider extends Component {
   }
 
   authenticate = () => {
+    this.setState({ isAuthenticating: true });
     auth().signInWithPopup(new auth.GithubAuthProvider()).then((result) => {
-      this.users.doc(result.user.uid).get().then((user) => {
-        if (user.exists) {
-          window.localStorage.setItem('rx-user-id', result.user.uid);
-          window.localStorage.setItem('rx-user-token', result.credential.accessToken);
+      const {
+        additionalUserInfo: {
+          profile,
+        },
+        user,
+        credential,
+      } = result;
+      this.users.doc(result.user.uid).get().then((doc) => {
+        if (doc.exists) {
+          window.localStorage.setItem('rx-user-id', user.uid);
+          window.localStorage.setItem('rx-user-token', credential.accessToken);
           this.setState(() => ({
             user: {
-              ...user.data(),
+              ...doc.data(),
             },
-            token: result.credential.accessToken,
+            token: credential.accessToken,
+            isAuthenticated: true,
+            isAuthenticating: false,
           }), () => this.fetchRateLimit());
         } else {
           const newUser = {
-            name: result.additionalUserInfo.profile.name,
-            email: result.additionalUserInfo.profile.email,
-            avatar: result.additionalUserInfo.profile.avatar_url,
-            blog: result.additionalUserInfo.profile.blog,
-            bio: result.additionalUserInfo.profile.bio,
-            id: result.user.uid,
+            name: profile.name,
+            email: profile.email,
+            avatar: profile.avatar_url,
+            blog: profile.blog,
+            bio: profile.bio,
+            id: user.uid,
             favorites: [],
           };
           this.users.doc(result.user.uid).set(newUser).then(() => {
-            window.localStorage.setItem('rx-user-id', result.user.uid);
-            window.localStorage.setItem('rx-user-token', result.credential.accessToken);
+            window.localStorage.setItem('rx-user-id', user.uid);
+            window.localStorage.setItem('rx-user-token', credential.accessToken);
             this.setState(() => ({
               user: newUser,
-              token: result.credential.accessToken,
+              token: credential.accessToken,
+              isAuthenticated: true,
+              isAuthenticating: false,
             }), () => this.fetchRateLimit());
           });
         }
@@ -179,23 +210,11 @@ class AppProvider extends Component {
     });
   }
 
-  onAuthStateChange = () => {
-    auth().onAuthStateChanged((user) => {
-      if (user) {
-        this.setState({ isAuthenticated: true });
-      } else {
-        window.localStorage.removeItem('rx-user-id');
-        window.localStorage.removeItem('rx-user-token');
-        this.setState({ isAuthenticated: false });
-      }
-    });
-  }
-
   logOut = () => {
     auth().signOut().then(() => {
       window.localStorage.removeItem('rx-user-id');
       window.localStorage.removeItem('rx-user-token');
-      this.setState({ user: null, token: null });
+      this.setState({ user: null, token: null, isAuthenticated: false });
       this.fetchRateLimit();
     });
   }
@@ -203,16 +222,13 @@ class AppProvider extends Component {
   render() {
     const {
       isAuthenticated,
+      isAuthenticating,
       rateLimit,
       user,
       isLoading,
-      hasError,
     } = this.state;
     if (isLoading) {
       return <Loader text="Checking user authentication" />;
-    }
-    if (hasError) {
-      return <div>Critical error occured.</div>;
     }
     return (
       <Provider
@@ -220,6 +236,7 @@ class AppProvider extends Component {
           rateLimit,
           user,
           isAuthenticated,
+          isAuthenticating,
           fetchRateLimit: this.fetchRateLimit,
           fetchPopularRepos: this.fetchPopularRepos,
           fetchRepo: this.fetchRepo,

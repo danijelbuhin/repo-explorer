@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import * as serviceWorker from './serviceWorker';
 import 'react-toastify/dist/ReactToastify.css';
+import 'react-tippy/dist/tippy.css';
 
 import Root from './Root';
 

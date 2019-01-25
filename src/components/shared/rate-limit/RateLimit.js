@@ -57,18 +57,27 @@ const RateLimit = ({
     },
     user,
     isAuthenticated,
+    isAuthenticating,
     authenticate,
     logOut,
   },
 }) => (
   <div style={{ border: '1px solid #000', padding: 10 }}>
-    <h2>Hello {isAuthenticated ? user && user.name : 'Guest'}, you{'\''}re using {isAuthenticated ? 'your own' : 'shared'} rate limit</h2>
+    {!isAuthenticating && (
+      <h2>Hello {isAuthenticated ? user && user.name : 'Guest'}, you{'\''}re using {isAuthenticated ? 'your own' : 'shared'} rate limit</h2>
+    )}
+    {isAuthenticating && <h2>Authenticating...</h2>}
     {isAuthenticated && (
       <button onClick={logOut} type="button">Log out</button>
     )}
     {!isAuthenticated && (
       <p>
-        <button onClick={authenticate} type="button">Authenticate with github</button> {' '}
+        <button
+          onClick={authenticate}
+          type="button"
+        >
+          {isAuthenticating ? 'Authenticating...' : 'Authenticate with github'}
+        </button>
         to get your own limits.
       </p>
     )}

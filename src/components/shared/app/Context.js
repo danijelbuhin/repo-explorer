@@ -2,6 +2,7 @@ import React, { Component, createContext } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import moment from 'moment';
+import { toast } from 'react-toastify';
 
 import db, { auth } from '../../../services/firebase';
 
@@ -37,14 +38,28 @@ class AppProvider extends Component {
       const id = window.localStorage.getItem('rx-user-id');
       const token = window.localStorage.getItem('rx-user-token');
       if (id && token) {
-        this.users.doc(id).get().then((user) => {
-          this.setState({
-            user: { ...user.data() },
-            token,
-            isLoading: false,
-            hasError: false,
+        axios
+          .get('https://api.github.com/user', {
+            params: { access_token: token },
+          })
+          .then(() => {
+            this.users.doc(id).get().then((user) => {
+              this.setState({
+                user: { ...user.data() },
+                token,
+                isLoading: false,
+                hasError: false,
+              });
+            });
+          })
+          .catch(({ response }) => {
+            if (response.data.message === 'Bad credentials') {
+              window.localStorage.removeItem('rx-user-id');
+              window.localStorage.removeItem('rx-user-token');
+              this.setState({ user: null, isAuthenticated: false, isLoading: false });
+              auth().signOut();
+            }
           });
-        });
       } else {
         this.setState({ isLoading: false });
       }

@@ -9,13 +9,15 @@ import withAppContext from '../shared/app/withAppContext';
 import db from '../../services/firebase';
 import paginate from '../../utils/paginate';
 
-import RateLimit from '../shared/rate-limit/RateLimit';
 import Repo, { Wrapper as RepoWrapper } from '../shared/repo/Repo';
 import Loader from '../shared/loader/Loader';
 import { ReactComponent as StarSVG } from './assets/Star.svg';
 import { ReactComponent as EyeSVG } from './assets/Eye.svg';
-import { ReactComponent as LogoSVG } from '../../assets/Logo.svg';
 import Pagination from '../shared/pagination/Pagination';
+
+const Wrapper = styled.div`
+  padding: 10px;
+`;
 
 const RepoList = styled.div`
   display: flex;
@@ -140,11 +142,7 @@ class Home extends Component {
       return <div>An error has occured.</div>;
     }
     return (
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'center', margin: '40px 0' }}>
-          <LogoSVG />
-        </div>
-        <RateLimit />
+      <Wrapper>
         <ListTitle>Popular repositories:</ListTitle>
         <RepoList>
           {paginate(popularRepos, 10, page).map(repo => (
@@ -196,7 +194,7 @@ class Home extends Component {
             />
           ))}
         </RepoList>
-      </div>
+      </Wrapper>
     );
   }
 }

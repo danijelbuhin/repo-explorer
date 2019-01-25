@@ -188,6 +188,7 @@ class Repo extends Component {
           title={isBookmarked ? 'Remove from your bookmarks' : 'Add to your bookmarks'}
           theme="light"
           style={{ position: 'absolute', top: '5px', right: '5px' }}
+          position="top-end"
         >
           <Bookmark
             className={isBookmarked ? 'is-bookmarked' : ''}

@@ -8,6 +8,8 @@ import generatePercentage from '../../../utils/generatePercentage';
 
 import { ReactComponent as LogoSVG } from './assets/Logo.svg';
 
+import Dropdown from '../dropdown/Dropdown';
+
 import DefaultUser from './assets/user.png';
 
 const Wrapper = styled.div`
@@ -123,23 +125,6 @@ const Indicator = styled.div`
   border-radius:  0 15px 15px 0;
 `;
 
-const DropDown = styled.div`
-  position: absolute;
-  bottom: -15px;
-  left: 0;
-
-  display: ${({ isActive }) => isActive ? 'block' : 'none'};
-
-  padding: 15px;
-  border-radius: 5px;
-
-  background: #fff;
-  border: 1px solid rgba(212, 221, 237, 0.25);
-  box-shadow: 0px 1px 3px rgba(212, 221, 237, 0.25);
-
-  transform: translateY(100%);
-`;
-
 class Header extends Component {
   state = {
     isDropdownActive: false,
@@ -195,7 +180,11 @@ class Header extends Component {
               />
             </Limit>
           </RateLimit>
-          <DropDown isActive={isDropdownActive}>
+          <Dropdown
+            isActive={isDropdownActive}
+            className={isDropdownActive && 'is-active'}
+            handleClickOutside={() => this.setState({ isDropdownActive: false })}
+          >
             {!isAuthenticating && (
               <p>Hello {isAuthenticated ? user && user.name : 'Guest'}, you{'\''}re using {isAuthenticated ? 'your own' : 'shared'} rate limit</p>
             )}
@@ -210,7 +199,7 @@ class Header extends Component {
                 {isAuthenticating ? 'Authenticating...' : 'Authenticate with github'}
               </button>
             )}
-          </DropDown>
+          </Dropdown>
         </UserInfo>
       </Wrapper>
     );

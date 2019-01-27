@@ -23,7 +23,7 @@ class AppProvider extends Component {
     rateLimit: {
       core: {},
       search: {},
-      isLoading: false,
+      isLoading: true,
       latest_usage: 0,
     },
     user: null,
@@ -71,7 +71,6 @@ class AppProvider extends Component {
     } catch (err) {
       console.log(err);
     }
-    this.fetchRateLimit();
   }
 
   fetchRateLimit = () => {

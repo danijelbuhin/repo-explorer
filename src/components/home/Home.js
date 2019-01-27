@@ -9,11 +9,13 @@ import withAppContext from '../shared/app/withAppContext';
 import db from '../../services/firebase';
 import paginate from '../../utils/paginate';
 
-import Repo, { Wrapper as RepoWrapper } from '../shared/repo/Repo';
-import Loader from '../shared/loader/Loader';
 import { ReactComponent as StarSVG } from './assets/Star.svg';
 import { ReactComponent as EyeSVG } from './assets/Eye.svg';
+
+import Repo, { Wrapper as RepoWrapper } from '../shared/repo/Repo';
+import Loader from '../shared/loader/Loader';
 import Pagination from '../shared/pagination/Pagination';
+import Search from './search/Search';
 
 const Wrapper = styled.div`
   padding: 10px;
@@ -143,6 +145,7 @@ class Home extends Component {
     }
     return (
       <Wrapper>
+        <Search />
         <ListTitle>Popular repositories:</ListTitle>
         <RepoList>
           {paginate(popularRepos, 10, page).map(repo => (

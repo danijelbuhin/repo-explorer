@@ -8,7 +8,7 @@ const generatePercentage = (val1 = 0, val2 = 0) => {
   if (result === 0) {
     return result;
   }
-  return result.toFixed(1);
+  return result.toFixed(0);
 };
 
 export default generatePercentage;

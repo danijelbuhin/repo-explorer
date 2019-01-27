@@ -84,6 +84,7 @@ const UserInfo = styled.div`
   align-items: center;
 
   width: 80%;
+  cursor: pointer;
   @media (min-width: 550px) {
     width: auto;
   }
@@ -94,8 +95,6 @@ const Avatar = styled.img`
   height: 52px;
 
   border-radius: 5px;
-
-  cursor: pointer;
 `;
 
 const RateLimit = styled.div`
@@ -172,7 +171,7 @@ class Header extends Component {
     return (
       <Wrapper>
         <LogoSVG />
-        <UserInfo>
+        <UserInfo onClick={this.toggleDropdown}>
           {(isLoading || isAuthenticating) && (
             <SpinnerWrapper>
               <Spinner />
@@ -181,7 +180,6 @@ class Header extends Component {
           <Avatar
             src={isAuthenticated ? user.avatar : DefaultUser}
             alt="User"
-            onClick={this.toggleDropdown}
           />
           <RateLimit>
             <Limit>

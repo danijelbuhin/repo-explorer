@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import moment from 'moment';
 
 import withAppContext from '../app/withAppContext';
-import percentToColor from '../../../utils/percentToColor';
 import generatePercentage from '../../../utils/generatePercentage';
 
 import { ReactComponent as LogoSVG } from './assets/Logo.svg';
@@ -32,7 +32,10 @@ const Wrapper = styled.div`
   z-index: 100;
 
   svg {
-    width: 175px;
+    width: 140px;
+    @media (min-width: 550px) {
+      width: 175px;
+    }
   }
 `;
 
@@ -79,6 +82,11 @@ const UserInfo = styled.div`
   position: relative;
   display: flex;
   align-items: center;
+
+  width: 80%;
+  @media (min-width: 550px) {
+    width: auto;
+  }
 `;
 
 const Avatar = styled.img`
@@ -91,17 +99,24 @@ const Avatar = styled.img`
 `;
 
 const RateLimit = styled.div`
+  width: 100%;
   margin-left: 5px;
 `;
 
 const Limit = styled.div`
   position: relative;
-  background: #ddd;
+  background: #F4F4F4;
   height: 20px;
-  width: 200px;
+  width: 100%;
   margin: 3px 0;
 
+  font-size: 12px;
   border-radius:  0 15px 15px 0;
+
+  @media (min-width: 550px) {
+    width: 200px;
+    font-size: 14px;
+  }
 `;
 
 const Text = styled.span`
@@ -120,7 +135,11 @@ const Indicator = styled.div`
   width: ${({ percentage }) => `${percentage}%`};
   height: 100%;
 
-  background: ${({ color }) => color};
+  background: ${({ percentage: p }) => (p > 75 && '#A7FF88')
+    || (p > 50 && p < 75 && '#F9FD43')
+    || (p > 20 && p <= 50 && '#FFD159')
+    || (p <= 20 && '#FF3E3E')
+};
   transform: translateY(-50%);
   border-radius:  0 15px 15px 0;
 `;
@@ -166,16 +185,14 @@ class Header extends Component {
           />
           <RateLimit>
             <Limit>
-              <Text>Search limit - {generatePercentage(search.remaining, search.limit)}%</Text>
+              <Text>Search limit - {search.remaining || 0} / {search.limit || 0}</Text>
               <Indicator
-                color={percentToColor((search.remaining / search.limit) * 100)}
                 percentage={generatePercentage(search.remaining, search.limit)}
               />
             </Limit>
             <Limit>
-              <Text>Core limit  - {generatePercentage(core.remaining, core.limit)}%</Text>
+              <Text>Core limit - {core.remaining || 0} / {core.limit || 0}</Text>
               <Indicator
-                color={percentToColor((core.remaining / core.limit) * 100)}
                 percentage={generatePercentage(core.remaining, core.limit)}
               />
             </Limit>
@@ -188,6 +205,10 @@ class Header extends Component {
             {!isAuthenticating && (
               <p>Hello {isAuthenticated ? user && user.name : 'Guest'}, you{'\''}re using {isAuthenticated ? 'your own' : 'shared'} rate limit</p>
             )}
+            <div>
+              <p><strong>Search limit reset:</strong> <br /> {moment(search.reset * 1000).format('HH:mm:ss')}h</p>
+              <p><strong>Core limit reset:</strong> <br /> {moment(core.reset * 1000).format('HH:mm:ss')}h</p>
+            </div>
             {isAuthenticated && (
               <button onClick={logOut} type="button">Log out</button>
             )}

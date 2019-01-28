@@ -52,7 +52,14 @@ class Search extends Component {
   handleSearch = (e) => {
     e.preventDefault();
     const { search } = this.state;
-    if (search.trim()) {
+    const trimmed = search.trim();
+    const regex = /([a-z]+\/[a-z])\w+/g;
+    if (trimmed) {
+      const test = regex.exec(trimmed);
+      if (test) {
+        console.log(test[0]);
+      }
+      // console.log(regex.exec(trimmed));
       history.push(`/search?q=${search}`);
     }
   }

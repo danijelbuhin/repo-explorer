@@ -125,11 +125,11 @@ class AppProvider extends Component {
       });
   }
 
-  fetchRepo = () => {
+  fetchRepo = (repo) => {
     const { client_id, client_secret } = tokens;
     const { token } = this.state;
     return axios
-      .get('https://api.github.com/repos/facebook/react', {
+      .get(`https://api.github.com/repos/${repo}`, {
         headers: {
           Accept: 'application/vnd.github.mercy-preview+json',
         },

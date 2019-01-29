@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const Wrapper = styled.div`
+export const Wrapper = styled.div`
   position: absolute;
   bottom: -15px;
   left: 0;
@@ -20,6 +20,8 @@ const Wrapper = styled.div`
   
   transition: all .4s cubic-bezier(.65,.05,.13,.73);
 
+  cursor: initial;
+
   &.is-active {
     transform: translateY(100%);
     opacity: 1;
@@ -28,45 +30,22 @@ const Wrapper = styled.div`
   }
 `;
 
-class Dropdown extends Component {
-  componentDidMount() {
-    document.addEventListener('mousedown', this.handleClick);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('mousedown', this.handleClick);
-  }
-
-  handleClick = (e) => {
-    if (this.node.contains(e.target)) {
-      return;
-    }
-    this.props.handleClickOutside();
-  }
-
-  render() {
-    const { isActive, children, ...rest } = this.props;
-    return (
-      <Wrapper
-        isActive={isActive}
-        onClick={this.handleClick}
-        ref={node => this.node = node} // eslint-disable-line
-        {...rest}
-      >
-        {children}
-      </Wrapper>
-    );
-  }
-}
+const Dropdown = ({
+  isActive,
+  children,
+  ...rest
+}) => (
+  <Wrapper
+    isActive={isActive}
+    {...rest}
+  >
+    {children}
+  </Wrapper>
+);
 
 Dropdown.propTypes = {
   isActive: PropTypes.bool.isRequired,
   children: PropTypes.node.isRequired,
-  handleClickOutside: PropTypes.func,
-};
-
-Dropdown.defaultProps = {
-  handleClickOutside: () => {},
 };
 
 export default Dropdown;

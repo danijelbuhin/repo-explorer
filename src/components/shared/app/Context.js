@@ -125,11 +125,35 @@ class AppProvider extends Component {
       });
   }
 
-  fetchRepo = () => {
+  fetchRepo = (repo) => {
     const { client_id, client_secret } = tokens;
     const { token } = this.state;
     return axios
-      .get('https://api.github.com/repos/facebook/react', {
+      .get(`https://api.github.com/repos/${repo}`, {
+        headers: {
+          Accept: 'application/vnd.github.mercy-preview+json',
+        },
+        params: {
+          client_id: token ? undefined : client_id,
+          client_secret: token ? undefined : client_secret,
+          access_token: token ? token : undefined,
+        },
+      })
+      .then(({ data }) => {
+        this.fetchRateLimit();
+        return data;
+      })
+      .catch((err) => {
+        this.fetchRateLimit();
+        return err;
+      });
+  }
+
+  searchRepo = (query, perPage) => {
+    const { client_id, client_secret } = tokens;
+    const { token } = this.state;
+    return axios
+      .get(`https://api.github.com/search/repositories?q=${query}&sort=stars&order=desc&per_page=${perPage}`, {
         headers: {
           Accept: 'application/vnd.github.mercy-preview+json',
         },
@@ -242,6 +266,7 @@ class AppProvider extends Component {
           authenticate: this.authenticate,
           updateUser: this.updateUser,
           logOut: this.logOut,
+          searchRepo: this.searchRepo,
         }}
       >
         {this.props.children}

@@ -22,6 +22,8 @@ const Wrapper = styled.form`
   ${DropdownWrapper} {
     width: 100%;
     bottom: -3px;
+
+    z-index: 10;
   }
 `;
 
@@ -59,7 +61,7 @@ class Search extends Component {
     search: '',
     isDropdownActive: false,
     renderRepo: false,
-    repo: null,
+    repos: [],
   }
 
   handleClickOutside = () => {
@@ -79,37 +81,14 @@ class Search extends Component {
     this.setState(() => ({ search: e.target.value }), () => {
       const { search } = this.state;
       const trimmed = search.trim();
-      const regex = /([a-z]+\/[a-z])\w+/g; // fix
       if (trimmed.length > 2) {
-        const test = regex.exec(trimmed);
-        if (test) {
-          this.props.appContext
-            .fetchRepo(trimmed)
-            .then((data) => {
-              this.setState(prevState => ({
-                ...prevState,
-                renderRepo: true,
-                repo: {
-                  full_name: data.full_name,
-                  id: data.id,
-                  avatar_url: data.owner && data.owner.avatar_url,
-                },
-              }));
-            })
-            .catch(() => {
-              this.setState(prevProps => ({
-                ...prevProps,
-                renderRepo: false,
-                repo: null,
-              }));
-            });
-        } else {
-          this.setState(prevProps => ({
-            ...prevProps,
-            renderRepo: false,
-            repo: null,
+        this.props.appContext.searchRepo(trimmed, 5).then((data) => {
+          this.setState(prevState => ({
+            ...prevState,
+            renderRepo: true,
+            repos: data.items,
           }));
-        }
+        });
         this.setState(() => ({ isDropdownActive: true }));
       } else {
         this.setState(() => ({ isDropdownActive: false }));
@@ -123,7 +102,8 @@ class Search extends Component {
   }
 
   render() {
-    const { search, renderRepo, repo, isDropdownActive } = this.state;
+    const { search, renderRepo, repos, isDropdownActive } = this.state;
+    console.log(repos);
     return (
       <Wrapper onSubmit={this.handleSearch}>
         <Input
@@ -136,15 +116,12 @@ class Search extends Component {
         <Dropdown isActive={isDropdownActive} className={isDropdownActive && 'is-active'}>
           Search query: {search}
           <hr />
-          {renderRepo && repo.id && (
-            <div>
-              <img src={repo.avatar_url} alt={repo.full_name} style={{ width: 36, height: 36 }} />
+          {renderRepo && repos.length > 0 && repos.map(repo => (
+            <div key={repo.id} style={{ display: 'inline-block', marginRight: '10px' }}>
+              <img src={repo.owner.avatar_url} alt={repo.full_name} style={{ width: 28, height: 28 }} />
               {repo.full_name}
             </div>
-          )}
-          {renderRepo && !repo.id && (
-            <div>Repo "{search}" was not found.</div>
-          )}
+          ))}
         </Dropdown>
       </Wrapper>
     );
@@ -154,7 +131,7 @@ class Search extends Component {
 
 Search.propTypes = {
   appContext: PropTypes.shape({
-    fetchRepo: PropTypes.func,
+    searchRepo: PropTypes.func,
   }).isRequired,
 };
 

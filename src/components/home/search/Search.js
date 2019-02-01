@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import withClickOutside from 'react-click-outside';
 import { debounce } from 'lodash';
+import { Link } from 'react-router-dom';
 
 import withAppContext from '../../shared/app/withAppContext';
 
@@ -55,6 +56,38 @@ const Icon = styled(SearchSVG)`
   right: 25px;
 
   transform: translateY(-50%);
+`;
+
+const Repo = styled(Link)`
+  display: block;
+
+  padding: 10px 0;
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(212,221,237,0.25);
+  }
+
+  color: #000;
+
+  transition: all .2s ease-in-out;
+  cursor: pointer;
+  
+  &:hover {
+    background: rgba(212,221,237,0.25);
+  }
+`;
+
+const Avatar = styled.img`
+  display: inline-block;
+  vertical-align: middle;
+
+  width: 36px;
+  height: 36px;
+`;
+
+const Name = styled.span`
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 10px;
 `;
 
 const SpinnerWrapper = styled.div`
@@ -170,10 +203,10 @@ class Search extends Component {
           Search query: {search}
           <hr />
           {shouldRenderRepo && repos.length > 0 && repos.map(repo => (
-            <div key={repo.id} style={{ display: 'inline-block', marginRight: '10px' }}>
-              <img src={repo.owner.avatar_url} alt={repo.full_name} style={{ width: 28, height: 28 }} />
-              {repo.full_name}
-            </div>
+            <Repo key={repo.id} to={`/repo/${repo.id}`}>
+              <Avatar src={repo.owner.avatar_url} alt={repo.full_name} style={{ width: 28, height: 28 }} />
+              <Name>{repo.full_name}</Name>
+            </Repo>
           ))}
         </Dropdown>
       </Wrapper>

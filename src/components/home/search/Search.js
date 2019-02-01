@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import withClickOutside from 'react-click-outside';
+import { debounce } from 'lodash';
 
 import withAppContext from '../../shared/app/withAppContext';
 
@@ -56,13 +57,66 @@ const Icon = styled(SearchSVG)`
   transform: translateY(-50%);
 `;
 
+const SpinnerWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100%;
+  height: 100%;
+
+  background: rgba(255, 255, 255, 0.5);
+`;
+
+const Spinner = styled.div`
+  width: 30px;
+  height: 30px;
+
+  border-top: 1px solid #335abb;
+  border-bottom: 1px solid transparent;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+  border-radius: 100%;
+  background: transparent;
+
+  animation: spin 0.6s infinite linear;
+  transform: rotateZ(0deg);
+
+  @keyframes spin {
+    from {
+      transform: rotateZ(0deg);
+    } to {
+      transform: rotateZ(360deg);
+    }
+  }
+`;
+
 class Search extends Component {
   state = {
     search: '',
     isDropdownActive: false,
-    renderRepo: false,
+    isSearching: false,
+    shouldRenderRepo: false,
     repos: [],
   }
+
+  debounceSearch = debounce(() => {
+    const { search } = this.state;
+    const trimmed = search.trim();
+    this.setState({ isSearching: true });
+    this.props.appContext.searchRepo(trimmed, 5).then((data) => {
+      this.setState(prevState => ({
+        ...prevState,
+        shouldRenderRepo: true,
+        repos: data.items,
+        isSearching: false,
+      }));
+    }).catch(() => this.setState({ isSearching: false }));
+  }, 300);
 
   handleClickOutside = () => {
     if (this.state.isDropdownActive) {
@@ -82,13 +136,7 @@ class Search extends Component {
       const { search } = this.state;
       const trimmed = search.trim();
       if (trimmed.length > 2) {
-        this.props.appContext.searchRepo(trimmed, 5).then((data) => {
-          this.setState(prevState => ({
-            ...prevState,
-            renderRepo: true,
-            repos: data.items,
-          }));
-        });
+        this.debounceSearch();
         this.setState(() => ({ isDropdownActive: true }));
       } else {
         this.setState(() => ({ isDropdownActive: false }));
@@ -102,7 +150,7 @@ class Search extends Component {
   }
 
   render() {
-    const { search, renderRepo, repos, isDropdownActive } = this.state;
+    const { search, shouldRenderRepo, repos, isDropdownActive, isSearching } = this.state;
     console.log(repos);
     return (
       <Wrapper onSubmit={this.handleSearch}>
@@ -114,9 +162,14 @@ class Search extends Component {
         />
         <Icon />
         <Dropdown isActive={isDropdownActive} className={isDropdownActive && 'is-active'}>
+          {isSearching && (
+            <SpinnerWrapper>
+              <Spinner />
+            </SpinnerWrapper>
+          )}
           Search query: {search}
           <hr />
-          {renderRepo && repos.length > 0 && repos.map(repo => (
+          {shouldRenderRepo && repos.length > 0 && repos.map(repo => (
             <div key={repo.id} style={{ display: 'inline-block', marginRight: '10px' }}>
               <img src={repo.owner.avatar_url} alt={repo.full_name} style={{ width: 28, height: 28 }} />
               {repo.full_name}

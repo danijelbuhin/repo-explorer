@@ -203,7 +203,7 @@ class Search extends Component {
           Search query: {search}
           <hr />
           {shouldRenderRepo && repos.length > 0 && repos.map(repo => (
-            <Repo key={repo.id} to={`/repo/${repo.id}`}>
+            <Repo key={repo.id} to={`/repo/${encodeURIComponent(repo.full_name)}`}>
               <Avatar src={repo.owner.avatar_url} alt={repo.full_name} style={{ width: 28, height: 28 }} />
               <Name>{repo.full_name}</Name>
             </Repo>

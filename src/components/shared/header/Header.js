@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 import { ReactComponent as LogoSVG } from './assets/Logo.svg';
 
@@ -10,6 +11,7 @@ const Wrapper = styled.div`
   top: 0;
   left: 0;
   width: 100%;
+  height: 70px;
 
   display: flex;
   justify-content: space-between;
@@ -34,7 +36,9 @@ const Wrapper = styled.div`
 
 const Header = () => (
   <Wrapper>
-    <LogoSVG />
+    <Link to="/">
+      <LogoSVG />
+    </Link>
     <UserInfo />
   </Wrapper>
 );

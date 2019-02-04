@@ -158,16 +158,6 @@ class Home extends Component {
               language={repo.language}
               topic={repo.topics[0]}
               id={repo.id}
-              onClick={() => {
-                this.handleView({
-                  id: repo.id,
-                  name: repo.name,
-                  full_name: repo.full_name,
-                  avatar_url: repo.owner.avatar_url,
-                  stargazers_count: repo.stargazers_count,
-                });
-                this.props.appContext.fetchRepo();
-              }}
             />
           ))}
           <Pagination

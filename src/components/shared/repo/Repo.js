@@ -7,6 +7,8 @@ import { Tooltip } from 'react-tippy';
 import repoColors from '../../../utils/repoColors.json';
 import withAppContext from '../app/withAppContext';
 
+import history from '../../../history';
+
 import { ReactComponent as BookmarkSVG } from './assets/Bookmark.svg';
 
 const Bookmark = styled(BookmarkSVG)`
@@ -182,6 +184,7 @@ class Repo extends Component {
     const isBookmarked = user && Boolean(user.favorites.filter(_repo => _repo.id === id)[0]);
     return (
       <Wrapper
+        onClick={() => history.push(`/repo/${encodeURIComponent(name)}`)}
         {...rest}
       >
         <Tooltip

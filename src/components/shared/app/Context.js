@@ -23,7 +23,7 @@ class AppProvider extends Component {
     rateLimit: {
       core: {},
       search: {},
-      isLoading: true,
+      isLoading: false,
       latest_usage: 0,
     },
     user: null,
@@ -37,6 +37,7 @@ class AppProvider extends Component {
       const id = window.localStorage.getItem('rx-user-id');
       const token = window.localStorage.getItem('rx-user-token');
       if (id && token) {
+        this.fetchRateLimit();
         axios
           .get('https://api.github.com/user', {
             params: { access_token: token },
@@ -66,6 +67,7 @@ class AppProvider extends Component {
             }
           });
       } else {
+        this.fetchRateLimit();
         this.setState({ isLoading: false });
       }
     } catch (err) {
@@ -249,6 +251,7 @@ class AppProvider extends Component {
       rateLimit,
       user,
       isLoading,
+      token,
     } = this.state;
     if (isLoading) {
       return <Loader text="Checking user authentication" />;
@@ -260,6 +263,8 @@ class AppProvider extends Component {
           user,
           isAuthenticated,
           isAuthenticating,
+          tokens,
+          token,
           fetchRateLimit: this.fetchRateLimit,
           fetchPopularRepos: this.fetchPopularRepos,
           fetchRepo: this.fetchRepo,

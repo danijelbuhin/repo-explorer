@@ -12,8 +12,6 @@ const config = {
 };
 
 firebase.initializeApp(config);
-const firestore = firebase.firestore();
-firestore.settings({ timestampsInSnapshots: true });
 
 export const { auth } = firebase;
 export default firebase.firestore();

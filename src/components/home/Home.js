@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import moment from 'moment';
 import styled from 'styled-components';
+import { Tooltip } from 'react-tippy';
 
 import withAppContext from '../shared/app/withAppContext';
 
@@ -93,24 +94,6 @@ class Home extends Component {
     })
   )
 
-  handleView = (params) => {
-    this.views.doc(String(params.id)).get().then((doc) => {
-      if (doc.exists) {
-        this.views.doc(String(params.id)).set({
-          ...params,
-          views: doc.data().views + 1,
-          viewed_at: moment().toDate().getTime(),
-        });
-      } else {
-        this.views.doc(String(params.id)).set({
-          ...params,
-          views: 1,
-          viewed_at: moment().toDate().getTime(),
-        });
-      }
-    });
-  }
-
   fetchRepos = () => {
     const { fetchPopularRepos } = this.props.appContext;
     return fetchPopularRepos()
@@ -181,7 +164,21 @@ class Home extends Component {
               text={(
                 <LastViewText>
                   <strong>Latest view: </strong>
-                  {`${moment(repo.viewed_at).format('DD MMM YYYY, HH:mm:ss')}h`}
+                  {`${moment(repo.viewed_at).format('DD MMM YYYY, HH:mm:ss')}h`} <br />
+                  <span>From: </span>
+                  {(!repo.viewed_from || repo.viewed_from === 'Unknown') && (
+                    <span>Unknown country</span>
+                  )}
+                  {repo.viewed_from && repo.viewed_from !== 'Unknown' && (
+                    <Tooltip
+                      title={repo.viewed_from && repo.viewed_from.country}
+                      theme="light"
+                    >
+                      <span
+                        className={`flag-icon flag-icon-${repo.viewed_from && repo.viewed_from.country_code}`}
+                      />
+                    </Tooltip>
+                  )}
                 </LastViewText>
               )}
             />

@@ -61,7 +61,7 @@ const Icon = styled(SearchSVG)`
 const Repo = styled(Link)`
   display: block;
 
-  padding: 10px 0;
+  padding: 10px;
   &:not(:last-child) {
     border-bottom: 1px solid rgba(212,221,237,0.25);
   }
@@ -90,6 +90,15 @@ const Name = styled.span`
   margin-left: 10px;
 `;
 
+const SearchQuery = styled(Link)`
+  display: block;
+
+  padding-bottom: 10px;
+  color: #3E97FF;
+
+  text-align: center;
+`;
+
 const SpinnerWrapper = styled.div`
   position: absolute;
   top: 0;
@@ -109,7 +118,7 @@ const Spinner = styled.div`
   width: 30px;
   height: 30px;
 
-  border-top: 1px solid #335abb;
+  border-top: 1px solid #3E97FF;
   border-bottom: 1px solid transparent;
   border-left: 1px solid transparent;
   border-right: 1px solid transparent;
@@ -184,7 +193,6 @@ class Search extends Component {
 
   render() {
     const { search, shouldRenderRepo, repos, isDropdownActive, isSearching } = this.state;
-    console.log(repos);
     return (
       <Wrapper onSubmit={this.handleSearch}>
         <Input
@@ -200,11 +208,12 @@ class Search extends Component {
               <Spinner />
             </SpinnerWrapper>
           )}
-          Search query: {search}
-          <hr />
+          <SearchQuery to={`/search?q=${encodeURIComponent(search)}`}>
+            Display all results for {'"'}{search}{'"'}
+          </SearchQuery>
           {shouldRenderRepo && repos.length > 0 && repos.map(repo => (
             <Repo key={repo.id} to={`/repo/${encodeURIComponent(repo.full_name)}`}>
-              <Avatar src={repo.owner.avatar_url} alt={repo.full_name} style={{ width: 28, height: 28 }} />
+              <Avatar src={repo.owner.avatar_url} alt={repo.full_name} />
               <Name>{repo.full_name}</Name>
             </Repo>
           ))}

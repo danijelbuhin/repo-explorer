@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Tooltip } from 'react-tippy';
 
@@ -104,7 +105,7 @@ const Text = styled.span`
   font-size: 12px;
 `;
 
-const Language = styled.div`
+const Language = styled(Link)`
   padding: 2px 4px;
 
   color: #fff;
@@ -112,9 +113,16 @@ const Language = styled.div`
 
   background: ${({ color }) => color ? color : '#f7f7f7'};
   border-radius: 3px;
+  text-decoration: none;
+
+  transition: all .2s ease-in-out;
+
+  &:hover {
+    box-shadow: 0px 2px 7px rgba(0,0,0,0.1);
+  }
 `;
 
-const Tag = styled.div`
+const Tag = styled(Link)`
   display: inline-block;
   padding: 2px 4px;
 
@@ -123,6 +131,13 @@ const Tag = styled.div`
 
   border-radius: 3px;
   white-space: nowrap;
+  text-decoration: none;
+
+  transition: all .2s ease-in-out;
+
+  &:hover {
+    background-color: #dbecfc;
+  }
 `;
 
 class Repo extends Component {
@@ -214,8 +229,27 @@ class Repo extends Component {
         />
         <Name>{name}</Name>
         <Count>{countIcon} <Number>{count}</Number></Count>
-        {language && <Language color={repoColors[language].color}>{language.toLowerCase()}</Language>}
-        {!language && topic && <Tag>#{topic.toLowerCase()}</Tag>}
+        {language && (
+          <Language
+            to={`/search?q=${encodeURIComponent(language.toLowerCase())}`}
+            color={repoColors[language].color}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            {language.toLowerCase()}
+          </Language>
+        )}
+        {!language && topic && (
+          <Tag
+            to={`/search?q=${encodeURIComponent(topic.toLowerCase())}`}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            #{topic.toLowerCase()}
+          </Tag>
+        )}
         {text && <Text>{text}</Text>}
       </Wrapper>
     );

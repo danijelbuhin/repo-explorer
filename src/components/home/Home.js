@@ -126,6 +126,7 @@ class Home extends Component {
     if (hasError) {
       return <div>An error has occured.</div>;
     }
+    console.log(popularViews);
     return (
       <Wrapper>
         <Search />
@@ -166,8 +167,8 @@ class Home extends Component {
                   <strong>Latest view: </strong>
                   {`${moment(repo.viewed_at).format('DD MMM YYYY, HH:mm:ss')}h`} <br />
                   <span>From: </span>
-                  {(!repo.viewed_from || repo.viewed_from === 'Unknown') && (
-                    <span>Unknown country</span>
+                  {(!repo.viewed_from || repo.viewed_from.country === 'Unknown') && (
+                    <span>Unknown location</span>
                   )}
                   {repo.viewed_from && repo.viewed_from !== 'Unknown' && (
                     <Tooltip

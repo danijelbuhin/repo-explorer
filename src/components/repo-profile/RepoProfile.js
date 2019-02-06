@@ -33,8 +33,8 @@ class RepoProfile extends Component {
   }
 
   handleView = (params) => {
-    axios.get('http://www.geoplugin.net/json.gp').then(({ data }) => {
-      this.storeView(params, data.geoplugin_countryName, data.geoplugin_countryCode);
+    axios.get('https://api.ipgeolocation.io/ipgeo?apiKey=400f298bfe8740648f023aced5623fef').then(({ data }) => {
+      this.storeView(params, data.country_name, data.country_code2);
     }).catch(() => {
       this.storeView(params, 'Unknown', '');
     });

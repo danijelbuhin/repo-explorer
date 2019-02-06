@@ -37,38 +37,37 @@ class AppProvider extends Component {
       const id = window.localStorage.getItem('rx-user-id');
       const token = window.localStorage.getItem('rx-user-token');
       if (id && token) {
-        this.fetchRateLimit();
         axios
           .get('https://api.github.com/user', {
             params: { access_token: token },
           })
           .then(() => {
             this.users.doc(id).get().then((user) => {
-              this.setState({
+              this.setState(() => ({
                 user: { ...user.data() },
                 token,
                 isLoading: false,
                 isAuthenticated: true,
                 isAuthenticating: false,
-              });
+              }), () => this.fetchRateLimit());
             });
           })
           .catch(({ response }) => {
             if (response.data.message === 'Bad credentials') {
               window.localStorage.removeItem('rx-user-id');
               window.localStorage.removeItem('rx-user-token');
-              this.setState({
+              this.setState(() => ({
                 user: null,
                 isAuthenticated: false,
                 isLoading: false,
                 isAuthenticating: false,
-              });
+              }), () => this.fetchRateLimit());
               auth().signOut();
             }
           });
       } else {
-        this.fetchRateLimit();
         this.setState({ isLoading: false });
+        this.fetchRateLimit();
       }
     } catch (err) {
       console.log(err);

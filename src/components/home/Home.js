@@ -13,7 +13,8 @@ import paginate from '../../utils/paginate';
 import { ReactComponent as StarSVG } from './assets/Star.svg';
 import { ReactComponent as EyeSVG } from './assets/Eye.svg';
 
-import Repo, { Wrapper as RepoWrapper } from '../shared/repo/Repo';
+import RepoList from '../shared/repo/List';
+import Card from '../shared/repo/Card';
 import Loader from '../shared/loader/Loader';
 import Pagination from '../shared/pagination/Pagination';
 import Search from './search/Search';
@@ -22,41 +23,11 @@ const Wrapper = styled.div`
   padding: 10px;
 `;
 
-const RepoList = styled.div`
-  display: flex;
-  align-items: stretch;
-  flex-wrap: wrap;
-
-  ${RepoWrapper} {
-    width: 100%;
-    @media (min-width: 420px) {
-      width: 48%;
-    }
-    @media (min-width: 768px) {
-      width: 31%;
-    }
-    @media (min-width: 900px) {
-      width: 23%;
-    }
-    @media (min-width: 1200px) {
-      width: 18%;
-    }
-  }
-`;
-
 const LastViewText = styled.span`
   text-align: center;
   strong {
     display: block;
   }
-`;
-
-const ListTitle = styled.h2`
-  margin-bottom: 10px;
-  padding-bottom: 10px;
-
-  border-bottom: 1px solid #F4F6F9;
-  color: #3A4044;
 `;
 
 class Home extends Component {
@@ -129,10 +100,11 @@ class Home extends Component {
     return (
       <Wrapper>
         <Search />
-        <ListTitle>Popular repositories:</ListTitle>
-        <RepoList>
+        <RepoList
+          title="Most popular repos:"
+        >
           {paginate(popularRepos, 10, page).map(repo => (
-            <Repo
+            <Card
               key={repo.id}
               avatar={repo.owner.avatar_url}
               name={repo.full_name}
@@ -151,10 +123,11 @@ class Home extends Component {
             onPagePrevious={this.onPagePrevious}
           />
         </RepoList>
-        <ListTitle>Most viewed repos:</ListTitle>
-        <RepoList>
+        <RepoList
+          title="Most viewed repos:"
+        >
           {popularViews.map(repo => (
-            <Repo
+            <Card
               key={repo.id}
               avatar={repo.avatar_url}
               name={repo.full_name}

@@ -11,30 +11,8 @@ import withAppContext from '../shared/app/withAppContext';
 
 import { ReactComponent as StarSVG } from '../home/assets/Star.svg';
 
-import Repo, { Wrapper as RepoWrapper } from '../shared/repo/Repo';
+import Card, { Wrapper as RepoWrapper } from '../shared/repo/Card';
 import generateTopic from '../../utils/generateTopic';
-
-const RepoList = styled.div`
-  display: flex;
-  align-items: stretch;
-  flex-wrap: wrap;
-
-  ${RepoWrapper} {
-    width: 100%;
-    @media (min-width: 420px) {
-      width: 48%;
-    }
-    @media (min-width: 768px) {
-      width: 31%;
-    }
-    @media (min-width: 900px) {
-      width: 23%;
-    }
-    @media (min-width: 1200px) {
-      width: 18%;
-    }
-  }
-`;
 
 const views = db.collection('views');
 
@@ -117,20 +95,7 @@ const RepoProfile = (props) => {
       {repo.full_name}
       <div>Repos with similar topic:</div>
       {isLoadingSimilarRepos && 'Loading similar repos....'}
-      <RepoList>
-        {!isLoadingSimilarRepos && similarRepos.length > 0 && similarRepos.map(similar => (
-          <Repo
-            key={similar.id}
-            avatar={similar.owner.avatar_url}
-            name={similar.full_name}
-            count={similar.stargazers_count}
-            countIcon={<StarSVG />}
-            language={similar.language}
-            topic={similar.topics[0]}
-            id={similar.id}
-          />
-        ))}
-      </RepoList>
+      
     </div>
   );
 };

@@ -140,7 +140,7 @@ const Tag = styled(Link)`
   }
 `;
 
-class Repo extends Component {
+class Card extends Component {
   bookmarkRepo = (repo) => {
     const { appContext } = this.props;
     if (!appContext.isAuthenticated) {
@@ -256,7 +256,7 @@ class Repo extends Component {
   }
 }
 
-Repo.propTypes = {
+Card.propTypes = {
   name: PropTypes.string,
   avatar: PropTypes.string,
   language: PropTypes.string,
@@ -269,7 +269,7 @@ Repo.propTypes = {
   appContext: PropTypes.object.isRequired,
 };
 
-Repo.defaultProps = {
+Card.defaultProps = {
   name: '',
   avatar: '',
   language: '',
@@ -281,4 +281,4 @@ Repo.defaultProps = {
   bookmarkRepo: () => {},
 };
 
-export default withAppContext(Repo);
+export default withAppContext(Card);

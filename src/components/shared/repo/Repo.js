@@ -232,7 +232,7 @@ class Repo extends Component {
         {language && (
           <Language
             to={`/search?q=${encodeURIComponent(language.toLowerCase())}`}
-            color={repoColors[language].color}
+            color={repoColors[language] ? repoColors[language].color : '#000'}
             onClick={(e) => {
               e.stopPropagation();
             }}

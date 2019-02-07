@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import axios from 'axios';
-import styled from 'styled-components';
 
 import db from '../../services/firebase';
 
@@ -11,8 +10,10 @@ import withAppContext from '../shared/app/withAppContext';
 
 import { ReactComponent as StarSVG } from '../home/assets/Star.svg';
 
-import Card, { Wrapper as RepoWrapper } from '../shared/repo/Card';
+import Card from '../shared/repo/Card';
+import RepoList from '../shared/repo/List';
 import generateTopic from '../../utils/generateTopic';
+import useApiState from '../../hooks/useApiState';
 
 const views = db.collection('views');
 
@@ -53,40 +54,52 @@ const handleView = (params) => {
 const RepoProfile = (props) => {
   const { match: { params: { id } }, appContext } = props;
 
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(false);
+  const [repoFetch, setRepoFetch] = useApiState();
   const [repo, setRepo] = useState({});
 
+  // const [isLoadingSimilarRepos, setIsLoadingSimilarRepos] = useState(false);
+  const [similarFetch, setSimilarFetch] = useApiState();
   const [similarRepos, setSimilarRepos] = useState([]);
-  const [isLoadingSimilarRepos, setIsLoadingSimilarRepos] = useState(true);
 
   useEffect(() => {
+    setRepoFetch({ isLoading: true, hasError: false });
     document.title = `Fetching ${decodeURIComponent(id)} | Repo Explorer`;
-    props.appContext.fetchRepo(decodeURIComponent(id)).then((data) => {
-      document.title = `Exploring ${data.full_name} | Repo Explorer`;
-      const viewedData = {
-        avatar_url: data.owner.avatar_url,
-        full_name: data.full_name,
-        id: data.id,
-        name: data.name,
-        stargazers_count: data.stargazers_count,
-      };
-      handleView(viewedData);
-      setIsLoading(false);
-      setRepo(data);
-      const query = generateTopic({
-        topics: data.topics,
-        language: data.language,
-      });
-      if (query) {
-        appContext.searchRepo(query, 5).then(({ items }) => {
-          setSimilarRepos(items);
-          setIsLoadingSimilarRepos(false);
+    props.appContext
+      .fetchRepo(decodeURIComponent(id))
+      .then((data) => {
+        document.title = `Exploring ${data.full_name} | Repo Explorer`;
+        const viewedData = {
+          avatar_url: data.owner.avatar_url,
+          full_name: data.full_name,
+          id: data.id,
+          name: data.name,
+          stargazers_count: data.stargazers_count,
+        };
+        handleView(viewedData);
+        setRepoFetch({ isLoading: false, hasError: false });
+        setRepo(data);
+        const query = generateTopic({
+          topics: data.topics,
+          language: data.language,
         });
-      }
-    });
+        if (query) {
+          setSimilarFetch({ isLoading: true, hasError: false });
+          appContext
+            .searchRepo(query, 5)
+            .then(({ items }) => {
+              setSimilarRepos(items);
+              setSimilarFetch({ isLoading: false, hasError: false });
+            })
+            .catch(() => setSimilarFetch({ isLoading: false, hasError: true }));
+        }
+      })
+      .catch(() => {
+        setSimilarFetch({ isLoading: false, hasError: true });
+      });
   }, [id]);
 
-  if (isLoading) {
+  if (repoFetch.isLoading) {
     return <Loader text={`Fetching information about ${decodeURIComponent(id)}`} />;
   }
 
@@ -94,8 +107,23 @@ const RepoProfile = (props) => {
     <div>
       {repo.full_name}
       <div>Repos with similar topic:</div>
-      {isLoadingSimilarRepos && 'Loading similar repos....'}
-      
+      <RepoList
+        title="Repos with similar topic:"
+        isLoading={similarFetch.isLoading}
+      >
+        {similarRepos.map(similarRepo => (
+          <Card
+            key={similarRepo.id}
+            avatar={similarRepo.owner.avatar_url}
+            name={similarRepo.full_name}
+            count={similarRepo.stargazers_count}
+            countIcon={<StarSVG />}
+            language={similarRepo.language}
+            topic={similarRepo.topics[0]}
+            id={similarRepo.id}
+          />
+        ))}
+      </RepoList>
     </div>
   );
 };

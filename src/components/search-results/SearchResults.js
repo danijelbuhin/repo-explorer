@@ -21,7 +21,7 @@ const SearchResults = (props) => {
   const { token, client_id, client_secret, fetchRateLimit } = appContext;
   const { q: result } = qs.parse(search, { ignoreQueryPrefix: true });
 
-  const { apiState, setApiState } = useApiState({ isLoading: false, hasError: false });
+  const [apiState, setApiState] = useApiState();
   const [repos, setRepos] = useState([]);
 
   const fetchRepos = () => {

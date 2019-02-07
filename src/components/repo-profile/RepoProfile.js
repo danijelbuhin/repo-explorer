@@ -5,15 +5,12 @@ import axios from 'axios';
 
 import db from '../../services/firebase';
 
-import Loader from '../shared/loader/Loader';
 import withAppContext from '../shared/app/withAppContext';
-
-import { ReactComponent as StarSVG } from '../home/assets/Star.svg';
-
-import Card from '../shared/repo/Card';
-import RepoList from '../shared/repo/List';
-import generateTopic from '../../utils/generateTopic';
 import useApiState from '../../hooks/useApiState';
+import generateTopic from '../../utils/generateTopic';
+
+import Loader from '../shared/loader/Loader';
+import SimilarRepos from './similar-repos/SimilarRepos';
 
 const views = db.collection('views');
 
@@ -54,72 +51,43 @@ const handleView = (params) => {
 const RepoProfile = (props) => {
   const { match: { params: { id } }, appContext } = props;
 
-  const [repoFetch, setRepoFetch] = useApiState();
+  const [apiState, setApiState] = useApiState();
   const [repo, setRepo] = useState({});
 
-  const [similarFetch, setSimilarFetch] = useApiState();
-  const [similarRepos, setSimilarRepos] = useState([]);
+  const [topic, setTopic] = useState(null);
 
   useEffect(() => {
-    setRepoFetch({ isLoading: true, hasError: false });
-    props.appContext
-      .fetchRepo(decodeURIComponent(id))
+    setApiState({ isLoading: true, hasError: false });
+    appContext.fetchRepo(decodeURIComponent(id))
       .then((data) => {
         document.title = `Exploring ${data.full_name} | Repo Explorer`;
-        const viewedData = {
+        handleView({
           avatar_url: data.owner.avatar_url,
           full_name: data.full_name,
           id: data.id,
           name: data.name,
           stargazers_count: data.stargazers_count,
-        };
-        handleView(viewedData);
-        setRepoFetch({ isLoading: false, hasError: false });
-        setRepo(data);
-        const query = generateTopic({
-          topics: data.topics,
-          language: data.language,
         });
-        if (query) {
-          setSimilarFetch({ isLoading: true, hasError: false });
-          appContext
-            .searchRepo(query, 5)
-            .then(({ items }) => {
-              setSimilarRepos(items);
-              setSimilarFetch({ isLoading: false, hasError: false });
-            })
-            .catch(() => setSimilarFetch({ isLoading: false, hasError: true }));
-        }
+        setTopic(generateTopic({ topics: data.topics, language: data.language }));
+        setApiState({ isLoading: false, hasError: false });
+        setRepo(data);
       })
       .catch(() => {
-        setSimilarFetch({ isLoading: false, hasError: true });
+        setApiState({ isLoading: false, hasError: true });
       });
   }, [id]);
 
-  if (repoFetch.isLoading) {
+  if (apiState.isLoading) {
     return <Loader text={`Fetching information about ${decodeURIComponent(id)}`} />;
   }
 
   return (
     <div>
       {repo.full_name}
-      <RepoList
-        title="Repos with similar topic:"
-        isLoading={similarFetch.isLoading}
-      >
-        {similarRepos.map(similarRepo => (
-          <Card
-            key={similarRepo.id}
-            avatar={similarRepo.owner.avatar_url}
-            name={similarRepo.full_name}
-            count={similarRepo.stargazers_count}
-            countIcon={<StarSVG />}
-            language={similarRepo.language}
-            topic={similarRepo.topics[0]}
-            id={similarRepo.id}
-          />
-        ))}
-      </RepoList>
+      <SimilarRepos
+        topic={topic}
+        searchRepo={appContext.searchRepo}
+      />
     </div>
   );
 };

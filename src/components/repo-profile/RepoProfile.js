@@ -12,6 +12,7 @@ import withAppContext from '../shared/app/withAppContext';
 import { ReactComponent as StarSVG } from '../home/assets/Star.svg';
 
 import Repo, { Wrapper as RepoWrapper } from '../shared/repo/Repo';
+import generateTopic from '../../utils/generateTopic';
 
 const RepoList = styled.div`
   display: flex;
@@ -94,10 +95,16 @@ const RepoProfile = (props) => {
       handleView(viewedData);
       setIsLoading(false);
       setRepo(data);
-      appContext.searchRepo(data.topics[0], 5).then(({ items }) => {
-        setSimilarRepos(items);
-        setIsLoadingSimilarRepos(false);
+      const query = generateTopic({
+        topics: data.topics,
+        language: data.language,
       });
+      if (query) {
+        appContext.searchRepo(query, 5).then(({ items }) => {
+          setSimilarRepos(items);
+          setIsLoadingSimilarRepos(false);
+        });
+      }
     });
   }, [id]);
 

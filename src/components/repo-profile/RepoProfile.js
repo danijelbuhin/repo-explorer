@@ -54,17 +54,14 @@ const handleView = (params) => {
 const RepoProfile = (props) => {
   const { match: { params: { id } }, appContext } = props;
 
-  // const [isLoading, setIsLoading] = useState(false);
   const [repoFetch, setRepoFetch] = useApiState();
   const [repo, setRepo] = useState({});
 
-  // const [isLoadingSimilarRepos, setIsLoadingSimilarRepos] = useState(false);
   const [similarFetch, setSimilarFetch] = useApiState();
   const [similarRepos, setSimilarRepos] = useState([]);
 
   useEffect(() => {
     setRepoFetch({ isLoading: true, hasError: false });
-    document.title = `Fetching ${decodeURIComponent(id)} | Repo Explorer`;
     props.appContext
       .fetchRepo(decodeURIComponent(id))
       .then((data) => {
@@ -106,7 +103,6 @@ const RepoProfile = (props) => {
   return (
     <div>
       {repo.full_name}
-      <div>Repos with similar topic:</div>
       <RepoList
         title="Repos with similar topic:"
         isLoading={similarFetch.isLoading}

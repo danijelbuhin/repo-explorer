@@ -22,12 +22,12 @@ export const Wrapper = styled.div`
 
   cursor: initial;
 
-  &.is-active {
+  ${({ isActive }) => isActive && `
     transform: translateY(100%);
     opacity: 1;
 
     pointer-events: initial;
-  }
+  `}
 `;
 
 const Dropdown = ({

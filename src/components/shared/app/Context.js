@@ -11,8 +11,8 @@ export const AppContext = createContext();
 export const { Consumer, Provider } = AppContext;
 
 const tokens = {
-  client_secret: '39e5f4613d7c4c23e96b7ad2f0b2b7546e05fb19',
-  client_id: 'edc304d4e5871143c167',
+  client_secret: process.env.REACT_APP_CLIENT_SECRET,
+  client_id: process.env.REACT_APP_CLIENT_ID,
 };
 
 class AppProvider extends Component {

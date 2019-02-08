@@ -3,12 +3,12 @@ import 'firebase/firestore';
 import 'firebase/auth';
 
 const config = {
-  apiKey: 'AIzaSyDO-F72RUGa2v57aVA0lH4wt4H-ryw7bvc',
-  authDomain: 'repo-explorer.firebaseapp.com',
-  databaseURL: 'https://repo-explorer.firebaseio.com',
-  projectId: 'repo-explorer',
-  storageBucket: 'repo-explorer.appspot.com',
-  messagingSenderId: '288133352996',
+  apiKey: process.env.REACT_APP_FIREBASE_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH,
+  databaseURL: process.env.REACT_APP_FIREBASE_DB,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_SENDER_ID,
 };
 
 firebase.initializeApp(config);

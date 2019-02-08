@@ -41,7 +41,7 @@ const storeView = (params, country, countryCode) => {
 };
 
 const handleView = (params) => {
-  axios.get('https://api.ipgeolocation.io/ipgeo?apiKey=400f298bfe8740648f023aced5623fef').then(({ data }) => {
+  axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=${process.env.REACT_APP_IP_KEY}`).then(({ data }) => {
     storeView(params, data.country_name, data.country_code2);
   }).catch(() => {
     storeView(params, 'Unknown', '');

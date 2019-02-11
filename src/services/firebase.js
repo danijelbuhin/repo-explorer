@@ -11,26 +11,19 @@ const config = {
   messagingSenderId: process.env.REACT_APP_FIREBASE_SENDER_ID,
 };
 
-// firebase.initializeApp(config);
-
 class Firebase {
   constructor() {
     firebase.initializeApp(config);
-    this.auth = firebase.auth;
+    this.auth = firebase.auth();
     this.db = firebase.firestore();
+    this.GithubProvider = new firebase.auth.GithubAuthProvider();
 
     this.users = this.db.collection('users');
     this.views = this.db.collection('views');
   }
 
-  getUserDoc() {
-    return this.users.doc(this.auth().currentUser.uid).get().then((data) => {
-      console.log(data)
-    });
-  }
-
   authenticate() {
-    return this.auth().signInWithPopup(new this.auth.GithubAuthProvider()).then((result) => {
+    return this.auth.signInWithPopup(this.GithubProvider).then((result) => {
       const {
         additionalUserInfo: {
           profile,
@@ -66,11 +59,8 @@ class Firebase {
   }
 
   logOut() {
-    return this.auth().signOut();
+    return this.auth.signOut();
   }
 }
-
-export const fb = new Firebase();
-
-export const { auth } = firebase;
-export default firebase.firestore();
+const firebaseService = new Firebase();
+export default firebaseService;

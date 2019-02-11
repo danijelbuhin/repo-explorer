@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import moment from 'moment';
 
-import db, { fb } from '../../../services/firebase';
+import firebase from '../../../services/firebase';
 
 import Loader from '../loader/Loader';
 
@@ -16,8 +16,6 @@ const tokens = {
 };
 
 class AppProvider extends Component {
-  users = db.collection('users');
-
   state = {
     isLoading: true,
     rateLimit: {
@@ -42,7 +40,7 @@ class AppProvider extends Component {
             params: { access_token: token },
           })
           .then(() => {
-            this.users.doc(id).get().then((user) => {
+            firebase.users.doc(id).get().then((user) => {
               this.setState(() => ({
                 user: { ...user.data() },
                 token,
@@ -62,7 +60,7 @@ class AppProvider extends Component {
                 isLoading: false,
                 isAuthenticating: false,
               }), () => this.fetchRateLimit());
-              fb.logOut();
+              firebase.logOut();
             }
           });
       } else {
@@ -189,7 +187,7 @@ class AppProvider extends Component {
 
   authenticate = () => {
     this.setState({ isAuthenticating: true });
-    fb.authenticate().then(({ token, user }) => {
+    firebase.authenticate().then(({ token, user }) => {
       this.setState(() => ({
         user,
         token,
@@ -200,7 +198,7 @@ class AppProvider extends Component {
   }
 
   logOut = () => {
-    fb.logOut().then(() => {
+    firebase.logOut().then(() => {
       window.localStorage.removeItem('rx-user-id');
       window.localStorage.removeItem('rx-user-token');
       this.setState({ user: null, token: null, isAuthenticated: false });

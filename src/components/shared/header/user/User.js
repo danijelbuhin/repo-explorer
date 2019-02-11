@@ -54,12 +54,7 @@ const Wrapper = styled.div`
   position: relative;
   display: flex;
   align-items: center;
-
-  width: 80%;
-  cursor: pointer;
-  @media (min-width: 550px) {
-    width: auto;
-  }
+  justify-content: flex-end;
 `;
 
 const Avatar = styled.img`
@@ -67,6 +62,7 @@ const Avatar = styled.img`
   height: 52px;
 
   border-radius: 5px;
+  cursor: pointer;
 `;
 
 const RateLimit = styled.div`
@@ -147,7 +143,7 @@ class UserInfo extends Component {
     } = this.props;
     const { isDropdownActive } = this.state;
     return (
-      <Wrapper onClick={this.toggleDropdown}>
+      <Wrapper>
         {(isLoading || isAuthenticating) && (
           <SpinnerWrapper>
             <Spinner />
@@ -156,6 +152,7 @@ class UserInfo extends Component {
         <Avatar
           src={isAuthenticated ? user.avatar : DefaultUser}
           alt="User"
+          onClick={this.toggleDropdown}
         />
         <RateLimit>
           <Limit>
@@ -171,12 +168,9 @@ class UserInfo extends Component {
             />
           </Limit>
         </RateLimit>
-        <Dropdown
-          isActive={isDropdownActive}
-          className={isDropdownActive && 'is-active'}
-        >
+        <Dropdown isActive={isDropdownActive}>
           {!isAuthenticating && (
-            <p>Hello {isAuthenticated ? user && user.name : 'Guest'}, you{'\''}re using {isAuthenticated ? 'your own' : 'shared'} rate limit</p>
+            <p>Hello {isAuthenticated ? user && user.name : 'Guest'}, you{'\''}re using {isAuthenticated ? 'your own' : 'shared'} rate limit.</p>
           )}
           <div>
             <p><strong>Search limit reset:</strong> <br /> {moment(search.reset * 1000).format('HH:mm:ss')}h</p>

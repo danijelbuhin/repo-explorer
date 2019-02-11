@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import moment from 'moment';
 
-import db, { auth } from '../../../services/firebase';
+import firebase from '../../../services/firebase';
 
 import Loader from '../loader/Loader';
 
@@ -16,8 +16,6 @@ const tokens = {
 };
 
 class AppProvider extends Component {
-  users = db.collection('users');
-
   state = {
     isLoading: true,
     rateLimit: {
@@ -42,7 +40,7 @@ class AppProvider extends Component {
             params: { access_token: token },
           })
           .then(() => {
-            this.users.doc(id).get().then((user) => {
+            firebase.users.doc(id).get().then((user) => {
               this.setState(() => ({
                 user: { ...user.data() },
                 token,
@@ -62,7 +60,7 @@ class AppProvider extends Component {
                 isLoading: false,
                 isAuthenticating: false,
               }), () => this.fetchRateLimit());
-              auth().signOut();
+              firebase.logOut();
             }
           });
       } else {
@@ -189,53 +187,18 @@ class AppProvider extends Component {
 
   authenticate = () => {
     this.setState({ isAuthenticating: true });
-    auth().signInWithPopup(new auth.GithubAuthProvider()).then((result) => {
-      const {
-        additionalUserInfo: {
-          profile,
-        },
+    firebase.authenticate().then(({ token, user }) => {
+      this.setState(() => ({
         user,
-        credential,
-      } = result;
-      this.users.doc(result.user.uid).get().then((doc) => {
-        if (doc.exists) {
-          window.localStorage.setItem('rx-user-id', user.uid);
-          window.localStorage.setItem('rx-user-token', credential.accessToken);
-          this.setState(() => ({
-            user: {
-              ...doc.data(),
-            },
-            token: credential.accessToken,
-            isAuthenticated: true,
-            isAuthenticating: false,
-          }), () => this.fetchRateLimit());
-        } else {
-          const newUser = {
-            name: profile.name,
-            email: profile.email,
-            avatar: profile.avatar_url,
-            blog: profile.blog,
-            bio: profile.bio,
-            id: user.uid,
-            favorites: [],
-          };
-          this.users.doc(result.user.uid).set(newUser).then(() => {
-            window.localStorage.setItem('rx-user-id', user.uid);
-            window.localStorage.setItem('rx-user-token', credential.accessToken);
-            this.setState(() => ({
-              user: newUser,
-              token: credential.accessToken,
-              isAuthenticated: true,
-              isAuthenticating: false,
-            }), () => this.fetchRateLimit());
-          });
-        }
-      });
+        token,
+        isAuthenticated: true,
+        isAuthenticating: false,
+      }), () => this.fetchRateLimit());
     });
   }
 
   logOut = () => {
-    auth().signOut().then(() => {
+    firebase.logOut().then(() => {
       window.localStorage.removeItem('rx-user-id');
       window.localStorage.removeItem('rx-user-token');
       this.setState({ user: null, token: null, isAuthenticated: false });

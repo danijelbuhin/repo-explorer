@@ -7,7 +7,7 @@ import { Tooltip } from 'react-tippy';
 
 import withAppContext from '../shared/app/withAppContext';
 
-import db from '../../services/firebase';
+import firebase from '../../services/firebase';
 import paginate from '../../utils/paginate';
 
 import { ReactComponent as StarSVG } from './assets/Star.svg';
@@ -31,8 +31,6 @@ const LastViewText = styled.span`
 `;
 
 class Home extends Component {
-  views = db.collection('views');
-
   state = {
     popularViews: [],
     popularRepos: [],
@@ -55,7 +53,7 @@ class Home extends Component {
   }
 
   fetchViews = () => (
-    this.views.orderBy('views', 'desc').limit(5).get().then(({ docs }) => {
+    firebase.views.orderBy('views', 'desc').limit(5).get().then(({ docs }) => {
       const views = [];
       docs.forEach(doc => views.push({
         id: doc.data().id,

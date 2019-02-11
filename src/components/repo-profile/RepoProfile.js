@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import axios from 'axios';
 
-import db from '../../services/firebase';
+import firebase from '../../services/firebase';
 
 import withAppContext from '../shared/app/withAppContext';
 import useApiState from '../../hooks/useApiState';
@@ -12,12 +12,10 @@ import generateTopic from '../../utils/generateTopic';
 import Loader from '../shared/loader/Loader';
 import SimilarRepos from './similar-repos/SimilarRepos';
 
-const views = db.collection('views');
-
 const storeView = (params, country, countryCode) => {
-  views.doc(String(params.id)).get().then((doc) => {
+  firebase.views.doc(String(params.id)).get().then((doc) => {
     if (doc.exists) {
-      views.doc(String(params.id)).set({
+      firebase.views.doc(String(params.id)).set({
         ...params,
         views: doc.data().views + 1,
         viewed_at: moment().toDate().getTime(),
@@ -27,7 +25,7 @@ const storeView = (params, country, countryCode) => {
         },
       });
     } else {
-      views.doc(String(params.id)).set({
+      firebase.views.doc(String(params.id)).set({
         ...params,
         views: 1,
         viewed_at: moment().toDate().getTime(),
@@ -41,8 +39,8 @@ const storeView = (params, country, countryCode) => {
 };
 
 const handleView = (params) => {
-  axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=${process.env.REACT_APP_IP_KEY}`).then(({ data }) => {
-    storeView(params, data.country_name, data.country_code2);
+  axios.get('https://json.geoiplookup.io/').then(({ data }) => {
+    storeView(params, data.country_name, data.country_code);
   }).catch(() => {
     storeView(params, 'Unknown', '');
   });

@@ -47,16 +47,12 @@ const handleView = (params) => {
   });
 };
 
-const transformCalendarData = (data = []) => {
-  console.log(data);
+const transformCommitData = (data = []) => {// eslint-disable-line
   return data.map((val) => { // eslint-disable-line
-    return val.days.map((d, i) => {
-      const day = {
-        day: moment(val.week * 1000).add(i, 'day').format('YYYY-MM-DD'),
-        value: d,
-      };
-      return day;
-    }).filter(d => d.value !== 0);
+    return val.days.map((d, i) => ({
+      day: moment(val.week * 1000).add(i, 'day').format('YYYY-MM-DD'),
+      value: d,
+    })).filter(d => d.value !== 0);
   }).flat();
 };
 
@@ -67,7 +63,6 @@ const RepoProfile = (props) => {
   const [repo, setRepo] = useState({});
 
   const [topic, setTopic] = useState(null);
-
 
   const [commits, setCommits] = useState([]);
 
@@ -86,9 +81,12 @@ const RepoProfile = (props) => {
         setTopic(generateTopic({ topics: data.topics, language: data.language }));
         setApiState({ isLoading: false, hasError: false });
         setRepo(data);
-        appContext.fetchCommits(decodeURIComponent(id)).then((items) => {
-          setCommits(transformCalendarData(items));
-        });
+        appContext
+          .fetchCommits(decodeURIComponent(id))
+          .then((items) => {
+            setCommits(transformCommitData(items));
+          })
+          .catch(err => console.log(err));
       })
       .catch(() => {
         setApiState({ isLoading: false, hasError: true });
@@ -131,17 +129,6 @@ const RepoProfile = (props) => {
             monthLegendOffset={10}
             dayBorderWidth={2}
             dayBorderColor="#ffffff"
-            legends={[
-              {
-                anchor: 'bottom-right',
-                direction: 'row',
-                translateY: 36,
-                itemCount: 4,
-                itemWidth: 34,
-                itemHeight: 36,
-                itemDirection: 'top-to-bottom',
-              },
-            ]}
             tooltip={({ day, value }) => <div>{moment(day).format('dddd, MMMM Do, YYYY')} - {value} commits</div>}
           />
         </div>

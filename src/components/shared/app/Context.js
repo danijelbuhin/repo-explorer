@@ -178,7 +178,6 @@ class AppProvider extends Component {
   fetchCommits = (repo) => {
     const { client_id, client_secret } = tokens;
     const { token } = this.state;
-
     return axios
       .get(`https://api.github.com/repos/${repo}/stats/commit_activity`, {
         headers: {

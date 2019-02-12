@@ -152,7 +152,34 @@ class AppProvider extends Component {
     const { client_id, client_secret } = tokens;
     const { token } = this.state;
     return axios
-      .get(`https://api.github.com/search/repositories?q=${query}&sort=stars&order=desc&per_page=${perPage}`, {
+      .get(`https://api.github.com/search/repositories?q=${query}`, {
+        headers: {
+          Accept: 'application/vnd.github.mercy-preview+json',
+        },
+        params: {
+          client_id: token ? undefined : client_id,
+          client_secret: token ? undefined : client_secret,
+          access_token: token ? token : undefined,
+          sort: 'stars',
+          order: 'desc',
+          per_page: perPage,
+        },
+      })
+      .then(({ data }) => {
+        this.fetchRateLimit();
+        return data;
+      })
+      .catch((err) => {
+        this.fetchRateLimit();
+        return err;
+      });
+  }
+
+  fetchCommits = (repo) => {
+    const { client_id, client_secret } = tokens;
+    const { token } = this.state;
+    return axios
+      .get(`https://api.github.com/repos/${repo}/stats/commit_activity`, {
         headers: {
           Accept: 'application/vnd.github.mercy-preview+json',
         },
@@ -234,6 +261,7 @@ class AppProvider extends Component {
           updateUser: this.updateUser,
           logOut: this.logOut,
           searchRepo: this.searchRepo,
+          fetchCommits: this.fetchCommits,
         }}
       >
         {this.props.children}

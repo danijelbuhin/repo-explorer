@@ -105,12 +105,13 @@ const List = ({
   isLoading,
   hasError,
   children,
+  loadingPlaceholdersCount,
 }) => (
   <Wrapper>
     <Title>{title}</Title>
     <Items>
       {isLoading && !hasError && (
-        Array.from(Array(5).keys()).map(key => (
+        Array.from(Array(loadingPlaceholdersCount).keys()).map(key => (
           <CardLoader key={key}>
             <Avatar />
             <Name />
@@ -124,12 +125,14 @@ const List = ({
 
 List.propTypes = {
   title: PropTypes.string.isRequired,
+  loadingPlaceholdersCount: PropTypes.number,
   isLoading: PropTypes.bool,
   hasError: PropTypes.bool,
   children: PropTypes.node.isRequired,
 };
 
 List.defaultProps = {
+  loadingPlaceholdersCount: 5,
   isLoading: false,
   hasError: false,
 };

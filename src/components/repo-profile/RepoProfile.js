@@ -64,7 +64,21 @@ const RepoProfile = (props) => {
 
   const [topic, setTopic] = useState(null);
 
+  const [commitsState, setCommitsState] = useApiState();
   const [commits, setCommits] = useState([]);
+
+  const fetchCommits = (repo_name) => {
+    setCommitsState({ isLoading: true, hasError: false });
+    appContext
+      .fetchCommits(decodeURIComponent(repo_name))
+      .then((items) => {
+        setCommitsState({ isLoading: false, hasError: false });
+        setCommits(transformCommitData(items));
+      })
+      .catch(() => {
+        setCommitsState({ isLoading: false, hasError: true });
+      });
+  };
 
   useEffect(() => {
     setApiState({ isLoading: true, hasError: false });
@@ -81,12 +95,7 @@ const RepoProfile = (props) => {
         setTopic(generateTopic({ topics: data.topics, language: data.language }));
         setApiState({ isLoading: false, hasError: false });
         setRepo(data);
-        appContext
-          .fetchCommits(decodeURIComponent(id))
-          .then((items) => {
-            setCommits(transformCommitData(items));
-          })
-          .catch(err => console.log(err));
+        fetchCommits(data.full_name);
       })
       .catch(() => {
         setApiState({ isLoading: false, hasError: true });
@@ -104,33 +113,41 @@ const RepoProfile = (props) => {
   return (
     <div>
       {repo.full_name}
-      <h3>Commit count</h3>
-      {commits.length > 0 && (
+      {commitsState.hasError && (
+        <p>
+          An error occured while trying to fetch commit count.
+          <button type="button" onClick={() => fetchCommits(repo.full_name)}>Try again</button>
+        </p>
+      )}
+      {!commitsState.isLoading && !commitsState.hasError && (
         <div style={{ width: 800, height: 400 }}>
-          <ResponsiveCalendar
-            data={commits}
-            from={commits[0].day}
-            to={commits[commits.length - 1].day}
-            emptyColor="#eeeeee"
-            colors={[
-              '#a3ccff',
-              '#77b5ff',
-              '#5ea8ff',
-              '#3E97FF',
-            ]}
-            margin={{
-              top: 100,
-              right: 30,
-              bottom: 60,
-              left: 30,
-            }}
-            yearSpacing={40}
-            monthBorderColor="#ffffff"
-            monthLegendOffset={10}
-            dayBorderWidth={2}
-            dayBorderColor="#ffffff"
-            tooltip={({ day, value }) => <div>{moment(day).format('dddd, MMMM Do, YYYY')} - {value} commits</div>}
-          />
+          <h3>Commit count</h3>
+          {!commitsState.hasError && commits.length > 0 && (
+            <ResponsiveCalendar
+              data={commits}
+              from={commits[0].day}
+              to={commits[commits.length - 1].day}
+              emptyColor="#eeeeee"
+              colors={[
+                '#a3ccff',
+                '#77b5ff',
+                '#5ea8ff',
+                '#3E97FF',
+              ]}
+              margin={{
+                top: 100,
+                right: 30,
+                bottom: 60,
+                left: 30,
+              }}
+              yearSpacing={40}
+              monthBorderColor="#ffffff"
+              monthLegendOffset={10}
+              dayBorderWidth={2}
+              dayBorderColor="#ffffff"
+              tooltip={({ day, value }) => <div>{moment(day).format('dddd, MMMM Do, YYYY')} - {value} commits</div>}
+            />
+          )}
         </div>
       )}
       <SimilarRepos

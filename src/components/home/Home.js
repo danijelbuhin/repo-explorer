@@ -41,15 +41,22 @@ const Home = ({ appContext }) => {
 
   const fetchViews = () => {
     setViewsState({ isLoading: true, hasError: false });
-    firebase.views.orderBy('views', 'desc').limit(5).get().then(({ docs }) => {
-      const _views = [];
-      docs.forEach(doc => _views.push({
-        id: doc.data().id,
-        ...doc.data(),
-      }));
-      setViews(_views);
-      setViewsState({ isLoading: false, hasError: false });
-    });
+    firebase.views
+      .orderBy('views', 'desc')
+      .limit(5)
+      .get()
+      .then(({ docs }) => {
+        const _views = [];
+        docs.forEach(doc => _views.push({
+          id: doc.data().id,
+          ...doc.data(),
+        }));
+        setViews(_views);
+        setViewsState({ isLoading: false, hasError: false });
+      })
+      .catch(() => {
+        setViewsState({ isLoading: false, hasError: true });
+      });
   };
 
   const fetchRepos = () => {
@@ -59,6 +66,9 @@ const Home = ({ appContext }) => {
       .then(({ items }) => {
         setRepos(items);
         setReposState({ isLoading: false, hasError: false });
+      })
+      .catch(() => {
+        setReposState({ isLoading: false, hasError: true });
       });
   };
 

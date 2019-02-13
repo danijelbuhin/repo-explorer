@@ -122,7 +122,7 @@ const Language = styled(Link)`
   }
 `;
 
-const Tag = styled(Link)`
+export const Tag = styled(Link)`
   display: inline-block;
   padding: 2px 4px;
 

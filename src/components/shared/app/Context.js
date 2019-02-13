@@ -199,6 +199,30 @@ class AppProvider extends Component {
       });
   }
 
+  fetchLanguages = (repo) => {
+    const { client_id, client_secret } = tokens;
+    const { token } = this.state;
+    return axios
+      .get(`https://api.github.com/repos/${repo}/languages`, {
+        headers: {
+          Accept: 'application/vnd.github.mercy-preview+json',
+        },
+        params: {
+          client_id: token ? undefined : client_id,
+          client_secret: token ? undefined : client_secret,
+          access_token: token ? token : undefined,
+        },
+      })
+      .then(({ data }) => {
+        this.fetchRateLimit();
+        return data;
+      })
+      .catch((err) => {
+        this.fetchRateLimit();
+        return err;
+      });
+  }
+
   updateUser = (field, value) => {
     const { user } = this.state;
     return firebase.users.doc(user.id).update({ [field]: value }).then(() => {
@@ -262,6 +286,7 @@ class AppProvider extends Component {
           logOut: this.logOut,
           searchRepo: this.searchRepo,
           fetchCommits: this.fetchCommits,
+          fetchLanguages: this.fetchLanguages,
         }}
       >
         {this.props.children}

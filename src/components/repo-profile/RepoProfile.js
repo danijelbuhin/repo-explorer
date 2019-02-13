@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import axios from 'axios';
-import { ResponsiveCalendar } from '@nivo/calendar';
+import styled from 'styled-components';
 
 import firebase from '../../services/firebase';
 
@@ -11,7 +11,26 @@ import useApiState from '../../hooks/useApiState';
 import generateTopic from '../../utils/generateTopic';
 
 import Loader from '../shared/loader/Loader';
+import Information from './information/Information';
 import SimilarRepos from './similar-repos/SimilarRepos';
+import Wall from './wall/Wall';
+
+const Wrapper = styled.div`
+  max-width: 1100px;
+  width: 100%;
+  padding: 0 10px;
+  margin: 20px auto;
+`;
+
+export const Panel = styled.div`
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+
+  border-radius: 5px;
+  box-shadow: 0px 3px 15px rgba(212, 221, 237, 0.25);
+  background: #fff;
+`;
 
 const storeView = (params, country, countryCode) => {
   firebase.views.doc(String(params.id)).get().then((doc) => {
@@ -67,6 +86,9 @@ const RepoProfile = (props) => {
   const [commitsState, setCommitsState] = useApiState();
   const [commits, setCommits] = useState([]);
 
+  const [languagesState, setLanguagesState] = useApiState();
+  const [languages, setLanguages] = useState([]);
+
   const fetchCommits = (repo_name) => {
     setCommitsState({ isLoading: true, hasError: false });
     appContext
@@ -77,6 +99,19 @@ const RepoProfile = (props) => {
       })
       .catch(() => {
         setCommitsState({ isLoading: false, hasError: true });
+      });
+  };
+
+  const fetchLanguages = (repo_name) => {
+    setLanguagesState({ isLoading: true, hasError: false });
+    appContext
+      .fetchLanguages(decodeURIComponent(repo_name))
+      .then((items) => {
+        setLanguagesState({ isLoading: false, hasError: false });
+        setLanguages(items);
+      })
+      .catch(() => {
+        setLanguagesState({ isLoading: false, hasError: true });
       });
   };
 
@@ -96,12 +131,14 @@ const RepoProfile = (props) => {
         setApiState({ isLoading: false, hasError: false });
         setRepo(data);
         fetchCommits(data.full_name);
+        fetchLanguages(data.full_name);
       })
       .catch(() => {
         setApiState({ isLoading: false, hasError: true });
       });
     return () => {
       setCommits([]);
+      setLanguages([]);
     };
   }, [id]);
 
@@ -111,50 +148,36 @@ const RepoProfile = (props) => {
 
 
   return (
-    <div>
-      {repo.full_name}
-      {commitsState.hasError && (
-        <p>
-          An error occured while trying to fetch commit count.
-          <button type="button" onClick={() => fetchCommits(repo.full_name)}>Try again</button>
-        </p>
-      )}
-      {!commitsState.isLoading && !commitsState.hasError && (
-        <div style={{ width: 800, height: 400 }}>
-          <h3>Commit count</h3>
-          {!commitsState.hasError && commits.length > 0 && (
-            <ResponsiveCalendar
-              data={commits}
-              from={commits[0].day}
-              to={commits[commits.length - 1].day}
-              emptyColor="#eeeeee"
-              colors={[
-                '#a3ccff',
-                '#77b5ff',
-                '#5ea8ff',
-                '#3E97FF',
-              ]}
-              margin={{
-                top: 100,
-                right: 30,
-                bottom: 60,
-                left: 30,
-              }}
-              yearSpacing={40}
-              monthBorderColor="#ffffff"
-              monthLegendOffset={10}
-              dayBorderWidth={2}
-              dayBorderColor="#ffffff"
-              tooltip={({ day, value }) => <div>{moment(day).format('dddd, MMMM Do, YYYY')} - {value} commits</div>}
-            />
-          )}
-        </div>
-      )}
-      <SimilarRepos
-        topic={topic}
-        searchRepo={appContext.searchRepo}
+    <Wrapper>
+      <Information
+        fullName={repo.full_name}
+        avatarUrl={repo.owner && repo.owner.avatar_url}
+        description={repo.description}
+        createdAt={repo.created_at}
+        updatedAt={repo.updated_at}
+        topics={repo.topics}
       />
-    </div>
+      <Wall
+        repo={repo}
+        languages={{
+          data: languages,
+          isLoading: languagesState.isLoading,
+          hasError: languagesState.hasError,
+        }}
+        commits={{
+          data: commits,
+          isLoading: commitsState.isLoading,
+          hasError: commitsState.hasError,
+        }}
+      >
+        <Panel>
+          <SimilarRepos
+            topic={topic}
+            searchRepo={appContext.searchRepo}
+          />
+        </Panel>
+      </Wall>
+    </Wrapper>
   );
 };
 

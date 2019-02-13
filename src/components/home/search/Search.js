@@ -38,7 +38,6 @@ const Input = styled.input`
   color: #AEB6CB;
   font-size: 16px;
   border: 1px solid rgba(212, 221, 237, 0.25);
-  box-sizing: border-box;
   box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
   border-radius: 3px;
 

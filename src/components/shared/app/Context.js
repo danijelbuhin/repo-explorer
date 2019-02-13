@@ -201,8 +201,8 @@ class AppProvider extends Component {
 
   updateUser = (field, value) => {
     const { user } = this.state;
-    return this.users.doc(user.id).update({ [field]: value }).then(() => {
-      this.users.doc(user.id).get().then((u) => {
+    return firebase.users.doc(user.id).update({ [field]: value }).then(() => {
+      firebase.users.doc(user.id).get().then((u) => {
         this.setState(() => ({
           user: {
             ...u.data(),

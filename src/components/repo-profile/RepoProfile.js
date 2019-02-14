@@ -72,8 +72,11 @@ const RepoProfile = (props) => {
   const [commitsState, setCommitsState] = useApiState();
   const [commits, setCommits] = useState([]);
 
+  const [contributorsState, setContributorsState] = useApiState();
+  const [contributors, setContributors] = useState([]);
+
   const [languagesState, setLanguagesState] = useApiState();
-  const [languages, setLanguages] = useState([]);
+  const [languages, setLanguages] = useState({});
 
   const fetchCommits = (repo_name) => {
     setCommitsState({ isLoading: true, hasError: false });
@@ -88,6 +91,19 @@ const RepoProfile = (props) => {
       });
   };
 
+  const fetchContributors = (repo_name) => {
+    setContributorsState({ isLoading: true, hasError: false });
+    return appContext
+      .fetchContributors(decodeURIComponent(repo_name))
+      .then((items) => {
+        setContributorsState({ isLoading: false, hasError: false });
+        setContributors(items);
+      })
+      .catch(() => {
+        setContributorsState({ isLoading: false, hasError: true });
+      });
+  };
+
   const fetchLanguages = (repo_name) => {
     setLanguagesState({ isLoading: true, hasError: false });
     return appContext
@@ -97,6 +113,7 @@ const RepoProfile = (props) => {
         setLanguages(items);
       })
       .catch(() => {
+        setLanguages({});
         setLanguagesState({ isLoading: false, hasError: true });
       });
   };
@@ -123,9 +140,12 @@ const RepoProfile = (props) => {
 
   useEffect(() => {
     fetchRepo().then((data) => {
-      axios.all([fetchCommits(data.full_name), fetchLanguages(data.full_name)]).then(() => {
-        setApiState({ isLoading: false, hasError: false });
-      });
+      axios
+        .all([fetchCommits(data.full_name), fetchLanguages(data.full_name), fetchContributors(data.full_name)])
+        .then(() => {
+          setApiState({ isLoading: false, hasError: false });
+        })
+        .catch(() => setApiState({ isLoading: false, hasError: true }));
     });
     return () => {
       setCommits([]);
@@ -159,6 +179,11 @@ const RepoProfile = (props) => {
           isLoading: commitsState.isLoading,
           hasError: commitsState.hasError,
         }}
+        contributors={{
+          data: contributors,
+          isLoading: contributorsState.isLoading,
+          hasError: contributorsState.hasError,
+        }}
       />
     </Wrapper>
   );
@@ -170,6 +195,9 @@ RepoProfile.propTypes = {
   }).isRequired,
   appContext: PropTypes.shape({
     fetchRepo: PropTypes.func,
+    fetchLanguages: PropTypes.func,
+    fetchCommits: PropTypes.func,
+    fetchContributors: PropTypes.func,
   }).isRequired,
 };
 

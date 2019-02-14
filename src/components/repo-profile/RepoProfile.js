@@ -8,10 +8,14 @@ import firebase from '../../services/firebase';
 
 import withAppContext from '../shared/app/withAppContext';
 import useApiState from '../../hooks/useApiState';
+import generateTopic from '../../utils/generateTopic';
 
 import Loader from '../shared/loader/Loader';
 import Information from './information/Information';
-import Wall from './wall/Wall';
+import Languages from './languages/Languages';
+import Commits from './commits/Commits';
+import SimilarRepos from './similar-repos/SimilarRepos';
+import Contributors from './contributors/Contributors';
 
 const Wrapper = styled.div`
   max-width: 1100px;
@@ -78,6 +82,8 @@ const RepoProfile = (props) => {
   const [languagesState, setLanguagesState] = useApiState();
   const [languages, setLanguages] = useState({});
 
+  const [topic, setTopic] = useState(null);
+
   const fetchCommits = (repo_name) => {
     setCommitsState({ isLoading: true, hasError: false });
     return appContext
@@ -131,6 +137,7 @@ const RepoProfile = (props) => {
           stargazers_count: data.stargazers_count,
         });
         setRepo(data);
+        setTopic(generateTopic({ topics: data.topics, language: data.language }));
         return data;
       })
       .catch(() => {
@@ -167,23 +174,25 @@ const RepoProfile = (props) => {
         updatedAt={repo.updated_at}
         topics={repo.topics}
       />
-      <Wall
-        repo={repo}
-        languages={{
-          data: languages,
-          isLoading: languagesState.isLoading,
-          hasError: languagesState.hasError,
-        }}
-        commits={{
-          data: commits,
-          isLoading: commitsState.isLoading,
-          hasError: commitsState.hasError,
-        }}
-        contributors={{
-          data: contributors,
-          isLoading: contributorsState.isLoading,
-          hasError: contributorsState.hasError,
-        }}
+      <Languages
+        languages={languages}
+        isLoading={languagesState.isLoading}
+        hasError={languagesState.hasError}
+      />
+      <Contributors
+        contributors={contributors}
+        isLoading={contributorsState.isLoading}
+        hasError={contributorsState.hasError}
+      />
+      <Commits
+        commits={commits}
+        isLoading={commitsState.isLoading}
+        hasError={commitsState.hasError}
+        fetchCommits={appContext.fetchCommits}
+      />
+      <SimilarRepos
+        topic={topic}
+        searchRepo={appContext.searchRepo}
       />
     </Wrapper>
   );

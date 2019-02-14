@@ -7,6 +7,7 @@ import Card from '../../shared/repo/Card';
 import RepoList from '../../shared/repo/List';
 
 import useApiState from '../../../hooks/useApiState';
+import Panel from '../panel/Panel';
 
 const SimilarRepos = (props) => {
   const { topic, searchRepo } = props;
@@ -27,20 +28,22 @@ const SimilarRepos = (props) => {
   }, [topic]);
 
   return (
-    <RepoList isLoading={apiState.isLoading}>
-      {similarRepos.map(similarRepo => (
-        <Card
-          key={similarRepo.id}
-          avatar={similarRepo.owner.avatar_url}
-          name={similarRepo.full_name}
-          count={similarRepo.stargazers_count}
-          countIcon={<StarSVG />}
-          language={similarRepo.language}
-          topic={similarRepo.topics[0]}
-          id={similarRepo.id}
-        />
-      ))}
-    </RepoList>
+    <Panel title="Repos with similar topic" isClosable={false}>
+      <RepoList isLoading={apiState.isLoading}>
+        {similarRepos.map(similarRepo => (
+          <Card
+            key={similarRepo.id}
+            avatar={similarRepo.owner.avatar_url}
+            name={similarRepo.full_name}
+            count={similarRepo.stargazers_count}
+            countIcon={<StarSVG />}
+            language={similarRepo.language}
+            topic={similarRepo.topics[0]}
+            id={similarRepo.id}
+          />
+        ))}
+      </RepoList>
+    </Panel>
   );
 };
 

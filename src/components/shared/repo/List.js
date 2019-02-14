@@ -108,7 +108,9 @@ const List = ({
   loadingPlaceholdersCount,
 }) => (
   <Wrapper>
-    <Title>{title}</Title>
+    {title && (
+      <Title>{title}</Title>
+    )}
     <Items>
       {isLoading && !hasError && (
         Array.from(Array(loadingPlaceholdersCount).keys()).map(key => (
@@ -124,7 +126,7 @@ const List = ({
 );
 
 List.propTypes = {
-  title: PropTypes.string.isRequired,
+  title: PropTypes.string,
   loadingPlaceholdersCount: PropTypes.number,
   isLoading: PropTypes.bool,
   hasError: PropTypes.bool,
@@ -132,6 +134,7 @@ List.propTypes = {
 };
 
 List.defaultProps = {
+  title: '',
   loadingPlaceholdersCount: 5,
   isLoading: false,
   hasError: false,

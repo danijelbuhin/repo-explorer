@@ -31,44 +31,40 @@ class AppProvider extends Component {
   }
 
   componentDidMount() {
-    try {
-      const id = window.localStorage.getItem('rx-user-id');
-      const token = window.localStorage.getItem('rx-user-token');
-      if (id && token) {
-        axios
-          .get('https://api.github.com/user', {
-            params: { access_token: token },
-          })
-          .then(() => {
-            firebase.users.doc(id).get().then((user) => {
-              this.setState(() => ({
-                user: { ...user.data() },
-                token,
-                isLoading: false,
-                isAuthenticated: true,
-                isAuthenticating: false,
-              }), () => this.fetchRateLimit());
-            });
-          })
-          .catch(({ response }) => {
-            if (response.data.message === 'Bad credentials') {
-              window.localStorage.removeItem('rx-user-id');
-              window.localStorage.removeItem('rx-user-token');
-              this.setState(() => ({
-                user: null,
-                isAuthenticated: false,
-                isLoading: false,
-                isAuthenticating: false,
-              }), () => this.fetchRateLimit());
-              firebase.logOut();
-            }
+    const id = window.localStorage.getItem('rx-user-id');
+    const token = window.localStorage.getItem('rx-user-token');
+    if (id && token) {
+      axios
+        .get('https://api.github.com/user', {
+          params: { access_token: token },
+        })
+        .then(() => {
+          firebase.users.doc(id).get().then((user) => {
+            this.setState(() => ({
+              user: { ...user.data() },
+              token,
+              isLoading: false,
+              isAuthenticated: true,
+              isAuthenticating: false,
+            }), () => this.fetchRateLimit());
           });
-      } else {
-        this.setState({ isLoading: false });
-        this.fetchRateLimit();
-      }
-    } catch (err) {
-      console.log(err);
+        })
+        .catch(({ response }) => {
+          if (response.data.message === 'Bad credentials') {
+            window.localStorage.removeItem('rx-user-id');
+            window.localStorage.removeItem('rx-user-token');
+            this.setState(() => ({
+              user: null,
+              isAuthenticated: false,
+              isLoading: false,
+              isAuthenticating: false,
+            }), () => this.fetchRateLimit());
+            firebase.logOut();
+          }
+        });
+    } else {
+      this.setState({ isLoading: false });
+      this.fetchRateLimit();
     }
   }
 

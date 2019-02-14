@@ -4,15 +4,7 @@ import styled from 'styled-components';
 import moment from 'moment';
 
 import { Tag } from '../../shared/repo/Card';
-
-const Wrapper = styled.div`
-  padding: 10px;
-  margin-bottom: 10px;
-
-  border-radius: 5px;
-  box-shadow: 0px 3px 15px rgba(212, 221, 237, 0.25);
-  background: #fff;
-`;
+import Panel from '../panel/Panel';
 
 const Avatar = styled.img`
   width: 64px;
@@ -37,7 +29,7 @@ const Information = ({
   updatedAt,
   topics,
 }) => (
-  <Wrapper>
+  <Panel>
     <Avatar src={avatarUrl} />
     <Name>{fullName}</Name>
     <Description>{description}</Description>
@@ -55,7 +47,7 @@ const Information = ({
         #{topic.toLowerCase()}
       </Tag>
     ))}
-  </Wrapper>
+  </Panel>
 );
 
 Information.propTypes = {

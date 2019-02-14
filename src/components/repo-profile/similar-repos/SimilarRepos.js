@@ -27,10 +27,7 @@ const SimilarRepos = (props) => {
   }, [topic]);
 
   return (
-    <RepoList
-      title="Repos with similar topic:"
-      isLoading={apiState.isLoading}
-    >
+    <RepoList isLoading={apiState.isLoading}>
       {similarRepos.map(similarRepo => (
         <Card
           key={similarRepo.id}

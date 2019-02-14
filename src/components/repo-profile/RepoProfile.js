@@ -8,11 +8,9 @@ import firebase from '../../services/firebase';
 
 import withAppContext from '../shared/app/withAppContext';
 import useApiState from '../../hooks/useApiState';
-import generateTopic from '../../utils/generateTopic';
 
 import Loader from '../shared/loader/Loader';
 import Information from './information/Information';
-import SimilarRepos from './similar-repos/SimilarRepos';
 import Wall from './wall/Wall';
 
 const Wrapper = styled.div`
@@ -20,16 +18,6 @@ const Wrapper = styled.div`
   width: 100%;
   padding: 0 10px;
   margin: 20px auto;
-`;
-
-export const Panel = styled.div`
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-
-  border-radius: 5px;
-  box-shadow: 0px 3px 15px rgba(212, 221, 237, 0.25);
-  background: #fff;
 `;
 
 const storeView = (params, country, countryCode) => {
@@ -78,10 +66,8 @@ const transformCommitData = (data = []) => {// eslint-disable-line
 const RepoProfile = (props) => {
   const { match: { params: { id } }, appContext } = props;
 
-  const [apiState, setApiState] = useApiState();
+  const [apiState, setApiState] = useApiState({ isLoading: true, hasError: false });
   const [repo, setRepo] = useState({});
-
-  const [topic, setTopic] = useState(null);
 
   const [commitsState, setCommitsState] = useApiState();
   const [commits, setCommits] = useState([]);
@@ -91,7 +77,7 @@ const RepoProfile = (props) => {
 
   const fetchCommits = (repo_name) => {
     setCommitsState({ isLoading: true, hasError: false });
-    appContext
+    return appContext
       .fetchCommits(decodeURIComponent(repo_name))
       .then((items) => {
         setCommitsState({ isLoading: false, hasError: false });
@@ -104,7 +90,7 @@ const RepoProfile = (props) => {
 
   const fetchLanguages = (repo_name) => {
     setLanguagesState({ isLoading: true, hasError: false });
-    appContext
+    return appContext
       .fetchLanguages(decodeURIComponent(repo_name))
       .then((items) => {
         setLanguagesState({ isLoading: false, hasError: false });
@@ -115,9 +101,9 @@ const RepoProfile = (props) => {
       });
   };
 
-  useEffect(() => {
+  const fetchRepo = () => {
     setApiState({ isLoading: true, hasError: false });
-    appContext.fetchRepo(decodeURIComponent(id))
+    return appContext.fetchRepo(decodeURIComponent(id))
       .then((data) => {
         document.title = `Exploring ${data.full_name} | Repo Explorer`;
         handleView({
@@ -127,15 +113,20 @@ const RepoProfile = (props) => {
           name: data.name,
           stargazers_count: data.stargazers_count,
         });
-        setTopic(generateTopic({ topics: data.topics, language: data.language }));
-        setApiState({ isLoading: false, hasError: false });
         setRepo(data);
-        fetchCommits(data.full_name);
-        fetchLanguages(data.full_name);
+        return data;
       })
       .catch(() => {
         setApiState({ isLoading: false, hasError: true });
       });
+  };
+
+  useEffect(() => {
+    fetchRepo().then((data) => {
+      axios.all([fetchCommits(data.full_name), fetchLanguages(data.full_name)]).then(() => {
+        setApiState({ isLoading: false, hasError: false });
+      });
+    });
     return () => {
       setCommits([]);
       setLanguages([]);
@@ -143,9 +134,8 @@ const RepoProfile = (props) => {
   }, [id]);
 
   if (apiState.isLoading) {
-    return <Loader text={`Fetching information about ${decodeURIComponent(id)}`} />;
+    return <Loader text={`Fetching all information about ${decodeURIComponent(id)}`} />;
   }
-
 
   return (
     <Wrapper>
@@ -169,14 +159,7 @@ const RepoProfile = (props) => {
           isLoading: commitsState.isLoading,
           hasError: commitsState.hasError,
         }}
-      >
-        <Panel>
-          <SimilarRepos
-            topic={topic}
-            searchRepo={appContext.searchRepo}
-          />
-        </Panel>
-      </Wall>
+      />
     </Wrapper>
   );
 };

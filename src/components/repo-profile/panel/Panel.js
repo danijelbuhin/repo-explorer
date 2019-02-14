@@ -25,7 +25,7 @@ const Header = styled.div`
 
   font-size: 16px;
 
-  cursor: pointer;
+  cursor: ${({ isClosable }) => isClosable ? 'pointer' : 'static'};
   border-bottom: 1px solid #F4F6F9;
   user-select: none;
 
@@ -45,12 +45,16 @@ const Panel = ({ title, isClosable, children }) => {
     <Wrapper>
       {title && (
         isClosable ? (
-          <Header isCollapsed={isCollapsed} onClick={() => setIsCollapsed(!isCollapsed)}>
+          <Header
+            isClosable={isClosable}
+            isCollapsed={isCollapsed}
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          >
             {title}
             <ChevronIcon />
           </Header>
         ) : (
-          <Header>
+          <Header isClosable={isClosable}>
             {title}
           </Header>
         )

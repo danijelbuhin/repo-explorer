@@ -112,7 +112,7 @@ const Wall = ({
                 monthLegendOffset={10}
                 dayBorderWidth={2}
                 dayBorderColor="#ffffff"
-                tooltip={({ day, value }) => <div>{moment(day).format('dddd, MMMM Do, YYYY')} - {value} commits</div>}
+                tooltip={({ day, value }) => <div>{value} commits on {moment(day).format('MMMM Do, YYYY')}</div>}
               />
             )}
           </div>

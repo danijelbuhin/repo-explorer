@@ -12,24 +12,16 @@ import generateTopic from '../../utils/generateTopic';
 
 import Loader from '../shared/loader/Loader';
 import Information from './information/Information';
+import Languages from './languages/Languages';
+import Commits from './commits/Commits';
 import SimilarRepos from './similar-repos/SimilarRepos';
-import Wall from './wall/Wall';
+import Contributors from './contributors/Contributors';
 
 const Wrapper = styled.div`
   max-width: 1100px;
   width: 100%;
   padding: 0 10px;
   margin: 20px auto;
-`;
-
-export const Panel = styled.div`
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-
-  border-radius: 5px;
-  box-shadow: 0px 3px 15px rgba(212, 221, 237, 0.25);
-  background: #fff;
 `;
 
 const storeView = (params, country, countryCode) => {
@@ -78,20 +70,23 @@ const transformCommitData = (data = []) => {// eslint-disable-line
 const RepoProfile = (props) => {
   const { match: { params: { id } }, appContext } = props;
 
-  const [apiState, setApiState] = useApiState();
+  const [apiState, setApiState] = useApiState({ isLoading: true, hasError: false });
   const [repo, setRepo] = useState({});
-
-  const [topic, setTopic] = useState(null);
 
   const [commitsState, setCommitsState] = useApiState();
   const [commits, setCommits] = useState([]);
 
+  const [contributorsState, setContributorsState] = useApiState();
+  const [contributors, setContributors] = useState([]);
+
   const [languagesState, setLanguagesState] = useApiState();
-  const [languages, setLanguages] = useState([]);
+  const [languages, setLanguages] = useState({});
+
+  const [topic, setTopic] = useState(null);
 
   const fetchCommits = (repo_name) => {
     setCommitsState({ isLoading: true, hasError: false });
-    appContext
+    return appContext
       .fetchCommits(decodeURIComponent(repo_name))
       .then((items) => {
         setCommitsState({ isLoading: false, hasError: false });
@@ -102,22 +97,36 @@ const RepoProfile = (props) => {
       });
   };
 
+  const fetchContributors = (repo_name) => {
+    setContributorsState({ isLoading: true, hasError: false });
+    return appContext
+      .fetchContributors(decodeURIComponent(repo_name))
+      .then((items) => {
+        setContributorsState({ isLoading: false, hasError: false });
+        setContributors(items);
+      })
+      .catch(() => {
+        setContributorsState({ isLoading: false, hasError: true });
+      });
+  };
+
   const fetchLanguages = (repo_name) => {
     setLanguagesState({ isLoading: true, hasError: false });
-    appContext
+    return appContext
       .fetchLanguages(decodeURIComponent(repo_name))
       .then((items) => {
         setLanguagesState({ isLoading: false, hasError: false });
         setLanguages(items);
       })
       .catch(() => {
+        setLanguages({});
         setLanguagesState({ isLoading: false, hasError: true });
       });
   };
 
-  useEffect(() => {
+  const fetchRepo = () => {
     setApiState({ isLoading: true, hasError: false });
-    appContext.fetchRepo(decodeURIComponent(id))
+    return appContext.fetchRepo(decodeURIComponent(id))
       .then((data) => {
         document.title = `Exploring ${data.full_name} | Repo Explorer`;
         handleView({
@@ -127,15 +136,24 @@ const RepoProfile = (props) => {
           name: data.name,
           stargazers_count: data.stargazers_count,
         });
-        setTopic(generateTopic({ topics: data.topics, language: data.language }));
-        setApiState({ isLoading: false, hasError: false });
         setRepo(data);
-        fetchCommits(data.full_name);
-        fetchLanguages(data.full_name);
+        setTopic(generateTopic({ topics: data.topics, language: data.language }));
+        return data;
       })
       .catch(() => {
         setApiState({ isLoading: false, hasError: true });
       });
+  };
+
+  useEffect(() => {
+    fetchRepo().then((data) => {
+      axios
+        .all([fetchCommits(data.full_name), fetchLanguages(data.full_name), fetchContributors(data.full_name)])
+        .then(() => {
+          setApiState({ isLoading: false, hasError: false });
+        })
+        .catch(() => setApiState({ isLoading: false, hasError: true }));
+    });
     return () => {
       setCommits([]);
       setLanguages([]);
@@ -143,9 +161,8 @@ const RepoProfile = (props) => {
   }, [id]);
 
   if (apiState.isLoading) {
-    return <Loader text={`Fetching information about ${decodeURIComponent(id)}`} />;
+    return <Loader text={`Fetching all information about ${decodeURIComponent(id)}`} />;
   }
-
 
   return (
     <Wrapper>
@@ -157,26 +174,26 @@ const RepoProfile = (props) => {
         updatedAt={repo.updated_at}
         topics={repo.topics}
       />
-      <Wall
-        repo={repo}
-        languages={{
-          data: languages,
-          isLoading: languagesState.isLoading,
-          hasError: languagesState.hasError,
-        }}
-        commits={{
-          data: commits,
-          isLoading: commitsState.isLoading,
-          hasError: commitsState.hasError,
-        }}
-      >
-        <Panel>
-          <SimilarRepos
-            topic={topic}
-            searchRepo={appContext.searchRepo}
-          />
-        </Panel>
-      </Wall>
+      <Languages
+        languages={languages}
+        isLoading={languagesState.isLoading}
+        hasError={languagesState.hasError}
+      />
+      <Contributors
+        contributors={contributors}
+        isLoading={contributorsState.isLoading}
+        hasError={contributorsState.hasError}
+      />
+      <Commits
+        commits={commits}
+        isLoading={commitsState.isLoading}
+        hasError={commitsState.hasError}
+        fetchCommits={appContext.fetchCommits}
+      />
+      <SimilarRepos
+        topic={topic}
+        searchRepo={appContext.searchRepo}
+      />
     </Wrapper>
   );
 };
@@ -187,6 +204,9 @@ RepoProfile.propTypes = {
   }).isRequired,
   appContext: PropTypes.shape({
     fetchRepo: PropTypes.func,
+    fetchLanguages: PropTypes.func,
+    fetchCommits: PropTypes.func,
+    fetchContributors: PropTypes.func,
   }).isRequired,
 };
 

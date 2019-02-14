@@ -22,6 +22,7 @@
     "qs": "^6.6.0",
     "react": "^16.7.0",
     "react-click-outside": "^3.0.1",
+    "react-custom-scrollbars": "^4.2.1",
     "react-document-title": "^2.0.3",
     "react-dom": "^16.7.0",
     "react-router-dom": "^4.3.1",

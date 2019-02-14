@@ -31,44 +31,40 @@ class AppProvider extends Component {
   }
 
   componentDidMount() {
-    try {
-      const id = window.localStorage.getItem('rx-user-id');
-      const token = window.localStorage.getItem('rx-user-token');
-      if (id && token) {
-        axios
-          .get('https://api.github.com/user', {
-            params: { access_token: token },
-          })
-          .then(() => {
-            firebase.users.doc(id).get().then((user) => {
-              this.setState(() => ({
-                user: { ...user.data() },
-                token,
-                isLoading: false,
-                isAuthenticated: true,
-                isAuthenticating: false,
-              }), () => this.fetchRateLimit());
-            });
-          })
-          .catch(({ response }) => {
-            if (response.data.message === 'Bad credentials') {
-              window.localStorage.removeItem('rx-user-id');
-              window.localStorage.removeItem('rx-user-token');
-              this.setState(() => ({
-                user: null,
-                isAuthenticated: false,
-                isLoading: false,
-                isAuthenticating: false,
-              }), () => this.fetchRateLimit());
-              firebase.logOut();
-            }
+    const id = window.localStorage.getItem('rx-user-id');
+    const token = window.localStorage.getItem('rx-user-token');
+    if (id && token) {
+      axios
+        .get('https://api.github.com/user', {
+          params: { access_token: token },
+        })
+        .then(() => {
+          firebase.users.doc(id).get().then((user) => {
+            this.setState(() => ({
+              user: { ...user.data() },
+              token,
+              isLoading: false,
+              isAuthenticated: true,
+              isAuthenticating: false,
+            }), () => this.fetchRateLimit());
           });
-      } else {
-        this.setState({ isLoading: false });
-        this.fetchRateLimit();
-      }
-    } catch (err) {
-      console.log(err);
+        })
+        .catch(({ response }) => {
+          if (response.data.message === 'Bad credentials') {
+            window.localStorage.removeItem('rx-user-id');
+            window.localStorage.removeItem('rx-user-token');
+            this.setState(() => ({
+              user: null,
+              isAuthenticated: false,
+              isLoading: false,
+              isAuthenticating: false,
+            }), () => this.fetchRateLimit());
+            firebase.logOut();
+          }
+        });
+    } else {
+      this.setState({ isLoading: false });
+      this.fetchRateLimit();
     }
   }
 
@@ -223,6 +219,30 @@ class AppProvider extends Component {
       });
   }
 
+  fetchContributors = (repo) => {
+    const { client_id, client_secret } = tokens;
+    const { token } = this.state;
+    return axios
+      .get(`https://api.github.com/repos/${repo}/contributors`, {
+        headers: {
+          Accept: 'application/vnd.github.mercy-preview+json',
+        },
+        params: {
+          client_id: token ? undefined : client_id,
+          client_secret: token ? undefined : client_secret,
+          access_token: token ? token : undefined,
+        },
+      })
+      .then(({ data }) => {
+        this.fetchRateLimit();
+        return data;
+      })
+      .catch((err) => {
+        this.fetchRateLimit();
+        return err;
+      });
+  }
+
   updateUser = (field, value) => {
     const { user } = this.state;
     return firebase.users.doc(user.id).update({ [field]: value }).then(() => {
@@ -287,6 +307,7 @@ class AppProvider extends Component {
           searchRepo: this.searchRepo,
           fetchCommits: this.fetchCommits,
           fetchLanguages: this.fetchLanguages,
+          fetchContributors: this.fetchContributors,
         }}
       >
         {this.props.children}

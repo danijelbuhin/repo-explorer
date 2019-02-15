@@ -60,6 +60,7 @@ const handleView = (params) => {
 };
 
 const transformCommitData = (data = []) => {// eslint-disable-line
+  if (data.lenght === 0 || Object.keys(data).length === 0) return [];
   return data.map((val) => { // eslint-disable-line
     return val.days.map((d, i) => ({
       day: moment(val.week * 1000).add(i, 'day').format('YYYY-MM-DD'),

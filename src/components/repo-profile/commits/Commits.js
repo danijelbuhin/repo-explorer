@@ -9,10 +9,11 @@ import Error from '../../shared/error/Error';
 
 const Commits = ({ commits, hasError, errorMessage, isLoading }) => (
   <Panel title="Commits count">
+    {commits.length === 0 && <div>No commits</div>/* update this */}
     {hasError && (
       <Error source="GitHub" message={errorMessage} />
     )}
-    {!isLoading && !hasError && (
+    {!isLoading && !hasError && commits.length > 0 && (
       <Scrollbars style={{ width: '100%', height: 410 }}>
         {!hasError && commits.length > 0 && (
           <Calendar

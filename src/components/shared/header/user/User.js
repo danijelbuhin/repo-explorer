@@ -10,6 +10,7 @@ import generatePercentage from '../../../../utils/generatePercentage';
 import Dropdown from '../../dropdown/Dropdown';
 
 import DefaultUser from './assets/user.png';
+import Button from '../../button/Button';
 
 const SpinnerWrapper = styled.div`
   position: absolute;
@@ -224,16 +225,20 @@ class UserInfo extends Component {
             <div>We could not fetch GitHub rate limit.</div>
           )}
           {isAuthenticated && (
-            <button onClick={logOut} type="button">Log out</button>
+            <Button block onClick={logOut} type="button">Log out</Button>
           )}
           {!isAuthenticated && (
-            <button
-              onClick={authenticate}
-              type="button"
-              disabled={isAuthenticating}
-            >
-              {isAuthenticating ? 'Authenticating...' : 'Authenticate with github'}
-            </button>
+            <React.Fragment>
+              If you want to use your own rate limit:
+              <Button
+                block
+                color="dark"
+                onClick={authenticate}
+                disabled={isAuthenticating}
+              >
+                {isAuthenticating ? 'Authenticating...' : 'Authenticate with github'}
+              </Button>
+            </React.Fragment>
           )}
         </Dropdown>
       </Wrapper>

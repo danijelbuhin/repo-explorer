@@ -67,8 +67,8 @@ const Home = ({ appContext }) => {
         setRepos(items);
         setReposState({ isLoading: false, hasError: false });
       })
-      .catch(() => {
-        setReposState({ isLoading: false, hasError: true });
+      .catch(({ response: { data } }) => {
+        setReposState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
   };
 
@@ -84,6 +84,7 @@ const Home = ({ appContext }) => {
         title="Most popular repos:"
         isLoading={reposState.isLoading}
         hasError={reposState.hasError}
+        errorMessage={reposState.errorMessage}
         loadingPlaceholdersCount={10}
       >
         {paginate(repos, 10, page).map(repo => (

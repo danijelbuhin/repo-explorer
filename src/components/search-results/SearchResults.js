@@ -41,9 +41,9 @@ const SearchResults = (props) => {
         setApiState({ isLoading: false, hasError: false });
         setRepos(data.items);
       })
-      .catch(() => {
+      .catch(({ response: { data } }) => {
         fetchRateLimit();
-        setApiState({ isLoading: false, hasError: true });
+        setApiState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
   };
 
@@ -57,6 +57,7 @@ const SearchResults = (props) => {
         title={`Search results for ${result} query`}
         isLoading={apiState.isLoading}
         hasError={apiState.hasError}
+        errorMessage={apiState.errorMessage}
       >
         {repos.length > 0 && repos.map(repo => (
           <Card

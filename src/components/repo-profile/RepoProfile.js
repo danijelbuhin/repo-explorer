@@ -16,6 +16,7 @@ import Languages from './languages/Languages';
 import Commits from './commits/Commits';
 import SimilarRepos from './similar-repos/SimilarRepos';
 import Contributors from './contributors/Contributors';
+import Error from '../shared/error/Error';
 
 const Wrapper = styled.div`
   max-width: 1100px;
@@ -92,8 +93,8 @@ const RepoProfile = (props) => {
         setCommitsState({ isLoading: false, hasError: false });
         setCommits(transformCommitData(items));
       })
-      .catch(() => {
-        setCommitsState({ isLoading: false, hasError: true });
+      .catch(({ response: { data } }) => {
+        setCommitsState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
   };
 
@@ -105,8 +106,8 @@ const RepoProfile = (props) => {
         setContributorsState({ isLoading: false, hasError: false });
         setContributors(items);
       })
-      .catch(() => {
-        setContributorsState({ isLoading: false, hasError: true });
+      .catch(({ response: { data } }) => {
+        setContributorsState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
   };
 
@@ -118,9 +119,9 @@ const RepoProfile = (props) => {
         setLanguagesState({ isLoading: false, hasError: false });
         setLanguages(items);
       })
-      .catch(() => {
+      .catch(({ response: { data } }) => {
         setLanguages({});
-        setLanguagesState({ isLoading: false, hasError: true });
+        setLanguagesState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
   };
 
@@ -139,21 +140,21 @@ const RepoProfile = (props) => {
         setRepo(data);
         setTopic(generateTopic({ topics: data.topics, language: data.language }));
         return data;
-      })
-      .catch(() => {
-        setApiState({ isLoading: false, hasError: true });
       });
   };
 
   useEffect(() => {
-    fetchRepo().then((data) => {
-      axios
-        .all([fetchCommits(data.full_name), fetchLanguages(data.full_name), fetchContributors(data.full_name)])
-        .then(() => {
-          setApiState({ isLoading: false, hasError: false });
-        })
-        .catch(() => setApiState({ isLoading: false, hasError: true }));
-    });
+    fetchRepo()
+      .then((data) => {
+        axios
+          .all([fetchCommits(data.full_name), fetchLanguages(data.full_name), fetchContributors(data.full_name)])
+          .then(() => {
+            setApiState({ isLoading: false, hasError: false });
+          });
+      })
+      .catch(({ response: { data } }) => {
+        setApiState({ isLoading: false, hasError: true, errorMessage: data.message });
+      });
     return () => {
       setCommits([]);
       setLanguages([]);
@@ -162,6 +163,10 @@ const RepoProfile = (props) => {
 
   if (apiState.isLoading) {
     return <Loader text={`Fetching all information about ${decodeURIComponent(id)}`} />;
+  }
+
+  if (apiState.hasError) {
+    return <Error source="github" message={apiState.errorMessage} />;
   }
 
   return (
@@ -178,16 +183,19 @@ const RepoProfile = (props) => {
         languages={languages}
         isLoading={languagesState.isLoading}
         hasError={languagesState.hasError}
+        errorMessage={languagesState.errorMessage}
       />
       <Contributors
         contributors={contributors}
         isLoading={contributorsState.isLoading}
         hasError={contributorsState.hasError}
+        errorMessage={contributorsState.errorMessage}
       />
       <Commits
         commits={commits}
         isLoading={commitsState.isLoading}
         hasError={commitsState.hasError}
+        errorMessage={commitsState.errorMessage}
         fetchCommits={appContext.fetchCommits}
       />
       <SimilarRepos

@@ -72,7 +72,9 @@ const RateLimit = styled.div`
 
 const Limit = styled.div`
   position: relative;
-  background: #F4F4F4;
+  background: ${({ hasError }) => (!hasError && '#F4F4F4')
+  || (hasError && '#FF3E3E')
+};
   height: 20px;
   width: 100%;
   margin: 3px 0;
@@ -136,6 +138,7 @@ class UserInfo extends Component {
           search,
           core,
           isLoading,
+          hasError,
         },
         logOut,
         authenticate,
@@ -155,13 +158,13 @@ class UserInfo extends Component {
           onClick={this.toggleDropdown}
         />
         <RateLimit>
-          <Limit>
+          <Limit hasError={hasError}>
             <Text>Search limit - {search.remaining || 0} / {search.limit || 0}</Text>
             <Indicator
               percentage={generatePercentage(search.remaining, search.limit)}
             />
           </Limit>
-          <Limit>
+          <Limit hasError={hasError}>
             <Text>Core limit - {core.remaining || 0} / {core.limit || 0}</Text>
             <Indicator
               percentage={generatePercentage(core.remaining, core.limit)}
@@ -169,13 +172,18 @@ class UserInfo extends Component {
           </Limit>
         </RateLimit>
         <Dropdown isActive={isDropdownActive}>
-          {!isAuthenticating && (
+          {!isAuthenticating && !hasError && (
             <p>Hello {isAuthenticated ? user && user.name : 'Guest'}, you{'\''}re using {isAuthenticated ? 'your own' : 'shared'} rate limit.</p>
           )}
-          <div>
-            <p><strong>Search limit reset:</strong> <br /> {moment(search.reset * 1000).format('HH:mm:ss')}h</p>
-            <p><strong>Core limit reset:</strong> <br /> {moment(core.reset * 1000).format('HH:mm:ss')}h</p>
-          </div>
+          {!hasError && (
+            <div>
+              <p><strong>Search limit reset:</strong> <br /> {moment(search.reset * 1000).format('HH:mm:ss')}h</p>
+              <p><strong>Core limit reset:</strong> <br /> {moment(core.reset * 1000).format('HH:mm:ss')}h</p>
+            </div>
+          )}
+          {hasError && (
+            <div>We could not fetch GitHub rate limit.</div>
+          )}
           {isAuthenticated && (
             <button onClick={logOut} type="button">Log out</button>
           )}
@@ -183,6 +191,7 @@ class UserInfo extends Component {
             <button
               onClick={authenticate}
               type="button"
+              disabled={isAuthenticating}
             >
               {isAuthenticating ? 'Authenticating...' : 'Authenticate with github'}
             </button>

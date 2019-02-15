@@ -23,13 +23,17 @@ const SimilarRepos = (props) => {
           setSimilarRepos(items);
           setApiState({ isLoading: false, hasError: false });
         })
-        .catch(() => setApiState({ isLoading: false, hasError: true }));
+        .catch(({ response: { data } }) => setApiState({ isLoading: false, hasError: true, errorMessage: data.message }));
     }
   }, [topic]);
 
   return (
     <Panel title="Repos with similar topic" isClosable={false}>
-      <RepoList isLoading={apiState.isLoading}>
+      <RepoList
+        isLoading={apiState.isLoading}
+        hasError={apiState.hasError}
+        errorMessage={apiState.errorMessage}
+      >
         {similarRepos.map(similarRepo => (
           <Card
             key={similarRepo.id}

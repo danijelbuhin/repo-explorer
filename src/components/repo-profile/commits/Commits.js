@@ -1,28 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import moment from 'moment';
 import { Calendar } from '@nivo/calendar';
 import { Scrollbars } from 'react-custom-scrollbars';
 
 import Panel from '../panel/Panel';
+import Error from '../../shared/error/Error';
 
-const Error = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 30px 0;
-
-  color: #ec4343;
-`;
-
-const Commits = ({ commits, hasError, fetchCommits, isLoading }) => (
+const Commits = ({ commits, hasError, errorMessage, isLoading }) => (
   <Panel title="Commits count">
     {hasError && (
-      <Error>
-        An error occurred while trying to fetch commits for this repo.
-        <button type="button" onClick={fetchCommits}>Try again?</button>
-      </Error>
+      <Error source="GitHub" message={errorMessage} />
     )}
     {!isLoading && !hasError && (
       <Scrollbars style={{ width: '100%', height: 410 }}>
@@ -60,17 +48,17 @@ const Commits = ({ commits, hasError, fetchCommits, isLoading }) => (
 );
 
 Commits.propTypes = {
+  errorMessage: PropTypes.string,
   commits: PropTypes.arrayOf(PropTypes.object),
   isLoading: PropTypes.bool,
   hasError: PropTypes.bool,
-  fetchCommits: PropTypes.func,
 };
 
 Commits.defaultProps = {
+  errorMessage: '',
   commits: [],
   isLoading: false,
   hasError: false,
-  fetchCommits: () => {},
 };
 
 export default Commits;

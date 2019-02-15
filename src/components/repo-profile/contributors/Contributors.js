@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { Scrollbars } from 'react-custom-scrollbars';
 
 import Panel from '../panel/Panel';
+import Error from '../../shared/error/Error';
 
 const Wrapper = styled.div`
   display: flex;
@@ -40,31 +41,38 @@ const Name = styled.strong`
   }
 `;
 
-const Contributors = ({ contributors, isLoading, hasError }) => (
+const Contributors = ({ contributors, isLoading, hasError, errorMessage }) => (
   <Panel title="Contributors">
-    <Scrollbars autoHeight>
-      <Wrapper>
-        {!isLoading && !hasError && contributors.map(contributor => (
-          <Contributor key={contributor.id}>
-            <Avatar src={contributor.avatar_url} />
-            <Name>
-              {contributor.login}
-              <span>{contributor.contributions} contributions</span>
-            </Name>
-          </Contributor>
-        ))}
-      </Wrapper>
-    </Scrollbars>
+    {hasError && (
+      <Error message={errorMessage} source="GitHub" />
+    )}
+    {!hasError && (
+      <Scrollbars autoHeight>
+        <Wrapper>
+          {!isLoading && contributors.map(contributor => (
+            <Contributor key={contributor.id}>
+              <Avatar src={contributor.avatar_url} />
+              <Name>
+                {contributor.login}
+                <span>{contributor.contributions} contributions</span>
+              </Name>
+            </Contributor>
+          ))}
+        </Wrapper>
+      </Scrollbars>
+    )}
   </Panel>
 );
 
 Contributors.propTypes = {
+  errorMessage: PropTypes.string,
   contributors: PropTypes.arrayOf(PropTypes.object),
   isLoading: PropTypes.bool,
   hasError: PropTypes.bool,
 };
 
 Contributors.defaultProps = {
+  errorMessage: '',
   contributors: [],
   isLoading: false,
   hasError: false,

@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Wrapper as CardWrapper } from './Card';
+import Error from '../error/Error';
 
 const CardLoader = styled.div`
   position: relative;
@@ -104,6 +105,7 @@ const List = ({
   title,
   isLoading,
   hasError,
+  errorMessage,
   children,
   loadingPlaceholdersCount,
 }) => (
@@ -111,22 +113,28 @@ const List = ({
     {title && (
       <Title>{title}</Title>
     )}
-    <Items>
-      {isLoading && !hasError && (
-        Array.from(Array(loadingPlaceholdersCount).keys()).map(key => (
-          <CardLoader key={key}>
-            <Avatar />
-            <Name />
-          </CardLoader>
-        ))
-      )}
-      {!isLoading && !hasError && children}
-    </Items>
+    {!hasError && (
+      <Items>
+        {isLoading && (
+          Array.from(Array(loadingPlaceholdersCount).keys()).map(key => (
+            <CardLoader key={key}>
+              <Avatar />
+              <Name />
+            </CardLoader>
+          ))
+        )}
+        {!isLoading && !hasError && children}
+      </Items>
+    )}
+    {!isLoading && hasError && (
+      <Error message={errorMessage} source="GitHub" />
+    )}
   </Wrapper>
 );
 
 List.propTypes = {
   title: PropTypes.string,
+  errorMessage: PropTypes.string,
   loadingPlaceholdersCount: PropTypes.number,
   isLoading: PropTypes.bool,
   hasError: PropTypes.bool,
@@ -135,6 +143,7 @@ List.propTypes = {
 
 List.defaultProps = {
   title: '',
+  errorMessage: '',
   loadingPlaceholdersCount: 5,
   isLoading: false,
   hasError: false,

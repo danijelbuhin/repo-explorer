@@ -14,7 +14,7 @@ import DefaultUser from './assets/user.png';
 const SpinnerWrapper = styled.div`
   position: absolute;
   top: 0;
-  left: 0;
+  left: -18px;
 
   display: flex;
   justify-content: center;
@@ -55,19 +55,21 @@ const Wrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
-`;
 
-const Avatar = styled.img`
-  width: 52px;
-  height: 52px;
-
-  border-radius: 5px;
-  cursor: pointer;
+  width: 300px;
 `;
 
 const RateLimit = styled.div`
   width: 100%;
-  margin-left: 5px;
+  margin: 10px 0;
+`;
+
+const Reset = styled.div`
+  margin-bottom: 10px;
+  strong {
+    display: inline-block;
+    margin-right: 10px;
+  }
 `;
 
 const Limit = styled.div`
@@ -80,7 +82,7 @@ const Limit = styled.div`
   margin: 3px 0;
 
   font-size: 12px;
-  border-radius:  0 15px 15px 0;
+  border-radius:  15px;
 
   @media (min-width: 550px) {
     width: 200px;
@@ -106,11 +108,42 @@ const Indicator = styled.div`
 
   background: ${({ percentage: p }) => (p > 75 && '#A7FF88')
     || (p > 50 && p < 75 && '#F9FD43')
-    || (p > 20 && p <= 50 && '#FFD159')
-    || (p <= 20 && '#FF3E3E')
+    || (p > 30 && p <= 50 && '#FFD159')
+    || (p <= 30 && '#FF3E3E')
 };
   transform: translateY(-50%);
-  border-radius:  0 15px 15px 0;
+  border-radius: 15px;
+`;
+
+const User = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 15px 10px;
+  padding: 10px;
+  min-width: 190px;
+
+  border: 1px solid #e6eaef;
+  border-radius: 50px;
+  cursor: pointer;
+  user-select: none;
+`;
+
+const Avatar = styled.img`
+  width: 32px;
+  height: 32px;
+
+  border-radius: 100%;
+  margin-right: 10px;
+`;
+
+const Name = styled.strong`
+  font-size: 16px;
+  span {
+    display: block;
+    font-size: 10px;
+    font-weight: 400;
+  }
 `;
 
 class UserInfo extends Component {
@@ -152,34 +185,40 @@ class UserInfo extends Component {
             <Spinner />
           </SpinnerWrapper>
         )}
-        <Avatar
-          src={isAuthenticated ? user.avatar : DefaultUser}
-          alt="User"
-          onClick={this.toggleDropdown}
-        />
-        <RateLimit>
-          <Limit hasError={hasError}>
-            <Text>Search limit - {search.remaining || 0} / {search.limit || 0}</Text>
-            <Indicator
-              percentage={generatePercentage(search.remaining, search.limit)}
-            />
-          </Limit>
-          <Limit hasError={hasError}>
-            <Text>Core limit - {core.remaining || 0} / {core.limit || 0}</Text>
-            <Indicator
-              percentage={generatePercentage(core.remaining, core.limit)}
-            />
-          </Limit>
-        </RateLimit>
+        <User onClick={this.toggleDropdown}>
+          <Avatar src={isAuthenticated ? user.avatar : DefaultUser} />
+          <Name>
+            {isAuthenticated ? user.name : 'Guest'}
+            <span>{core.remaining || 0} / {core.limit || 0} - {search.remaining || 0} / {search.limit || 0}</span>
+          </Name>
+        </User>
         <Dropdown isActive={isDropdownActive}>
           {!isAuthenticating && !hasError && (
             <p>Hello {isAuthenticated ? user && user.name : 'Guest'}, you{'\''}re using {isAuthenticated ? 'your own' : 'shared'} rate limit.</p>
           )}
           {!hasError && (
-            <div>
-              <p><strong>Search limit reset:</strong> <br /> {moment(search.reset * 1000).format('HH:mm:ss')}h</p>
-              <p><strong>Core limit reset:</strong> <br /> {moment(core.reset * 1000).format('HH:mm:ss')}h</p>
-            </div>
+            <RateLimit>
+              <Limit hasError={hasError}>
+                <Text>Search limit - {search.remaining || 0} / {search.limit || 0}</Text>
+                <Indicator
+                  percentage={generatePercentage(search.remaining, search.limit)}
+                />
+              </Limit>
+              <Reset>
+                <strong>Reset time:</strong>
+                {moment(search.reset * 1000).format('HH:mm:ss')}h
+              </Reset>
+              <Limit hasError={hasError}>
+                <Text>Core limit - {core.remaining || 0} / {core.limit || 0}</Text>
+                <Indicator
+                  percentage={generatePercentage(core.remaining, core.limit)}
+                />
+              </Limit>
+              <Reset>
+                <strong>Reset time:</strong>
+                {moment(core.reset * 1000).format('HH:mm:ss')}h
+              </Reset>
+            </RateLimit>
           )}
           {hasError && (
             <div>We could not fetch GitHub rate limit.</div>

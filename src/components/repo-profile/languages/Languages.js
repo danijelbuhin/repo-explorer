@@ -26,14 +26,14 @@ const Language = styled(Link)`
   color: #000;
   text-decoration: none;
 
-  border: 1px solid #F4F6F9;
+  border: 1px solid #e6eaef;
   border-radius: 50px;
 
   cursor: pointer;
   transition: all .2s ease-in-out;
 
   &:hover {
-    background: #f7f7f7;
+    background: #f9f9f9;
   }
 `;
 

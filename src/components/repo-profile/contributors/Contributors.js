@@ -20,7 +20,7 @@ const Contributor = styled.div`
   margin: 15px 10px;
   padding: 10px;
 
-  border: 1px solid #F4F6F9;
+  border: 1px solid #e6eaef;
   border-radius: 50px;
 `;
 

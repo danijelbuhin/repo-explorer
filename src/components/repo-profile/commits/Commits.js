@@ -30,7 +30,7 @@ const Commits = ({ commits, hasError, errorMessage, isLoading, fetchCommits }) =
         <span>
           Note: GitHub sometimes returns empty results. If you think that this might be the case,
         </span>
-        <Button onClick={fetchCommits}>Fetch commits again</Button>
+        <Button onClick={fetchCommits} disabled={isLoading}>{isLoading ? 'Fetching commits...' : 'Fetch commits again'}</Button>
       </Warning>
     )}
     {hasError && (

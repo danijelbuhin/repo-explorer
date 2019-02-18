@@ -37,6 +37,15 @@ const Language = styled(Link)`
   }
 `;
 
+const Warning = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  padding: 40px;
+`;
+
 const Dot = styled.div`
   width: 18px;
   height: 18px;
@@ -58,6 +67,11 @@ const totalBytes = data => Object.values(data).reduce((acc, curr) => acc + curr,
 
 const Languages = ({ languages, hasError, isLoading, errorMessage }) => (
   <Panel title="Languages list">
+    {!hasError && Object.keys(languages).length === 0 && (
+      <Warning>
+        This repo does not contain any programming language.
+      </Warning>
+    )}
     {!hasError && (
       <Scrollbars autoHeight>
         <Wrapper>

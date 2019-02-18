@@ -5,7 +5,7 @@ import moment from 'moment';
 
 import { Tag } from '../../shared/repo/Card';
 import Panel from '../panel/Panel';
-
+import { popularTopics } from '../../../utils/generateTopic';
 
 const Content = styled.div`
   display: flex;
@@ -105,7 +105,23 @@ const Information = ({ repo }) => (
       </Left>
       <Right>
         <h3>Topics:</h3>
-        {repo.topics && repo.topics.length > 0 ? repo.topics.map(topic => (
+        {repo.topics && repo.topics.length < 1 && popularTopics.map((popular) => { //eslint-disable-line
+          if (repo.full_name.includes(popular) || repo.description.includes(popular)) {
+            return (
+              <Tag
+                key={popular}
+                to={`/search?q=${encodeURIComponent(popular.toLowerCase())}`}
+                style={{ margin: 3 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                #{popular.toLowerCase()}
+              </Tag>
+            );
+          }
+        })}
+        {repo.topics && repo.topics.length > 0 && repo.topics.map(topic => (
           <Tag
             key={topic}
             to={`/search?q=${encodeURIComponent(topic.toLowerCase())}`}
@@ -116,10 +132,7 @@ const Information = ({ repo }) => (
           >
             #{topic.toLowerCase()}
           </Tag>
-        )) : (
-          <div>This repo is not related to any topic.</div>
-        )}
-
+        ))}
         <h3>Links:</h3>
         <Links>
           {repo.homepage && <a href={repo.homepage} target="_blank" rel="noopener noreferrer">Website</a>}

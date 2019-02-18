@@ -152,7 +152,12 @@ const RepoProfile = (props) => {
           stargazers_count: data.stargazers_count,
         });
         setRepo(data);
-        setTopic(generateTopic({ topics: data.topics, language: data.language }));
+        setTopic(generateTopic({
+          topics: data.topics,
+          language: data.language,
+          name: data.full_name.replace('/', ' '),
+          description: data.description,
+        }));
         return data;
       });
   };

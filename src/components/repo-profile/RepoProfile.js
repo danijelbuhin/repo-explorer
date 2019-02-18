@@ -17,6 +17,7 @@ import Commits from './commits/Commits';
 import SimilarRepos from './similar-repos/SimilarRepos';
 import Contributors from './contributors/Contributors';
 import Error from '../shared/error/Error';
+import Totals from './totals/Totals';
 
 const Wrapper = styled.div`
   max-width: 1100px;
@@ -86,6 +87,18 @@ const RepoProfile = (props) => {
 
   const [topic, setTopic] = useState(null);
 
+  const [views, setViews] = useState(0);
+
+  const getRepoViews = (repoId) => { // eslint-disable-line
+    return firebase.views.doc(String(repoId)).get().then((doc) => {
+      setCommitsState({ isLoading: false, hasError: false });
+      if (doc.exists) {
+        setViews(doc.data().views);
+      }
+      return 0;
+    });
+  };
+
   const fetchCommits = (repo_name) => {
     setCommitsState({ isLoading: true, hasError: false });
     return appContext
@@ -148,7 +161,7 @@ const RepoProfile = (props) => {
     fetchRepo()
       .then((data) => {
         axios
-          .all([fetchCommits(data.full_name), fetchLanguages(data.full_name), fetchContributors(data.full_name)])
+          .all([fetchCommits(data.full_name), fetchLanguages(data.full_name), fetchContributors(data.full_name), getRepoViews(data.id)])
           .then(() => {
             setApiState({ isLoading: false, hasError: false });
           });
@@ -172,13 +185,14 @@ const RepoProfile = (props) => {
 
   return (
     <Wrapper>
-      <Information
-        fullName={repo.full_name}
-        avatarUrl={repo.owner && repo.owner.avatar_url}
-        description={repo.description}
-        createdAt={repo.created_at}
-        updatedAt={repo.updated_at}
-        topics={repo.topics}
+      <Information repo={repo} />
+      <Totals
+        forks={repo.forks_count}
+        watchers={repo.watchers}
+        stars={repo.stargazers_count}
+        issues={repo.open_issues_count}
+        subscribers={repo.subscribers_count}
+        views={views}
       />
       <Languages
         languages={languages}

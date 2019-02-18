@@ -77,7 +77,7 @@ const Languages = ({ languages, hasError, isLoading, errorMessage }) => (
         <Wrapper>
           {!isLoading && Object.keys(languages).map(language => (
             <Language key={language} to={`/search?q=${encodeURIComponent(language.toLowerCase())}`}>
-              <Dot background={repoColors[language].color} />
+              <Dot background={repoColors[language] && repoColors[language].color} />
               <Name>
                 {language}
                 {(languages[language] / totalBytes(languages) * 100).toFixed(2) === '0.00' ? (

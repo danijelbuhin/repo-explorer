@@ -16,6 +16,8 @@ import Languages from './languages/Languages';
 import Commits from './commits/Commits';
 import SimilarRepos from './similar-repos/SimilarRepos';
 import Contributors from './contributors/Contributors';
+import Error from '../shared/error/Error';
+import Totals from './totals/Totals';
 
 const Wrapper = styled.div`
   max-width: 1100px;
@@ -59,6 +61,7 @@ const handleView = (params) => {
 };
 
 const transformCommitData = (data = []) => {// eslint-disable-line
+  if (data.lenght === 0 || Object.keys(data).length === 0) return [];
   return data.map((val) => { // eslint-disable-line
     return val.days.map((d, i) => ({
       day: moment(val.week * 1000).add(i, 'day').format('YYYY-MM-DD'),
@@ -84,6 +87,18 @@ const RepoProfile = (props) => {
 
   const [topic, setTopic] = useState(null);
 
+  const [views, setViews] = useState(0);
+
+  const getRepoViews = (repoId) => { // eslint-disable-line
+    return firebase.views.doc(String(repoId)).get().then((doc) => {
+      setCommitsState({ isLoading: false, hasError: false });
+      if (doc.exists) {
+        setViews(doc.data().views);
+      }
+      return 0;
+    });
+  };
+
   const fetchCommits = (repo_name) => {
     setCommitsState({ isLoading: true, hasError: false });
     return appContext
@@ -92,8 +107,8 @@ const RepoProfile = (props) => {
         setCommitsState({ isLoading: false, hasError: false });
         setCommits(transformCommitData(items));
       })
-      .catch(() => {
-        setCommitsState({ isLoading: false, hasError: true });
+      .catch(({ response: { data } }) => {
+        setCommitsState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
   };
 
@@ -105,8 +120,8 @@ const RepoProfile = (props) => {
         setContributorsState({ isLoading: false, hasError: false });
         setContributors(items);
       })
-      .catch(() => {
-        setContributorsState({ isLoading: false, hasError: true });
+      .catch(({ response: { data } }) => {
+        setContributorsState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
   };
 
@@ -118,9 +133,9 @@ const RepoProfile = (props) => {
         setLanguagesState({ isLoading: false, hasError: false });
         setLanguages(items);
       })
-      .catch(() => {
+      .catch(({ response: { data } }) => {
         setLanguages({});
-        setLanguagesState({ isLoading: false, hasError: true });
+        setLanguagesState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
   };
 
@@ -137,23 +152,28 @@ const RepoProfile = (props) => {
           stargazers_count: data.stargazers_count,
         });
         setRepo(data);
-        setTopic(generateTopic({ topics: data.topics, language: data.language }));
+        setTopic(generateTopic({
+          topics: data.topics,
+          language: data.language,
+          name: data.full_name.replace('/', ' '),
+          description: data.description,
+        }));
         return data;
-      })
-      .catch(() => {
-        setApiState({ isLoading: false, hasError: true });
       });
   };
 
   useEffect(() => {
-    fetchRepo().then((data) => {
-      axios
-        .all([fetchCommits(data.full_name), fetchLanguages(data.full_name), fetchContributors(data.full_name)])
-        .then(() => {
-          setApiState({ isLoading: false, hasError: false });
-        })
-        .catch(() => setApiState({ isLoading: false, hasError: true }));
-    });
+    fetchRepo()
+      .then((data) => {
+        axios
+          .all([fetchCommits(data.full_name), fetchLanguages(data.full_name), fetchContributors(data.full_name), getRepoViews(data.id)])
+          .then(() => {
+            setApiState({ isLoading: false, hasError: false });
+          });
+      })
+      .catch(({ response: { data } }) => {
+        setApiState({ isLoading: false, hasError: true, errorMessage: data.message });
+      });
     return () => {
       setCommits([]);
       setLanguages([]);
@@ -164,31 +184,39 @@ const RepoProfile = (props) => {
     return <Loader text={`Fetching all information about ${decodeURIComponent(id)}`} />;
   }
 
+  if (apiState.hasError) {
+    return <Error source="github" message={apiState.errorMessage} />;
+  }
+
   return (
     <Wrapper>
-      <Information
-        fullName={repo.full_name}
-        avatarUrl={repo.owner && repo.owner.avatar_url}
-        description={repo.description}
-        createdAt={repo.created_at}
-        updatedAt={repo.updated_at}
-        topics={repo.topics}
+      <Information repo={repo} />
+      <Totals
+        forks={repo.forks_count}
+        watchers={repo.watchers}
+        stars={repo.stargazers_count}
+        issues={repo.open_issues_count}
+        subscribers={repo.subscribers_count}
+        views={views}
       />
       <Languages
         languages={languages}
         isLoading={languagesState.isLoading}
         hasError={languagesState.hasError}
+        errorMessage={languagesState.errorMessage}
       />
       <Contributors
         contributors={contributors}
         isLoading={contributorsState.isLoading}
         hasError={contributorsState.hasError}
+        errorMessage={contributorsState.errorMessage}
       />
       <Commits
         commits={commits}
         isLoading={commitsState.isLoading}
         hasError={commitsState.hasError}
-        fetchCommits={appContext.fetchCommits}
+        errorMessage={commitsState.errorMessage}
+        fetchCommits={() => fetchCommits(decodeURIComponent(id))}
       />
       <SimilarRepos
         topic={topic}

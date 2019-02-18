@@ -2,6 +2,7 @@ import React, { Component, createContext } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import moment from 'moment';
+import { toast } from 'react-toastify';
 
 import firebase from '../../../services/firebase';
 
@@ -89,6 +90,23 @@ class AppProvider extends Component {
             latest_usage: moment().unix(),
           },
         }));
+      })
+      .catch(() => {
+        toast.error('We could not fetch github rate limit.', {
+          position: 'bottom-center',
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        this.setState(({ rateLimit }) => ({
+          rateLimit: {
+            ...rateLimit,
+            isLoading: false,
+            hasError: true,
+          },
+        }));
       });
   }
 
@@ -113,10 +131,6 @@ class AppProvider extends Component {
       .then(({ data }) => {
         this.fetchRateLimit();
         return data;
-      })
-      .catch((err) => {
-        this.fetchRateLimit();
-        return err;
       });
   }
 
@@ -137,10 +151,6 @@ class AppProvider extends Component {
       .then(({ data }) => {
         this.fetchRateLimit();
         return data;
-      })
-      .catch((err) => {
-        this.fetchRateLimit();
-        return err;
       });
   }
 
@@ -164,10 +174,6 @@ class AppProvider extends Component {
       .then(({ data }) => {
         this.fetchRateLimit();
         return data;
-      })
-      .catch((err) => {
-        this.fetchRateLimit();
-        return err;
       });
   }
 
@@ -188,10 +194,6 @@ class AppProvider extends Component {
       .then(({ data }) => {
         this.fetchRateLimit();
         return data;
-      })
-      .catch((err) => {
-        this.fetchRateLimit();
-        return err;
       });
   }
 
@@ -212,10 +214,6 @@ class AppProvider extends Component {
       .then(({ data }) => {
         this.fetchRateLimit();
         return data;
-      })
-      .catch((err) => {
-        this.fetchRateLimit();
-        return err;
       });
   }
 
@@ -236,10 +234,6 @@ class AppProvider extends Component {
       .then(({ data }) => {
         this.fetchRateLimit();
         return data;
-      })
-      .catch((err) => {
-        this.fetchRateLimit();
-        return err;
       });
   }
 
@@ -258,14 +252,27 @@ class AppProvider extends Component {
 
   authenticate = () => {
     this.setState({ isAuthenticating: true });
-    firebase.authenticate().then(({ token, user }) => {
-      this.setState(() => ({
-        user,
-        token,
-        isAuthenticated: true,
-        isAuthenticating: false,
-      }), () => this.fetchRateLimit());
-    });
+    firebase
+      .authenticate()
+      .then(({ token, user }) => {
+        this.setState(() => ({
+          user,
+          token,
+          isAuthenticated: true,
+          isAuthenticating: false,
+        }), () => this.fetchRateLimit());
+      })
+      .catch(() => {
+        this.setState({ isAuthenticated: false, isAuthenticating: false });
+        toast.error('Auth popup has been closed by the user before finalizing authentication.', {
+          position: 'bottom-center',
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      });
   }
 
   logOut = () => {

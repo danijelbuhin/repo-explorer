@@ -19,8 +19,10 @@ const Bookmark = styled(BookmarkSVG)`
 
   z-index: 5;
 
-  opacity: 0;
-  transform: translate3d(0, 10px, 0);
+  @media (min-width: 768px) {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
 
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1);
 
@@ -45,7 +47,7 @@ export const Wrapper = styled.div`
 
   width: 18%;
   margin: 10px 1%;
-  padding: 15px 33px;
+  padding: 15px;
 
   background: #FFFFFF;
 
@@ -79,7 +81,7 @@ const Name = styled.span`
   text-align: center;
 
   white-space: nowrap; 
-  max-width: 200px; 
+  max-width: 150px; 
   overflow: hidden;
   text-overflow: ellipsis;
 
@@ -227,7 +229,7 @@ class Card extends Component {
           src={avatar}
           alt={name}
         />
-        <Name>{name}</Name>
+        <Name title={name}>{name}</Name>
         <Count>{countIcon} <Number>{count}</Number></Count>
         {language && (
           <Language

@@ -6,6 +6,7 @@ import { Scrollbars } from 'react-custom-scrollbars';
 
 import repoColors from '../../../utils/repoColors.json';
 import Panel from '../panel/Panel';
+import Error from '../../shared/error/Error';
 
 const Wrapper = styled.div`
   display: flex;
@@ -25,15 +26,24 @@ const Language = styled(Link)`
   color: #000;
   text-decoration: none;
 
-  border: 1px solid #F4F6F9;
+  border: 1px solid #e6eaef;
   border-radius: 50px;
 
   cursor: pointer;
   transition: all .2s ease-in-out;
 
   &:hover {
-    background: #f7f7f7;
+    background: #f9f9f9;
   }
+`;
+
+const Warning = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  padding: 40px;
 `;
 
 const Dot = styled.div`
@@ -53,49 +63,49 @@ const Name = styled.div`
   }
 `;
 
-const Error = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 30px 0;
-
-  color: #ec4343;
-`;
-
 const totalBytes = data => Object.values(data).reduce((acc, curr) => acc + curr, 0);
 
-const Languages = ({ languages, hasError, isLoading }) => (
+const Languages = ({ languages, hasError, isLoading, errorMessage }) => (
   <Panel title="Languages list">
-    <Scrollbars autoHeight>
-      <Wrapper>
-        {!hasError && !isLoading && Object.keys(languages).map(language => (
-          <Language key={language} to={`/search?q=${encodeURIComponent(language.toLowerCase())}`}>
-            <Dot background={repoColors[language].color} />
-            <Name>
-              {language}
-              {(languages[language] / totalBytes(languages) * 100).toFixed(2) === '0.00' ? (
-                <span>{'>'}0.01%</span>
-              ) : (
-                <span>{(languages[language] / totalBytes(languages) * 100).toFixed(2)} %</span>
-              )}
-            </Name>
-          </Language>
-        ))}
-        {hasError && (
-          <Error>An error has occured while trying to fetch languages for this repo</Error>
-        )}
-      </Wrapper>
-    </Scrollbars>
+    {!hasError && Object.keys(languages).length === 0 && (
+      <Warning>
+        This repo does not contain any programming language.
+      </Warning>
+    )}
+    {!hasError && (
+      <Scrollbars autoHeight>
+        <Wrapper>
+          {!isLoading && Object.keys(languages).map(language => (
+            <Language key={language} to={`/search?q=${encodeURIComponent(language.toLowerCase())}`}>
+              <Dot background={repoColors[language].color} />
+              <Name>
+                {language}
+                {(languages[language] / totalBytes(languages) * 100).toFixed(2) === '0.00' ? (
+                  <span>{'>'}0.01%</span>
+                ) : (
+                  <span>{(languages[language] / totalBytes(languages) * 100).toFixed(2)} %</span>
+                )}
+              </Name>
+            </Language>
+          ))}
+        </Wrapper>
+      </Scrollbars>
+    )}
+    {hasError && (
+      <Error source="GitHub" message={errorMessage} />
+    )}
   </Panel>
 );
 
 Languages.propTypes = {
+  errorMessage: PropTypes.string,
   languages: PropTypes.object,
   isLoading: PropTypes.bool,
   hasError: PropTypes.bool,
 };
 
 Languages.defaultProps = {
+  errorMessage: '',
   languages: {},
   isLoading: false,
   hasError: false,

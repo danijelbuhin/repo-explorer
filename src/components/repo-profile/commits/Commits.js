@@ -1,30 +1,42 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import moment from 'moment';
+import styled from 'styled-components';
 import { Calendar } from '@nivo/calendar';
 import { Scrollbars } from 'react-custom-scrollbars';
 
 import Panel from '../panel/Panel';
+import Button from '../../shared/button/Button';
+import Error from '../../shared/error/Error';
 
-const Error = styled.div`
+const Warning = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 30px 0;
+  flex-direction: column;
 
-  color: #ec4343;
+  padding: 40px;
+
+  span {
+    display: block;
+  }
 `;
 
-const Commits = ({ commits, hasError, fetchCommits, isLoading }) => (
+const Commits = ({ commits, hasError, errorMessage, isLoading, fetchCommits }) => (
   <Panel title="Commits count">
-    {hasError && (
-      <Error>
-        An error occurred while trying to fetch commits for this repo.
-        <button type="button" onClick={fetchCommits}>Try again?</button>
-      </Error>
+    {commits.length === 0 && (
+      <Warning>
+        <span>No commits have been found.</span>
+        <span>
+          Note: GitHub sometimes returns empty results. If you think that this might be the case,
+        </span>
+        <Button onClick={fetchCommits} disabled={isLoading}>{isLoading ? 'Fetching commits...' : 'Fetch commits again'}</Button>
+      </Warning>
     )}
-    {!isLoading && !hasError && (
+    {hasError && (
+      <Error source="GitHub" message={errorMessage} />
+    )}
+    {!isLoading && !hasError && commits.length > 0 && (
       <Scrollbars style={{ width: '100%', height: 410 }}>
         {!hasError && commits.length > 0 && (
           <Calendar
@@ -60,6 +72,7 @@ const Commits = ({ commits, hasError, fetchCommits, isLoading }) => (
 );
 
 Commits.propTypes = {
+  errorMessage: PropTypes.string,
   commits: PropTypes.arrayOf(PropTypes.object),
   isLoading: PropTypes.bool,
   hasError: PropTypes.bool,
@@ -67,6 +80,7 @@ Commits.propTypes = {
 };
 
 Commits.defaultProps = {
+  errorMessage: '',
   commits: [],
   isLoading: false,
   hasError: false,

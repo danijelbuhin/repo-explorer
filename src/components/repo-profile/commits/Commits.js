@@ -1,15 +1,38 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import styled from 'styled-components';
 import { Calendar } from '@nivo/calendar';
 import { Scrollbars } from 'react-custom-scrollbars';
 
 import Panel from '../panel/Panel';
+import Button from '../../shared/button/Button';
 import Error from '../../shared/error/Error';
 
-const Commits = ({ commits, hasError, errorMessage, isLoading }) => (
+const Warning = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  padding: 40px;
+
+  span {
+    display: block;
+  }
+`;
+
+const Commits = ({ commits, hasError, errorMessage, isLoading, fetchCommits }) => (
   <Panel title="Commits count">
-    {commits.length === 0 && <div>No commits</div>/* update this */}
+    {commits.length === 0 && (
+      <Warning>
+        <span>No commits have been found.</span>
+        <span>
+          Note: GitHub sometimes returns empty results. If you think that this might be the case,
+        </span>
+        <Button onClick={fetchCommits}>Fetch commits again</Button>
+      </Warning>
+    )}
     {hasError && (
       <Error source="GitHub" message={errorMessage} />
     )}
@@ -53,6 +76,7 @@ Commits.propTypes = {
   commits: PropTypes.arrayOf(PropTypes.object),
   isLoading: PropTypes.bool,
   hasError: PropTypes.bool,
+  fetchCommits: PropTypes.func,
 };
 
 Commits.defaultProps = {
@@ -60,6 +84,7 @@ Commits.defaultProps = {
   commits: [],
   isLoading: false,
   hasError: false,
+  fetchCommits: () => {},
 };
 
 export default Commits;

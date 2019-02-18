@@ -211,7 +211,7 @@ const RepoProfile = (props) => {
         isLoading={commitsState.isLoading}
         hasError={commitsState.hasError}
         errorMessage={commitsState.errorMessage}
-        fetchCommits={appContext.fetchCommits}
+        fetchCommits={() => fetchCommits(decodeURIComponent(id))}
       />
       <SimilarRepos
         topic={topic}

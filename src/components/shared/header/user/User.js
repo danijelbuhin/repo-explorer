@@ -15,7 +15,7 @@ import Button from '../../button/Button';
 const SpinnerWrapper = styled.div`
   position: absolute;
   top: 0;
-  left: -18px;
+  left: 0;
 
   display: flex;
   justify-content: center;
@@ -56,8 +56,6 @@ const Wrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
-
-  width: 300px;
 `;
 
 const RateLimit = styled.div`
@@ -193,7 +191,7 @@ class UserInfo extends Component {
             <span>{core.remaining || 0} / {core.limit || 0} - {search.remaining || 0} / {search.limit || 0}</span>
           </Name>
         </User>
-        <Dropdown isActive={isDropdownActive}>
+        <Dropdown isActive={isDropdownActive} style={{ left: '-50px' }}>
           {!isAuthenticating && !hasError && (
             <p>Hello {isAuthenticated ? user && user.name : 'Guest'}, you{'\''}re using {isAuthenticated ? 'your own' : 'shared'} rate limit.</p>
           )}

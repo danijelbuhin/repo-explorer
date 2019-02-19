@@ -13,6 +13,7 @@
     "firebase": "^5.7.3",
     "flag-icon-css": "^3.2.1",
     "fork-ts-checker-webpack-plugin": "^0.5.2",
+    "formik": "^1.5.1",
     "history": "^4.7.2",
     "lodash": "^4.17.11",
     "moment": "^2.23.0",
@@ -27,10 +28,12 @@
     "react-dom": "^16.7.0",
     "react-router-dom": "^4.3.1",
     "react-scripts": "2.1.3",
+    "react-select": "^2.4.1",
     "react-tippy": "^1.2.3",
     "react-toastify": "^4.5.2",
     "styled-components": "^4.1.3",
-    "typescript": "^3.3.3"
+    "typescript": "^3.3.3",
+    "yup": "^0.26.10"
   },
   "scripts": {
     "start": "set PORT=3400 && react-scripts start",

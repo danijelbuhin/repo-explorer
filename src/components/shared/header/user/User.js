@@ -191,7 +191,7 @@ class UserInfo extends Component {
             <span>{core.remaining || 0} / {core.limit || 0} - {search.remaining || 0} / {search.limit || 0}</span>
           </Name>
         </User>
-        <Dropdown isActive={isDropdownActive} style={{ left: '-50px' }}>
+        <Dropdown isActive={isDropdownActive} style={{ width: '250px' }}>
           {!isAuthenticating && !hasError && (
             <p>Hello {isAuthenticated ? user && user.name : 'Guest'}, you{'\''}re using {isAuthenticated ? 'your own' : 'shared'} rate limit.</p>
           )}

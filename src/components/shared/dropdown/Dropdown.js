@@ -5,7 +5,7 @@ import styled from 'styled-components';
 export const Wrapper = styled.div`
   position: absolute;
   bottom: 0px;
-  left: 0;
+  right: 0;
 
   padding: 15px;
   border-radius: 5px;
@@ -21,6 +21,7 @@ export const Wrapper = styled.div`
   transition: all .4s cubic-bezier(.65,.05,.13,.73);
 
   cursor: initial;
+  z-index: 100;
 
   ${({ isActive }) => isActive && `
     transform: translateY(100%);

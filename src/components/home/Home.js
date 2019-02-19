@@ -18,6 +18,7 @@ import Pagination from '../shared/pagination/Pagination';
 import Search from './search/Search';
 
 import useApiState from '../../hooks/useApiState';
+import FiltersForm from './filters/FiltersForm';
 
 const Wrapper = styled.div`
   padding: 10px;
@@ -59,15 +60,18 @@ const Home = ({ appContext }) => {
       });
   };
 
-  const fetchRepos = () => {
+  const fetchRepos = (params = {}, setSubmitting) => {
     const { fetchPopularRepos } = appContext;
+    if (setSubmitting) setSubmitting(true);
     setReposState({ isLoading: true, hasError: false });
-    return fetchPopularRepos()
+    return fetchPopularRepos(params)
       .then(({ items }) => {
         setRepos(items);
+        if (setSubmitting) setSubmitting(false);
         setReposState({ isLoading: false, hasError: false });
       })
       .catch(({ response: { data } }) => {
+        if (setSubmitting) setSubmitting(false);
         setReposState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
   };
@@ -84,8 +88,22 @@ const Home = ({ appContext }) => {
         title="Most popular repos:"
         isLoading={reposState.isLoading}
         hasError={reposState.hasError}
+        hasFilters
         errorMessage={reposState.errorMessage}
         loadingPlaceholdersCount={10}
+        filtersForm={(
+          <FiltersForm
+            initialValues={{
+              order: 'desc',
+              minStars: 30000,
+            }}
+            isClear={(val) => {console.log(val)}}
+            onClear={() => fetchRepos({})}
+            onSubmit={(values, { setSubmitting }) => {
+              fetchRepos(values, setSubmitting);
+            }}
+          />
+        )}
       >
         {paginate(repos, 10, page).map(repo => (
           <Card
@@ -111,6 +129,7 @@ const Home = ({ appContext }) => {
         title="Most viewed repos:"
         isLoading={viewsState.isLoading}
         hasError={viewsState.hasError}
+        hasFilters={false}
       >
         {views.map(repo => (
           <Card

@@ -110,7 +110,7 @@ class AppProvider extends Component {
       });
   }
 
-  fetchPopularRepos = () => {
+  fetchPopularRepos = (params) => {
     const { client_id, client_secret } = tokens;
     const { token } = this.state;
     return axios
@@ -122,10 +122,11 @@ class AppProvider extends Component {
           client_id: token ? undefined : client_id,
           client_secret: token ? undefined : client_secret,
           access_token: token ? token : undefined,
-          q: 'stars:>=30000',
-          sort: 'stars',
-          order: 'desc',
-          per_page: 100,
+          q: `stars:>=${params.minStars || 30000}`,
+          sort: params.sort || 'stars',
+          order: params.order || 'desc',
+          per_page: params.per_page || 100,
+          ...params,
         },
       })
       .then(({ data }) => {

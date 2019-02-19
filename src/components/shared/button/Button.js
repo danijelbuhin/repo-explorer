@@ -7,15 +7,15 @@ const Wrapper = styled.button`
   width: ${({ block }) => block ? '100%' : 'auto'};
   padding: 15px 25px;
   border: none;
-  border-radius: 50px;
+  border-radius: 7px;
 
-  cursor: pointer;
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
 
   background: ${({ color }) => (color === 'dark' && '#000')
   || (color === 'primary' && '#3E97FF')
 };
   color: ${({ color }) => (color === 'dark' && '#FFF')
-    || (color === 'primary' && '#000')
+    || (color === 'primary' && '#FFF')
 };
 `;
 

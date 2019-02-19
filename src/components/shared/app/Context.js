@@ -154,11 +154,11 @@ class AppProvider extends Component {
       });
   }
 
-  searchRepo = (query, perPage) => {
+  searchRepo = (params, excludeId) => {
     const { client_id, client_secret } = tokens;
     const { token } = this.state;
     return axios
-      .get(`https://api.github.com/search/repositories?q=${query}`, {
+      .get('https://api.github.com/search/repositories', {
         headers: {
           Accept: 'application/vnd.github.mercy-preview+json',
         },
@@ -166,13 +166,17 @@ class AppProvider extends Component {
           client_id: token ? undefined : client_id,
           client_secret: token ? undefined : client_secret,
           access_token: token ? token : undefined,
-          sort: 'stars',
-          order: 'desc',
-          per_page: perPage,
+          ...params,
         },
       })
       .then(({ data }) => {
         this.fetchRateLimit();
+        if (excludeId) {
+          return {
+            ...data,
+            items: data.items.filter(r => r.id !== excludeId).filter((_, i) => i < 5),
+          };
+        }
         return data;
       });
   }

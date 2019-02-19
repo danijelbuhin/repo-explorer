@@ -219,6 +219,7 @@ const RepoProfile = (props) => {
         fetchCommits={() => fetchCommits(decodeURIComponent(id))}
       />
       <SimilarRepos
+        id={repo.id}
         topic={topic}
         searchRepo={appContext.searchRepo}
       />

@@ -149,7 +149,10 @@ class Search extends Component {
     const { search } = this.state;
     const trimmed = search.trim();
     this.setState({ isSearching: true });
-    this.props.appContext.searchRepo(trimmed, 5).then((data) => {
+    this.props.appContext.searchRepo({
+      q: trimmed,
+      per_page: 5,
+    }).then((data) => {
       this.setState(prevState => ({
         ...prevState,
         shouldRenderRepo: true,

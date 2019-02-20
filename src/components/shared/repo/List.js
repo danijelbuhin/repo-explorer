@@ -1,8 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+
 import { Wrapper as CardWrapper } from './Card';
 import Error from '../error/Error';
+import Filters from './Filters';
 
 const CardLoader = styled.div`
   position: relative;
@@ -93,12 +95,19 @@ const Items = styled.div`
   }
 `;
 
-const Title = styled.h2`
-  margin-bottom: 10px;
+const Header = styled.div`
+  display: flex;
+  align-content: center;
+  margin: 30px 0 10px 0;
   padding-bottom: 10px;
 
   border-bottom: 1px solid #F4F6F9;
+`;
+
+const Title = styled.h2`
+  margin: 0 auto 0 0;
   color: #3A4044;
+  justify-self: start;
 `;
 
 const List = ({
@@ -106,12 +115,21 @@ const List = ({
   isLoading,
   hasError,
   errorMessage,
-  children,
   loadingPlaceholdersCount,
+  hasFilters,
+  fetchRepos,
+  children,
 }) => (
   <Wrapper>
-    {title && (
-      <Title>{title}</Title>
+    {(title || hasFilters) && (
+      <Header>
+        {title && (
+          <Title>{title}</Title>
+        )}
+        {hasFilters && (
+          <Filters fetchRepos={fetchRepos} />
+        )}
+      </Header>
     )}
     {!hasError && (
       <Items>
@@ -138,6 +156,8 @@ List.propTypes = {
   loadingPlaceholdersCount: PropTypes.number,
   isLoading: PropTypes.bool,
   hasError: PropTypes.bool,
+  hasFilters: PropTypes.bool,
+  fetchRepos: PropTypes.func,
   children: PropTypes.node.isRequired,
 };
 
@@ -147,6 +167,8 @@ List.defaultProps = {
   loadingPlaceholdersCount: 5,
   isLoading: false,
   hasError: false,
+  hasFilters: false,
+  fetchRepos: () => {},
 };
 
 export default List;

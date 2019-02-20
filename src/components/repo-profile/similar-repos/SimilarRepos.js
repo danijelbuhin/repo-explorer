@@ -18,7 +18,15 @@ const SimilarRepos = (props) => {
   useEffect(() => {
     if (topic) {
       setApiState({ isLoading: true, hasError: false });
-      searchRepo(topic, 5)
+      searchRepo(
+        {
+          q: `topic:${topic}`,
+          per_page: 6,
+          sort: 'stars',
+          order: 'desc',
+        },
+        props.id,
+      )
         .then(({ items }) => {
           setSimilarRepos(items);
           setApiState({ isLoading: false, hasError: false });
@@ -52,11 +60,13 @@ const SimilarRepos = (props) => {
 };
 
 SimilarRepos.propTypes = {
+  id: PropTypes.number,
   topic: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   searchRepo: PropTypes.func.isRequired,
 };
 
 SimilarRepos.defaultProps = {
+  id: 0,
   topic: null,
 };
 

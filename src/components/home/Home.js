@@ -59,22 +59,24 @@ const Home = ({ appContext }) => {
       });
   };
 
-  const fetchRepos = () => {
+  const fetchRepos = (params = {}, setSubmitting) => {
     const { fetchPopularRepos } = appContext;
+    if (setSubmitting) setSubmitting(true);
     setReposState({ isLoading: true, hasError: false });
-    return fetchPopularRepos()
+    return fetchPopularRepos(params)
       .then(({ items }) => {
         setRepos(items);
+        if (setSubmitting) setSubmitting(false);
         setReposState({ isLoading: false, hasError: false });
       })
       .catch(({ response: { data } }) => {
+        if (setSubmitting) setSubmitting(false);
         setReposState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
   };
 
   useEffect(() => {
     fetchViews();
-    fetchRepos();
   }, []);
 
   return (
@@ -84,6 +86,8 @@ const Home = ({ appContext }) => {
         title="Most popular repos:"
         isLoading={reposState.isLoading}
         hasError={reposState.hasError}
+        hasFilters
+        fetchRepos={fetchRepos}
         errorMessage={reposState.errorMessage}
         loadingPlaceholdersCount={10}
       >
@@ -111,6 +115,7 @@ const Home = ({ appContext }) => {
         title="Most viewed repos:"
         isLoading={viewsState.isLoading}
         hasError={viewsState.hasError}
+        hasFilters={false}
       >
         {views.map(repo => (
           <Card

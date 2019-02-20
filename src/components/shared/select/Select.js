@@ -11,19 +11,21 @@ export const Wrapper = styled.div`
     text-align: left;
 
     &__placeholder {
-      color: #333;
+      color: #aeb6cb;
     }
 
     &__control {
       height: 40px;
-      padding: 8px 5px;
       min-height: 40px;
       
       background: #FFF;
-      border-radius: 8px;
-      box-shadow: 0px 2px 10px rgba(0,0,0,.1);
-      border: none;
+      border-radius: 5px;
+      border: 1px solid #e2e2e2;
 
+      cursor: pointer;
+    }
+
+    &__option {
       cursor: pointer;
     }
 

@@ -18,7 +18,6 @@ import Pagination from '../shared/pagination/Pagination';
 import Search from './search/Search';
 
 import useApiState from '../../hooks/useApiState';
-import FiltersForm from './filters/FiltersForm';
 
 const Wrapper = styled.div`
   padding: 10px;
@@ -78,7 +77,6 @@ const Home = ({ appContext }) => {
 
   useEffect(() => {
     fetchViews();
-    fetchRepos();
   }, []);
 
   return (
@@ -89,21 +87,9 @@ const Home = ({ appContext }) => {
         isLoading={reposState.isLoading}
         hasError={reposState.hasError}
         hasFilters
+        fetchRepos={fetchRepos}
         errorMessage={reposState.errorMessage}
         loadingPlaceholdersCount={10}
-        filtersForm={(
-          <FiltersForm
-            initialValues={{
-              order: 'desc',
-              minStars: 30000,
-            }}
-            isClear={(val) => {console.log(val)}}
-            onClear={() => fetchRepos({})}
-            onSubmit={(values, { setSubmitting }) => {
-              fetchRepos(values, setSubmitting);
-            }}
-          />
-        )}
       >
         {paginate(repos, 10, page).map(repo => (
           <Card

@@ -126,7 +126,6 @@ class AppProvider extends Component {
           sort: params.sort || 'stars',
           order: params.order || 'desc',
           per_page: params.per_page || 100,
-          ...params,
         },
       })
       .then(({ data }) => {

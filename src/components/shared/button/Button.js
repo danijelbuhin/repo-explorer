@@ -11,12 +11,16 @@ const Wrapper = styled.button`
 
   cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
 
-  background: ${({ color }) => (color === 'dark' && '#000')
-  || (color === 'primary' && '#3E97FF')
+  background: ${({ color, disabled }) => (color === 'dark' && !disabled && '#000')
+  || (color === 'dark' && !disabled && '#2f3133')
+  || (color === 'primary' && !disabled && '#3E97FF')
+  || (color === 'primary' && disabled && '#7fbaff')
 };
   color: ${({ color }) => (color === 'dark' && '#FFF')
     || (color === 'primary' && '#FFF')
 };
+
+  transition: all .2s ease-in-out;
 `;
 
 const Button = ({

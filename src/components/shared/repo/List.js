@@ -117,7 +117,7 @@ const List = ({
   errorMessage,
   loadingPlaceholdersCount,
   hasFilters,
-  filtersForm,
+  fetchRepos,
   children,
 }) => (
   <Wrapper>
@@ -127,7 +127,7 @@ const List = ({
           <Title>{title}</Title>
         )}
         {hasFilters && (
-          <Filters filtersForm={filtersForm} />
+          <Filters fetchRepos={fetchRepos} />
         )}
       </Header>
     )}
@@ -157,7 +157,7 @@ List.propTypes = {
   isLoading: PropTypes.bool,
   hasError: PropTypes.bool,
   hasFilters: PropTypes.bool,
-  filtersForm: PropTypes.node,
+  fetchRepos: PropTypes.func,
   children: PropTypes.node.isRequired,
 };
 
@@ -168,7 +168,7 @@ List.defaultProps = {
   isLoading: false,
   hasError: false,
   hasFilters: false,
-  filtersForm: null,
+  fetchRepos: () => {},
 };
 
 export default List;

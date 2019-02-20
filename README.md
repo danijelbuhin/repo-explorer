@@ -10,3 +10,5 @@ Tech stack
 - Firebase for backend and authentication
 
 <hr>
+
+Project demo - https://repo-explorer.firebaseapp.com/

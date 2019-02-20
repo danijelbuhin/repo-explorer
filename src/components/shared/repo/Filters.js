@@ -42,7 +42,7 @@ const Tags = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-right: 30px;
+  margin-right: 10px;
 `;
 
 const Tag = styled.div`

@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@nivo/calendar": "^0.52.1",
+    "@nivo/line": "^0.52.1",
     "axios": "^0.18.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.14.0",

@@ -18,6 +18,7 @@ import SimilarRepos from './similar-repos/SimilarRepos';
 import Contributors from './contributors/Contributors';
 import Error from '../shared/error/Error';
 import Totals from './totals/Totals';
+import Participation from './participation/Participation';
 
 const Wrapper = styled.div`
   max-width: 1100px;
@@ -70,6 +71,21 @@ const transformCommitData = (data = []) => {// eslint-disable-line
   }).flat();
 };
 
+const transformParticipationData = (data = {}) => { //eslint-disable-line
+  return Object.keys(data).map((key) => { //eslint-disable-line
+    return {
+      id: key === 'all' ? 'All Contributors' : 'Repo Owner',
+      color: key !== 'all' ? '#89E051' : '#3E97FF',
+      data: data[key].map((val, i) => { //eslint-disable-line
+        return {
+          x: i,
+          y: val,
+        };
+      }),
+    };
+  });
+};
+
 const RepoProfile = (props) => {
   const { match: { params: { id } }, appContext } = props;
 
@@ -78,6 +94,9 @@ const RepoProfile = (props) => {
 
   const [commitsState, setCommitsState] = useApiState();
   const [commits, setCommits] = useState([]);
+
+  const [participationState, setParticipationState] = useApiState();
+  const [participation, setParticipation] = useState([]);
 
   const [contributorsState, setContributorsState] = useApiState();
   const [contributors, setContributors] = useState([]);
@@ -109,6 +128,20 @@ const RepoProfile = (props) => {
       })
       .catch(({ response: { data } }) => {
         setCommitsState({ isLoading: false, hasError: true, errorMessage: data.message });
+      });
+  };
+
+  const fetchParticipation = (repo_name) => {
+    setParticipationState({ isLoading: true, hasError: false });
+    return appContext
+      .fetchParticipation(decodeURIComponent(repo_name))
+      .then((items) => {
+        setParticipationState({ isLoading: false, hasError: false });
+        transformParticipationData(items);
+        setParticipation(transformParticipationData(items));
+      })
+      .catch(({ response: { data } }) => {
+        setParticipationState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
   };
 
@@ -166,7 +199,13 @@ const RepoProfile = (props) => {
     fetchRepo()
       .then((data) => {
         axios
-          .all([fetchCommits(data.full_name), fetchLanguages(data.full_name), fetchContributors(data.full_name), getRepoViews(data.id)])
+          .all([
+            fetchCommits(data.full_name),
+            fetchParticipation(data.full_name),
+            fetchLanguages(data.full_name),
+            fetchContributors(data.full_name),
+            getRepoViews(data.id),
+          ])
           .then(() => {
             setApiState({ isLoading: false, hasError: false });
           });
@@ -217,6 +256,12 @@ const RepoProfile = (props) => {
         hasError={commitsState.hasError}
         errorMessage={commitsState.errorMessage}
         fetchCommits={() => fetchCommits(decodeURIComponent(id))}
+      />
+      <Participation
+        participation={participation}
+        isLoading={participationState.isLoading}
+        hasError={participationState.hasError}
+        errorMessage={participationState.errorMessage}
       />
       <SimilarRepos
         id={repo.id}

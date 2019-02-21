@@ -1021,6 +1021,18 @@
     call-me-maybe "^1.0.1"
     glob-to-regexp "^0.3.0"
 
+"@nivo/axes@0.52.1":
+  version "0.52.1"
+  resolved "https://registry.yarnpkg.com/@nivo/axes/-/axes-0.52.1.tgz#ebd5f961d633dbf19ca80a219436c09c1a603c44"
+  integrity sha512-kxkqAa/CqXz/gH8vxUM86KXdM7j8XymJYXlYFQtWreaLSMdl+YWGLHiOWLFaC4co2dScp9VwkhiLW7UzIEl0xA==
+  dependencies:
+    "@nivo/core" "0.52.1"
+    d3-format "^1.3.2"
+    d3-time-format "^2.1.3"
+    lodash "^4.17.4"
+    react-motion "^0.5.2"
+    recompose "^0.26.0"
+
 "@nivo/calendar@^0.52.1":
   version "0.52.1"
   resolved "https://registry.yarnpkg.com/@nivo/calendar/-/calendar-0.52.1.tgz#60f67fe4e6758815b1a48af657e45445a4874636"
@@ -1059,6 +1071,31 @@
   dependencies:
     lodash "^4.17.4"
     recompose "^0.26.0"
+
+"@nivo/line@^0.52.1":
+  version "0.52.1"
+  resolved "https://registry.yarnpkg.com/@nivo/line/-/line-0.52.1.tgz#dd0a9e315366ff8e15b1be968168d6dbfe96421a"
+  integrity sha512-SMhEBob7tnvAPMLJhl9EsF6FKC50e0ClANMJtkiILIQqWjA1eYWq+bzsbuRB3mzCHfRbZ0A1QjA7q2q65Y3Ldg==
+  dependencies:
+    "@nivo/axes" "0.52.1"
+    "@nivo/core" "0.52.1"
+    "@nivo/legends" "0.52.1"
+    "@nivo/scales" "0.52.1"
+    d3-format "^1.3.2"
+    d3-scale "^2.1.2"
+    d3-shape "^1.2.2"
+    lodash "^4.17.4"
+    react-motion "^0.5.2"
+    recompose "^0.26.0"
+
+"@nivo/scales@0.52.1":
+  version "0.52.1"
+  resolved "https://registry.yarnpkg.com/@nivo/scales/-/scales-0.52.1.tgz#d84e567f13c3f28698561ab9bce114b2367e2f8b"
+  integrity sha512-4tB15+mdTBMJx68Y/gusQm9i5WD0HcSz/K7IpDA0hARcgdsFMRSZ3VPXMoAmqaaTSRDcbVpYxgt6rOVHVdGP3g==
+  dependencies:
+    d3-scale "^2.1.2"
+    d3-time-format "^2.1.3"
+    lodash "^4.17.4"
 
 "@nodelib/fs.stat@^1.1.2":
   version "1.1.3"

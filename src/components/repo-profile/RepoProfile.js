@@ -74,7 +74,7 @@ const transformCommitData = (data = []) => {// eslint-disable-line
 
 const groupParticipationData = (data = []) => { // eslint-disable-line
   const months = data.map((value, i) => {
-    const date = moment().subtract(i, 'weeks').toDate();
+    const date = moment().subtract(52 - i, 'weeks').toDate();
     return {
       month: moment(date).format('MMM YYYY'),
       value,
@@ -86,7 +86,7 @@ const groupParticipationData = (data = []) => { // eslint-disable-line
       new Map, // eslint-disable-line
     ),
     ([month, value]) => ({ month, value }),
-  ).reverse();
+  );
 };
 
 const transformParticipationData = (data = {}) => { //eslint-disable-line

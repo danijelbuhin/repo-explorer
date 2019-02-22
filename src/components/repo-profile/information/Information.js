@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import moment from 'moment';
+import { Emojione } from 'react-emoji-render';
 
 import { Tag } from '../../shared/repo/Card';
 import Panel from '../panel/Panel';
@@ -91,7 +92,9 @@ const Information = ({ repo }) => (
           <Avatar src={repo.owner && repo.owner.avatar_url} />
           <Name>
             {repo.full_name}
-            <Description>{repo.description}</Description>
+            <Description>
+              <Emojione text={repo.description} />
+            </Description>
           </Name>
         </Profile>
         <Date>
@@ -111,7 +114,7 @@ const Information = ({ repo }) => (
               <Tag
                 key={popular}
                 to={`/search?q=${encodeURIComponent(popular.toLowerCase())}`}
-                style={{ margin: 3 }}
+                style={{ margin: '3px 5px' }}
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
@@ -136,8 +139,8 @@ const Information = ({ repo }) => (
         <h3>Links:</h3>
         <Links>
           {repo.homepage && <a href={repo.homepage} target="_blank" rel="noopener noreferrer">Website</a>}
-          <a href={repo.html_url} target="_blank" rel="noopener noreferrer">GitHub repo</a>
-          <a href={repo.owner && repo.owner.html_url} target="_blank" rel="noopener noreferrer">Owner profile</a>
+          <a href={repo.html_url} target="_blank" rel="noopener noreferrer">View on GitHub</a>
+          <a href={repo.owner && repo.owner.html_url} target="_blank" rel="noopener noreferrer">Owner{'\''}s GitHub profile</a>
         </Links>
       </Right>
     </Content>

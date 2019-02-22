@@ -201,6 +201,26 @@ class AppProvider extends Component {
       });
   }
 
+  fetchParticipation = (repo) => {
+    const { client_id, client_secret } = tokens;
+    const { token } = this.state;
+    return axios
+      .get(`https://api.github.com/repos/${repo}/stats/participation`, {
+        headers: {
+          Accept: 'application/vnd.github.mercy-preview+json',
+        },
+        params: {
+          client_id: token ? undefined : client_id,
+          client_secret: token ? undefined : client_secret,
+          access_token: token ? token : undefined,
+        },
+      })
+      .then(({ data }) => {
+        this.fetchRateLimit();
+        return data;
+      });
+  }
+
   fetchLanguages = (repo) => {
     const { client_id, client_secret } = tokens;
     const { token } = this.state;
@@ -228,6 +248,26 @@ class AppProvider extends Component {
       .get(`https://api.github.com/repos/${repo}/contributors`, {
         headers: {
           Accept: 'application/vnd.github.mercy-preview+json',
+        },
+        params: {
+          client_id: token ? undefined : client_id,
+          client_secret: token ? undefined : client_secret,
+          access_token: token ? token : undefined,
+        },
+      })
+      .then(({ data }) => {
+        this.fetchRateLimit();
+        return data;
+      });
+  }
+
+  fetchReadme = (repo) => {
+    const { client_id, client_secret } = tokens;
+    const { token } = this.state;
+    return axios
+      .get(`https://api.github.com/repos/${repo}/readme`, {
+        headers: {
+          Accept: 'application/vnd.github.VERSION.raw',
         },
         params: {
           client_id: token ? undefined : client_id,
@@ -317,8 +357,10 @@ class AppProvider extends Component {
           logOut: this.logOut,
           searchRepo: this.searchRepo,
           fetchCommits: this.fetchCommits,
+          fetchParticipation: this.fetchParticipation,
           fetchLanguages: this.fetchLanguages,
           fetchContributors: this.fetchContributors,
+          fetchReadme: this.fetchReadme,
         }}
       >
         {this.props.children}

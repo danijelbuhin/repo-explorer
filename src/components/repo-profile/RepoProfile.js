@@ -18,6 +18,8 @@ import SimilarRepos from './similar-repos/SimilarRepos';
 import Contributors from './contributors/Contributors';
 import Error from '../shared/error/Error';
 import Totals from './totals/Totals';
+import Participation from './participation/Participation';
+import Readme from './readme/Readme';
 
 const Wrapper = styled.div`
   max-width: 1100px;
@@ -70,6 +72,40 @@ const transformCommitData = (data = []) => {// eslint-disable-line
   }).flat();
 };
 
+const groupParticipationData = (data = []) => { // eslint-disable-line
+  const months = data.map((value, i) => {
+    const date = moment().subtract(52 - i, 'weeks').toDate();
+    return {
+      month: moment(date).format('MMM YYYY'),
+      value,
+    };
+  });
+  return Array.from(
+    months.reduce(
+      (m, { month, value }) => m.set(month, (m.get(month) || 0) + value),
+      new Map, // eslint-disable-line
+    ),
+    ([month, value]) => ({ month, value }),
+  );
+};
+
+const transformParticipationData = (data = {}) => { //eslint-disable-line
+  return Object.keys(data).map((key) => { //eslint-disable-line
+    const groupedData = groupParticipationData(data[key]);
+    return {
+      id: key === 'all' ? 'All Contributors' : 'Repo Owner',
+      color: key !== 'all' ? '#89E051' : '#3E97FF',
+      data: groupedData.map((val) => { //eslint-disable-line
+        return {
+          x: val.month,
+          y: val.value,
+        };
+      }),
+    };
+  });
+};
+
+
 const RepoProfile = (props) => {
   const { match: { params: { id } }, appContext } = props;
 
@@ -78,6 +114,12 @@ const RepoProfile = (props) => {
 
   const [commitsState, setCommitsState] = useApiState();
   const [commits, setCommits] = useState([]);
+
+  const [readmeState, setReadmeState] = useApiState();
+  const [readme, setReadme] = useState('');
+
+  const [participationState, setParticipationState] = useApiState();
+  const [participation, setParticipation] = useState([]);
 
   const [contributorsState, setContributorsState] = useApiState();
   const [contributors, setContributors] = useState([]);
@@ -112,33 +154,6 @@ const RepoProfile = (props) => {
       });
   };
 
-  const fetchContributors = (repo_name) => {
-    setContributorsState({ isLoading: true, hasError: false });
-    return appContext
-      .fetchContributors(decodeURIComponent(repo_name))
-      .then((items) => {
-        setContributorsState({ isLoading: false, hasError: false });
-        setContributors(items);
-      })
-      .catch(({ response: { data } }) => {
-        setContributorsState({ isLoading: false, hasError: true, errorMessage: data.message });
-      });
-  };
-
-  const fetchLanguages = (repo_name) => {
-    setLanguagesState({ isLoading: true, hasError: false });
-    return appContext
-      .fetchLanguages(decodeURIComponent(repo_name))
-      .then((items) => {
-        setLanguagesState({ isLoading: false, hasError: false });
-        setLanguages(items);
-      })
-      .catch(({ response: { data } }) => {
-        setLanguages({});
-        setLanguagesState({ isLoading: false, hasError: true, errorMessage: data.message });
-      });
-  };
-
   const fetchRepo = () => {
     setApiState({ isLoading: true, hasError: false });
     return appContext.fetchRepo(decodeURIComponent(id))
@@ -162,11 +177,40 @@ const RepoProfile = (props) => {
       });
   };
 
+  const fetchSection = (setHook, setApiHook, apiMethod, initialData, customThen) => {
+    setApiHook({ isLoading: true, hasError: false });
+    return appContext[apiMethod](decodeURIComponent(id))
+      .then((data) => { // eslint-disable-line
+        if (customThen) {
+          return data;
+        }
+        setApiHook({ isLoading: false, hasError: false });
+        setHook(data);
+      })
+      .catch(({ response: { data } }) => {
+        setHook(initialData);
+        setApiHook({ isLoading: false, hasError: true, errorMessage: data.message });
+      });
+  };
+
   useEffect(() => {
     fetchRepo()
       .then((data) => {
         axios
-          .all([fetchCommits(data.full_name), fetchLanguages(data.full_name), fetchContributors(data.full_name), getRepoViews(data.id)])
+          .all([
+            fetchSection(setCommits, setCommitsState, 'fetchCommits', [], true).then((items) => {
+              setCommitsState({ isLoading: false, hasError: false });
+              setCommits(transformCommitData(items));
+            }),
+            fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [], true).then((items) => {
+              setParticipationState({ isLoading: false, hasError: false });
+              setParticipation(transformParticipationData(items));
+            }),
+            fetchSection(setLanguages, setLanguagesState, 'fetchLanguages', []),
+            fetchSection(setContributors, setContributorsState, 'fetchContributors', []),
+            fetchSection(setReadme, setReadmeState, 'fetchReadme', ''),
+            getRepoViews(data.id),
+          ])
           .then(() => {
             setApiState({ isLoading: false, hasError: false });
           });
@@ -218,10 +262,22 @@ const RepoProfile = (props) => {
         errorMessage={commitsState.errorMessage}
         fetchCommits={() => fetchCommits(decodeURIComponent(id))}
       />
+      <Participation
+        participation={participation}
+        isLoading={participationState.isLoading}
+        hasError={participationState.hasError}
+        errorMessage={participationState.errorMessage}
+      />
       <SimilarRepos
         id={repo.id}
         topic={topic}
         searchRepo={appContext.searchRepo}
+      />
+      <Readme
+        readme={readme}
+        isLoading={readmeState.isLoading}
+        hasError={readmeState.hasError}
+        errorMessage={readmeState.errorMessage}
       />
     </Wrapper>
   );

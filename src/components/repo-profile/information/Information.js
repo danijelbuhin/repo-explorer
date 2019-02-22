@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import moment from 'moment';
+import { Emojione } from 'react-emoji-render';
 
 import { Tag } from '../../shared/repo/Card';
 import Panel from '../panel/Panel';
@@ -91,7 +92,9 @@ const Information = ({ repo }) => (
           <Avatar src={repo.owner && repo.owner.avatar_url} />
           <Name>
             {repo.full_name}
-            <Description>{repo.description}</Description>
+            <Description>
+              <Emojione text={repo.description} />
+            </Description>
           </Name>
         </Profile>
         <Date>

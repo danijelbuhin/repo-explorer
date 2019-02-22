@@ -71,20 +71,39 @@ const transformCommitData = (data = []) => {// eslint-disable-line
   }).flat();
 };
 
+const groupParticipationData = (data = []) => { // eslint-disable-line
+  const months = data.map((value, i) => {
+    const date = moment().subtract(i, 'weeks').toDate();
+    return {
+      month: moment(date).format('MMM YYYY'),
+      value,
+    };
+  });
+  return Array.from(
+    months.reduce(
+      (m, { month, value }) => m.set(month, (m.get(month) || 0) + value),
+      new Map, // eslint-disable-line
+    ),
+    ([month, value]) => ({ month, value }),
+  ).reverse();
+};
+
 const transformParticipationData = (data = {}) => { //eslint-disable-line
   return Object.keys(data).map((key) => { //eslint-disable-line
+    const groupedData = groupParticipationData(data[key]);
     return {
       id: key === 'all' ? 'All Contributors' : 'Repo Owner',
       color: key !== 'all' ? '#89E051' : '#3E97FF',
-      data: data[key].map((val, i) => { //eslint-disable-line
+      data: groupedData.map((val) => { //eslint-disable-line
         return {
-          x: i,
-          y: val,
+          x: val.month,
+          y: val.value,
         };
       }),
     };
   });
 };
+
 
 const RepoProfile = (props) => {
   const { match: { params: { id } }, appContext } = props;

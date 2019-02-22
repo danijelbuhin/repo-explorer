@@ -154,59 +154,6 @@ const RepoProfile = (props) => {
       });
   };
 
-  const fetchReadme = (repo_name) => {
-    setReadmeState({ isLoading: true, hasError: false });
-    return appContext
-      .fetchReadme(decodeURIComponent(repo_name))
-      .then((data) => {
-        setReadmeState({ isLoading: false, hasError: false });
-        setReadme(data);
-      })
-      .catch(({ response: { data } }) => {
-        setReadmeState({ isLoading: false, hasError: true, errorMessage: data.message });
-      });
-  };
-
-  const fetchParticipation = (repo_name) => {
-    setParticipationState({ isLoading: true, hasError: false });
-    return appContext
-      .fetchParticipation(decodeURIComponent(repo_name))
-      .then((items) => {
-        setParticipationState({ isLoading: false, hasError: false });
-        setParticipation(transformParticipationData(items));
-      })
-      .catch(({ response: { data } }) => {
-        setParticipationState({ isLoading: false, hasError: true, errorMessage: data.message });
-      });
-  };
-
-  const fetchContributors = (repo_name) => {
-    setContributorsState({ isLoading: true, hasError: false });
-    return appContext
-      .fetchContributors(decodeURIComponent(repo_name))
-      .then((items) => {
-        setContributorsState({ isLoading: false, hasError: false });
-        setContributors(items);
-      })
-      .catch(({ response: { data } }) => {
-        setContributorsState({ isLoading: false, hasError: true, errorMessage: data.message });
-      });
-  };
-
-  const fetchLanguages = (repo_name) => {
-    setLanguagesState({ isLoading: true, hasError: false });
-    return appContext
-      .fetchLanguages(decodeURIComponent(repo_name))
-      .then((items) => {
-        setLanguagesState({ isLoading: false, hasError: false });
-        setLanguages(items);
-      })
-      .catch(({ response: { data } }) => {
-        setLanguages({});
-        setLanguagesState({ isLoading: false, hasError: true, errorMessage: data.message });
-      });
-  };
-
   const fetchRepo = () => {
     setApiState({ isLoading: true, hasError: false });
     return appContext.fetchRepo(decodeURIComponent(id))
@@ -230,16 +177,38 @@ const RepoProfile = (props) => {
       });
   };
 
+  const fetchSection = (setHook, setApiHook, apiMethod, initialData, customThen) => {
+    setApiHook({ isLoading: true, hasError: false });
+    return appContext[apiMethod](decodeURIComponent(id))
+      .then((data) => { // eslint-disable-line
+        if (customThen) {
+          return data;
+        }
+        setApiHook({ isLoading: false, hasError: false });
+        setHook(data);
+      })
+      .catch(({ response: { data } }) => {
+        setHook(initialData);
+        setApiHook({ isLoading: false, hasError: true, errorMessage: data.message });
+      });
+  };
+
   useEffect(() => {
     fetchRepo()
       .then((data) => {
         axios
           .all([
-            fetchCommits(data.full_name),
-            fetchParticipation(data.full_name),
-            fetchLanguages(data.full_name),
-            fetchContributors(data.full_name),
-            fetchReadme(data.full_name),
+            fetchSection(setCommits, setCommitsState, 'fetchCommits', [], true).then((items) => {
+              setCommitsState({ isLoading: false, hasError: false });
+              setCommits(transformCommitData(items));
+            }),
+            fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [], true).then((items) => {
+              setParticipationState({ isLoading: false, hasError: false });
+              setParticipation(transformParticipationData(items));
+            }),
+            fetchSection(setLanguages, setLanguagesState, 'fetchLanguages', []),
+            fetchSection(setContributors, setContributorsState, 'fetchContributors', []),
+            fetchSection(setReadme, setReadmeState, 'fetchReadme', ''),
             getRepoViews(data.id),
           ])
           .then(() => {

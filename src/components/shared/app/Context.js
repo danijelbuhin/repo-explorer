@@ -261,6 +261,26 @@ class AppProvider extends Component {
       });
   }
 
+  fetchReadme = (repo) => {
+    const { client_id, client_secret } = tokens;
+    const { token } = this.state;
+    return axios
+      .get(`https://api.github.com/repos/${repo}/readme`, {
+        headers: {
+          Accept: 'application/vnd.github.VERSION.raw',
+        },
+        params: {
+          client_id: token ? undefined : client_id,
+          client_secret: token ? undefined : client_secret,
+          access_token: token ? token : undefined,
+        },
+      })
+      .then(({ data }) => {
+        this.fetchRateLimit();
+        return data;
+      });
+  }
+
   updateUser = (field, value) => {
     const { user } = this.state;
     return firebase.users.doc(user.id).update({ [field]: value }).then(() => {
@@ -340,6 +360,7 @@ class AppProvider extends Component {
           fetchParticipation: this.fetchParticipation,
           fetchLanguages: this.fetchLanguages,
           fetchContributors: this.fetchContributors,
+          fetchReadme: this.fetchReadme,
         }}
       >
         {this.props.children}

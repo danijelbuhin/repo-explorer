@@ -19,6 +19,7 @@ import Contributors from './contributors/Contributors';
 import Error from '../shared/error/Error';
 import Totals from './totals/Totals';
 import Participation from './participation/Participation';
+import Readme from './readme/Readme';
 
 const Wrapper = styled.div`
   max-width: 1100px;
@@ -114,6 +115,9 @@ const RepoProfile = (props) => {
   const [commitsState, setCommitsState] = useApiState();
   const [commits, setCommits] = useState([]);
 
+  const [readmeState, setReadmeState] = useApiState();
+  const [readme, setReadme] = useState('');
+
   const [participationState, setParticipationState] = useApiState();
   const [participation, setParticipation] = useState([]);
 
@@ -150,13 +154,25 @@ const RepoProfile = (props) => {
       });
   };
 
+  const fetchReadme = (repo_name) => {
+    setReadmeState({ isLoading: true, hasError: false });
+    return appContext
+      .fetchReadme(decodeURIComponent(repo_name))
+      .then((data) => {
+        setReadmeState({ isLoading: false, hasError: false });
+        setReadme(data);
+      })
+      .catch(({ response: { data } }) => {
+        setReadmeState({ isLoading: false, hasError: true, errorMessage: data.message });
+      });
+  };
+
   const fetchParticipation = (repo_name) => {
     setParticipationState({ isLoading: true, hasError: false });
     return appContext
       .fetchParticipation(decodeURIComponent(repo_name))
       .then((items) => {
         setParticipationState({ isLoading: false, hasError: false });
-        transformParticipationData(items);
         setParticipation(transformParticipationData(items));
       })
       .catch(({ response: { data } }) => {
@@ -223,6 +239,7 @@ const RepoProfile = (props) => {
             fetchParticipation(data.full_name),
             fetchLanguages(data.full_name),
             fetchContributors(data.full_name),
+            fetchReadme(data.full_name),
             getRepoViews(data.id),
           ])
           .then(() => {
@@ -286,6 +303,12 @@ const RepoProfile = (props) => {
         id={repo.id}
         topic={topic}
         searchRepo={appContext.searchRepo}
+      />
+      <Readme
+        readme={readme}
+        isLoading={readmeState.isLoading}
+        hasError={readmeState.hasError}
+        errorMessage={readmeState.errorMessage}
       />
     </Wrapper>
   );

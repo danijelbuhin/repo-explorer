@@ -5,6 +5,7 @@ import AppProvider from './components/shared/app/Context';
 import Router from './components/shared/app/Router';
 import './GlobalStyle.scss';
 import 'flag-icon-css/css/flag-icon.min.css';
+import 'github-markdown-css/github-markdown.css';
 
 class App extends Component {
   render() {

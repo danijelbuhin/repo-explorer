@@ -13,7 +13,6 @@ const Participation = ({ participation, hasError, errorMessage, isLoading }) => 
     )}
     {!isLoading && !hasError && participation.length > 0 && (
       <Scrollbars style={{ width: '100%', height: 410 }}>
-        {console.log(participation)}
         {!hasError && participation.length > 0 && (
           <Line
             width={1060}
@@ -21,9 +20,9 @@ const Participation = ({ participation, hasError, errorMessage, isLoading }) => 
             data={participation}
             margin={{
               top: 50,
-              right: 30,
-              bottom: 30,
-              left: 30,
+              right: 50,
+              bottom: 50,
+              left: 50,
             }}
             xScale={{
               type: 'point',

@@ -7,7 +7,7 @@ import Panel from '../panel/Panel';
 import Error from '../../shared/error/Error';
 
 const Participation = ({ participation, hasError, errorMessage, isLoading }) => (
-  <Panel title="Weekly commit participation">
+  <Panel title="Commit participation in the last 12 months">
     {hasError && (
       <Error source="GitHub" message={errorMessage} />
     )}

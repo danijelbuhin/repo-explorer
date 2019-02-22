@@ -111,7 +111,7 @@ const Information = ({ repo }) => (
               <Tag
                 key={popular}
                 to={`/search?q=${encodeURIComponent(popular.toLowerCase())}`}
-                style={{ margin: 3 }}
+                style={{ margin: '3px 5px' }}
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
@@ -136,8 +136,8 @@ const Information = ({ repo }) => (
         <h3>Links:</h3>
         <Links>
           {repo.homepage && <a href={repo.homepage} target="_blank" rel="noopener noreferrer">Website</a>}
-          <a href={repo.html_url} target="_blank" rel="noopener noreferrer">GitHub repo</a>
-          <a href={repo.owner && repo.owner.html_url} target="_blank" rel="noopener noreferrer">Owner profile</a>
+          <a href={repo.html_url} target="_blank" rel="noopener noreferrer">View on GitHub</a>
+          <a href={repo.owner && repo.owner.html_url} target="_blank" rel="noopener noreferrer">Owner{'\''}s GitHub profile</a>
         </Links>
       </Right>
     </Content>

@@ -110,11 +110,21 @@ const Title = styled.h2`
   justify-self: start;
 `;
 
+const Warning = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  text-align: center;
+`;
+
 const List = ({
   title,
   isLoading,
+  isEmpty,
   hasError,
   errorMessage,
+  emptyMessage,
   loadingPlaceholdersCount,
   hasFilters,
   fetchRepos,
@@ -141,8 +151,11 @@ const List = ({
             </CardLoader>
           ))
         )}
-        {!isLoading && !hasError && children}
+        {!isLoading && !hasError && !isEmpty && children}
       </Items>
+    )}
+    {isEmpty && !isLoading && !hasError && (
+      <Warning>{emptyMessage}</Warning>
     )}
     {!isLoading && hasError && (
       <Error message={errorMessage} source="GitHub" />
@@ -153,8 +166,10 @@ const List = ({
 List.propTypes = {
   title: PropTypes.string,
   errorMessage: PropTypes.string,
+  emptyMessage: PropTypes.string,
   loadingPlaceholdersCount: PropTypes.number,
   isLoading: PropTypes.bool,
+  isEmpty: PropTypes.bool,
   hasError: PropTypes.bool,
   hasFilters: PropTypes.bool,
   fetchRepos: PropTypes.func,
@@ -164,8 +179,10 @@ List.propTypes = {
 List.defaultProps = {
   title: '',
   errorMessage: '',
+  emptyMessage: 'No data has been found.',
   loadingPlaceholdersCount: 5,
   isLoading: false,
+  isEmpty: false,
   hasError: false,
   hasFilters: false,
   fetchRepos: () => {},

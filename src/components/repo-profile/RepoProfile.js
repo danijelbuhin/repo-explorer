@@ -218,10 +218,6 @@ const RepoProfile = (props) => {
       .catch(({ response: { data } }) => {
         setApiState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
-    return () => {
-      setCommits([]);
-      setLanguages([]);
-    };
   }, [id]);
 
   if (apiState.isLoading) {

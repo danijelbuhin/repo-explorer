@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
@@ -40,7 +40,9 @@ const Body = styled.div`
 
 const Panel = ({ title, isClosable, isClosed: isClosedInitial, children }) => {
   const [isClosed, setIsClosed] = useState(isClosedInitial);
-
+  useEffect(() => {
+    setIsClosed(isClosedInitial);
+  }, [isClosedInitial]);
   return (
     <Wrapper>
       {title && (

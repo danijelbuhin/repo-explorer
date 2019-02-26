@@ -7,6 +7,7 @@ import { Emojione } from 'react-emoji-render';
 import { Tag } from '../../shared/repo/Card';
 import Panel from '../panel/Panel';
 import { popularTopics } from '../../../utils/generateTopic';
+import Bookmark, { BookmarkIcon } from '../../shared/repo/Bookmark';
 
 const Content = styled.div`
   display: flex;
@@ -73,7 +74,12 @@ const Avatar = styled.img`
 `;
 
 const Name = styled.h2`
+  position: relative;
   margin: 0 0 10px 0;
+
+  ${BookmarkIcon} {
+    margin-left: 5px;
+  }
 `;
 
 const Description = styled.p`
@@ -84,7 +90,7 @@ const Description = styled.p`
   max-width: 400px;
 `;
 
-const Information = ({ repo }) => (
+const Information = ({ repo, count }) => (
   <Panel>
     <Content>
       <Left>
@@ -92,6 +98,14 @@ const Information = ({ repo }) => (
           <Avatar src={repo.owner && repo.owner.avatar_url} />
           <Name>
             {repo.full_name}
+            <Bookmark
+              id={repo.id}
+              name={repo.full_name}
+              avatar={repo.owner && repo.owner.avatar_url}
+              count={count}
+              language={repo.language}
+              topic={repo.topics[0]}
+            />
             <Description>
               <Emojione text={repo.description} />
             </Description>
@@ -148,10 +162,12 @@ const Information = ({ repo }) => (
 );
 
 Information.propTypes = {
+  count: PropTypes.number,
   repo: PropTypes.object,
 };
 
 Information.defaultProps = {
+  count: 0,
   repo: {},
 };
 

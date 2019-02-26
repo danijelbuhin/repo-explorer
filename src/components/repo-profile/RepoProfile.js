@@ -172,7 +172,7 @@ const RepoProfile = (props) => {
 
   return (
     <Wrapper>
-      <Information repo={repo} />
+      <Information repo={repo} count={repo.stargazers_count} />
       <Totals
         forks={repo.forks_count}
         watchers={repo.watchers}

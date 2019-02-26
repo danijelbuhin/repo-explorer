@@ -267,7 +267,7 @@ class AppProvider extends Component {
     return axios
       .get(`https://api.github.com/repos/${repo}/readme`, {
         headers: {
-          Accept: 'application/vnd.github.VERSION.raw',
+          Accept: 'application/vnd.github.VERSION.html',
         },
         params: {
           client_id: token ? undefined : client_id,

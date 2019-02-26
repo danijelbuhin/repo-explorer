@@ -138,7 +138,7 @@ const Participation = ({
 
 Participation.propTypes = {
   errorMessage: PropTypes.string,
-  participation: PropTypes.object,
+  participation: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   isLoading: PropTypes.bool,
   hasError: PropTypes.bool,
   fetchParticipation: PropTypes.func.isRequired,

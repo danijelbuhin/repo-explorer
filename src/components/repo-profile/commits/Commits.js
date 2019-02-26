@@ -93,7 +93,7 @@ const Commits = ({
 
 Commits.propTypes = {
   errorMessage: PropTypes.string,
-  commits: PropTypes.arrayOf(PropTypes.object),
+  commits: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   isLoading: PropTypes.bool,
   hasError: PropTypes.bool,
   fetchCommits: PropTypes.func,
@@ -101,7 +101,7 @@ Commits.propTypes = {
 
 Commits.defaultProps = {
   errorMessage: '',
-  commits: [],
+  commits: {},
   isLoading: false,
   hasError: false,
   fetchCommits: () => {},

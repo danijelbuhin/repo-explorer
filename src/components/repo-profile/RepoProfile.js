@@ -53,11 +53,10 @@ const RepoProfile = (props) => {
 
   const [views, setViews] = useState(0);
 
-  const getRepoViews = (repoId) => { // eslint-disable-line
-    return firebase.views.doc(String(repoId)).get().then((doc) => {
-      setCommitsState({ isLoading: false, hasError: false });
+  const getRepoViews = (id) => { // eslint-disable-line
+    return firebase.views.doc(String(id)).get().then((doc) => {
       if (doc.exists) {
-        setViews(doc.data().views);
+        setViews(doc.data().views + 1);
       }
       return 0;
     });

@@ -101,7 +101,7 @@ Commits.propTypes = {
 
 Commits.defaultProps = {
   errorMessage: '',
-  commits: {},
+  commits: [],
   isLoading: false,
   hasError: false,
   fetchCommits: () => {},

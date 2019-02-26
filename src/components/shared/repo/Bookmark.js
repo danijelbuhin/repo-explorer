@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Tooltip } from 'react-tippy';
@@ -23,6 +23,36 @@ export const BookmarkIcon = styled(BookmarkSVG)`
   }
 `;
 
+
+export const Loader = styled.div`
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+
+  border-top: 1px solid #EEEEEE;
+  border-right: 1px solid #EEEEEE;
+  border-bottom: 1px solid #EEEEEE;
+  border-left: 1px solid #3E97FF;
+  border-radius: 100%;
+
+  transition: all .3s ease-in-out;
+  transform: scale(0);
+  opacity: 0;
+  &.is-active {
+    transform: rotateZ(0deg) scale(1);
+    opacity: 1;
+    animation: rotate .5s linear infinite;
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotateZ(0deg) scale(1);
+    } to {
+      transform: rotateZ(360deg) scale(1);
+    }
+  }
+`;
+
 const Bookmark = ({
   id,
   name,
@@ -33,6 +63,8 @@ const Bookmark = ({
   appContext,
   ...rest
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const bookmarkRepo = (repo) => {
     if (!appContext.isAuthenticated) {
       toast('⚠️ You have to be signed in to bookmark the repository!', {
@@ -48,7 +80,9 @@ const Bookmark = ({
     const { favorites } = appContext.user;
     const bookmarked = favorites.filter(_repo => _repo.id === repo.id)[0];
     if (bookmarked && bookmarked.id === repo.id) {
+      setIsLoading(true);
       appContext.updateUser('favorites', favorites.filter(_r => _r.id !== repo.id)).then(() => {
+        setIsLoading(false);
         toast('👍 Repo removed from bookmarks!', {
           position: 'bottom-center',
           autoClose: 3000,
@@ -60,7 +94,9 @@ const Bookmark = ({
       });
       return;
     }
+    setIsLoading(true);
     appContext.updateUser('favorites', [...favorites, repo]).then(() => {
+      setIsLoading(false);
       toast('👍 Repo added to bookmarks!', {
         position: 'bottom-center',
         autoClose: 3000,
@@ -81,20 +117,23 @@ const Bookmark = ({
       position="top-end"
       {...rest}
     >
-      <BookmarkIcon
-        className={isBookmarked ? 'is-bookmarked' : ''}
-        onClick={(e) => {
-          e.stopPropagation();
-          bookmarkRepo({
-            name,
-            avatar,
-            count,
-            language,
-            topic,
-            id,
-          });
-        }}
-      />
+      {isLoading && <Loader className={isLoading ? 'is-active' : ''} />}
+      {!isLoading && (
+        <BookmarkIcon
+          className={isBookmarked ? 'is-bookmarked' : ''}
+          onClick={(e) => {
+            e.stopPropagation();
+            bookmarkRepo({
+              name,
+              avatar,
+              count,
+              language,
+              topic,
+              id,
+            });
+          }}
+        />
+      )}
     </Tooltip>
   );
 };

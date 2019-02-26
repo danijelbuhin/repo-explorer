@@ -7,7 +7,7 @@ import { Emojione } from 'react-emoji-render';
 import { Tag } from '../../shared/repo/Card';
 import Panel from '../panel/Panel';
 import { popularTopics } from '../../../utils/generateTopic';
-import Bookmark, { BookmarkIcon } from '../../shared/repo/Bookmark';
+import Bookmark, { BookmarkIcon, Loader } from '../../shared/repo/Bookmark';
 
 const Content = styled.div`
   display: flex;
@@ -78,6 +78,9 @@ const Name = styled.h2`
   margin: 0 0 10px 0;
 
   ${BookmarkIcon} {
+    margin-left: 5px;
+  }
+  ${Loader} {
     margin-left: 5px;
   }
 `;

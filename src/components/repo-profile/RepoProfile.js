@@ -28,84 +28,6 @@ const Wrapper = styled.div`
   margin: 20px auto;
 `;
 
-const storeView = (params, country, countryCode) => {
-  firebase.views.doc(String(params.id)).get().then((doc) => {
-    if (doc.exists) {
-      firebase.views.doc(String(params.id)).set({
-        ...params,
-        views: doc.data().views + 1,
-        viewed_at: moment().toDate().getTime(),
-        viewed_from: {
-          country,
-          country_code: countryCode.toLowerCase(),
-        },
-      });
-    } else {
-      firebase.views.doc(String(params.id)).set({
-        ...params,
-        views: 1,
-        viewed_at: moment().toDate().getTime(),
-        viewed_from: {
-          country,
-          country_code: countryCode.toLowerCase(),
-        },
-      });
-    }
-  });
-};
-
-const handleView = (params) => {
-  axios.get('https://json.geoiplookup.io/').then(({ data }) => {
-    storeView(params, data.country_name, data.country_code);
-  }).catch(() => {
-    storeView(params, 'Unknown', '');
-  });
-};
-
-const transformCommitData = (data = []) => {// eslint-disable-line
-  if (data.lenght === 0 || Object.keys(data).length === 0) return [];
-  return data.map((val) => { // eslint-disable-line
-    return val.days.map((d, i) => ({
-      day: moment(val.week * 1000).add(i, 'day').format('YYYY-MM-DD'),
-      value: d,
-    })).filter(d => d.value !== 0);
-  }).flat();
-};
-
-const groupParticipationData = (data = []) => { // eslint-disable-line
-  const months = data.map((value, i) => {
-    const date = moment().subtract(52 - i, 'weeks').toDate();
-    return {
-      month: moment(date).format('MMM YYYY'),
-      value,
-    };
-  });
-  return Array.from(
-    months.reduce(
-      (m, { month, value }) => m.set(month, (m.get(month) || 0) + value),
-      new Map, // eslint-disable-line
-    ),
-    ([month, value]) => ({ month, value }),
-  );
-};
-
-const transformParticipationData = (data = {}) => { //eslint-disable-line
-  return Object.keys(data).map((key) => { //eslint-disable-line
-    const groupedData = groupParticipationData(data[key]);
-    return {
-      id: key === 'all' ? 'All Contributors' : 'Repo Owner',
-      color: key !== 'all' ? '#89E051' : '#3E97FF',
-      data: groupedData.map((val) => { //eslint-disable-line
-        return {
-          x: val.month,
-          y: val.value,
-        };
-      }),
-    };
-  });
-};
-
-
 const RepoProfile = (props) => {
   const { match: { params: { id } }, appContext } = props;
 
@@ -131,27 +53,47 @@ const RepoProfile = (props) => {
 
   const [views, setViews] = useState(0);
 
-  const getRepoViews = (repoId) => { // eslint-disable-line
-    return firebase.views.doc(String(repoId)).get().then((doc) => {
-      setCommitsState({ isLoading: false, hasError: false });
+  const getRepoViews = (id) => { // eslint-disable-line
+    return firebase.views.doc(String(id)).get().then((doc) => {
       if (doc.exists) {
-        setViews(doc.data().views);
+        setViews(doc.data().views + 1);
       }
       return 0;
     });
   };
 
-  const fetchCommits = (repo_name) => {
-    setCommitsState({ isLoading: true, hasError: false });
-    return appContext
-      .fetchCommits(decodeURIComponent(repo_name))
-      .then((items) => {
-        setCommitsState({ isLoading: false, hasError: false });
-        setCommits(transformCommitData(items));
-      })
-      .catch(({ response: { data } }) => {
-        setCommitsState({ isLoading: false, hasError: true, errorMessage: data.message });
-      });
+  const storeView = (params, country, countryCode) => {
+    firebase.views.doc(String(params.id)).get().then((doc) => {
+      if (doc.exists) {
+        firebase.views.doc(String(params.id)).set({
+          ...params,
+          views: doc.data().views + 1,
+          viewed_at: moment().toDate().getTime(),
+          viewed_from: {
+            country,
+            country_code: countryCode.toLowerCase(),
+          },
+        });
+      } else {
+        firebase.views.doc(String(params.id)).set({
+          ...params,
+          views: 1,
+          viewed_at: moment().toDate().getTime(),
+          viewed_from: {
+            country,
+            country_code: countryCode.toLowerCase(),
+          },
+        });
+      }
+    });
+  };
+
+  const handleView = (params) => {
+    axios.get('https://json.geoiplookup.io/').then(({ data }) => {
+      storeView(params, data.country_name, data.country_code);
+    }).catch(() => {
+      storeView(params, 'Unknown', '');
+    });
   };
 
   const fetchRepo = () => {
@@ -200,11 +142,11 @@ const RepoProfile = (props) => {
           .all([
             fetchSection(setCommits, setCommitsState, 'fetchCommits', [], true).then((items) => {
               setCommitsState({ isLoading: false, hasError: false });
-              setCommits(transformCommitData(items));
+              setCommits(items);
             }),
             fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [], true).then((items) => {
               setParticipationState({ isLoading: false, hasError: false });
-              setParticipation(transformParticipationData(items));
+              setParticipation(items);
             }),
             fetchSection(setLanguages, setLanguagesState, 'fetchLanguages', []),
             fetchSection(setContributors, setContributorsState, 'fetchContributors', []),
@@ -218,10 +160,6 @@ const RepoProfile = (props) => {
       .catch(({ response: { data } }) => {
         setApiState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
-    return () => {
-      setCommits([]);
-      setLanguages([]);
-    };
   }, [id]);
 
   if (apiState.isLoading) {
@@ -234,7 +172,7 @@ const RepoProfile = (props) => {
 
   return (
     <Wrapper>
-      <Information repo={repo} />
+      <Information repo={repo} count={repo.stargazers_count} />
       <Totals
         forks={repo.forks_count}
         watchers={repo.watchers}
@@ -260,13 +198,24 @@ const RepoProfile = (props) => {
         isLoading={commitsState.isLoading}
         hasError={commitsState.hasError}
         errorMessage={commitsState.errorMessage}
-        fetchCommits={() => fetchCommits(decodeURIComponent(id))}
+        fetchCommits={() => {
+          fetchSection(setCommits, setCommitsState, 'fetchCommits', [], true).then((items) => {
+            setCommitsState({ isLoading: false, hasError: false });
+            setCommits(items);
+          });
+        }}
       />
       <Participation
         participation={participation}
         isLoading={participationState.isLoading}
         hasError={participationState.hasError}
         errorMessage={participationState.errorMessage}
+        fetchParticipation={() => {
+          fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [], true).then((items) => {
+            setParticipationState({ isLoading: false, hasError: false });
+            setParticipation(items);
+          });
+        }}
       />
       <SimilarRepos
         id={repo.id}

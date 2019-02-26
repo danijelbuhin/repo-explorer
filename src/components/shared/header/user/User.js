@@ -234,7 +234,7 @@ class UserInfo extends Component {
                 onClick={authenticate}
                 disabled={isAuthenticating}
               >
-                {isAuthenticating ? 'Authenticating...' : 'Authenticate with github'}
+                {isAuthenticating ? 'Authenticating...' : 'Log in with github'}
               </Button>
             </React.Fragment>
           )}

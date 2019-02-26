@@ -36,11 +36,17 @@ const SimilarRepos = (props) => {
   }, [topic]);
 
   return (
-    <Panel title="Repos with similar topic" isClosable={false}>
+    <Panel
+      title="Repos with similar topic"
+      isClosable={similarRepos.length === 0}
+      isClosed={similarRepos.length === 0}
+    >
       <RepoList
         isLoading={apiState.isLoading}
         hasError={apiState.hasError}
         errorMessage={apiState.errorMessage}
+        isEmpty={similarRepos.length === 0}
+        emptyMessage="We couldn't find similar repos"
       >
         {similarRepos.map(similarRepo => (
           <Card

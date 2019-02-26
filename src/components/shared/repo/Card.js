@@ -1,41 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { Tooltip } from 'react-tippy';
 
 import repoColors from '../../../utils/repoColors.json';
-import withAppContext from '../app/withAppContext';
 
 import history from '../../../history';
-
-import { ReactComponent as BookmarkSVG } from './assets/Bookmark.svg';
-
-const Bookmark = styled(BookmarkSVG)`
-  position: absolute;
-  top: 5px;
-  right: 5px;
-
-  z-index: 5;
-
-  @media (min-width: 768px) {
-    opacity: 0;
-    transform: translate3d(0, 10px, 0);
-  }
-
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1);
-
-  path {
-    transition: all .3s ease-in-out;
-  }
-
-  &:hover, &.is-bookmarked {
-    path {
-      fill: #FF2A9D;
-    }
-  }
-`;
+import Bookmark, { BookmarkIcon } from './Bookmark';
 
 export const Wrapper = styled.div`
   position: relative;
@@ -57,11 +28,24 @@ export const Wrapper = styled.div`
   transition: all .2s ease-in-out;
   cursor: pointer;
 
+  ${BookmarkIcon} {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+
+    z-index: 5;
+
+    @media (min-width: 768px) {
+      opacity: 0;
+      transform: translate3d(0, 10px, 0);
+    }
+  }
+
   &:hover {
     box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
     transform: translate3d(0, -5px, 0);
 
-    ${Bookmark} {
+    ${BookmarkIcon} {
       opacity: 1;
       transform: translate3d(0, 0, 0);
     }
@@ -142,121 +126,61 @@ export const Tag = styled(Link)`
   }
 `;
 
-class Card extends Component {
-  bookmarkRepo = (repo) => {
-    const { appContext } = this.props;
-    if (!appContext.isAuthenticated) {
-      toast('⚠️ You have to be signed in to bookmark the repository!', {
-        position: 'bottom-center',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      return;
-    }
-    const { favorites } = appContext.user;
-    const bookmarked = favorites.filter(_repo => _repo.id === repo.id)[0];
-    if (bookmarked && bookmarked.id === repo.id) {
-      appContext.updateUser('favorites', favorites.filter(_r => _r.id !== repo.id)).then(() => {
-        toast('👍 Repo removed from bookmarks!', {
-          position: 'bottom-center',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-      });
-      return;
-    }
-    appContext.updateUser('favorites', [...favorites, repo]).then(() => {
-      toast('👍 Repo added to bookmarks!', {
-        position: 'bottom-center',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    });
-  }
-
-  render() {
-    const {
-      name,
-      avatar,
-      count,
-      countIcon,
-      language,
-      topic,
-      text,
-      id,
-      appContext: {
-        user,
-      },
-      ...rest
-    } = this.props;
-    const isBookmarked = user && Boolean(user.favorites.filter(_repo => _repo.id === id)[0]);
-    return (
-      <Wrapper
-        onClick={() => history.push(`/repo/${encodeURIComponent(name)}`)}
-        {...rest}
+const Card = ({
+  name,
+  avatar,
+  count,
+  countIcon,
+  language,
+  topic,
+  text,
+  id,
+  ...rest
+}) => (
+  <Wrapper
+    onClick={() => history.push(`/repo/${encodeURIComponent(name)}`)}
+    {...rest}
+  >
+    <Bookmark
+      id={id}
+      name={name}
+      avatar={avatar}
+      count={count}
+      language={language}
+      topic={topic}
+      style={{
+        position: 'absolute',
+        top: 5,
+        right: 5,
+      }}
+    />
+    <Image src={avatar} alt={name} />
+    <Name title={name}>{name}</Name>
+    <Count>{countIcon} <Number>{count}</Number></Count>
+    {language && (
+      <Language
+        to={`/search?q=language:${encodeURIComponent(language.toLowerCase())}`}
+        color={repoColors[language] ? repoColors[language].color : '#000'}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
       >
-        <Tooltip
-          title={isBookmarked ? 'Remove from your bookmarks' : 'Add to your bookmarks'}
-          theme="light"
-          style={{ position: 'absolute', top: '5px', right: '5px' }}
-          position="top-end"
-        >
-          <Bookmark
-            className={isBookmarked ? 'is-bookmarked' : ''}
-            onClick={(e) => {
-              e.stopPropagation();
-              this.bookmarkRepo({
-                name,
-                avatar,
-                count,
-                language,
-                topic,
-                id,
-              });
-            }}
-          />
-        </Tooltip>
-        <Image
-          src={avatar}
-          alt={name}
-        />
-        <Name title={name}>{name}</Name>
-        <Count>{countIcon} <Number>{count}</Number></Count>
-        {language && (
-          <Language
-            to={`/search?q=${encodeURIComponent(language.toLowerCase())}`}
-            color={repoColors[language] ? repoColors[language].color : '#000'}
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            {language.toLowerCase()}
-          </Language>
-        )}
-        {!language && topic && (
-          <Tag
-            to={`/search?q=${encodeURIComponent(topic.toLowerCase())}`}
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            #{topic.toLowerCase()}
-          </Tag>
-        )}
-        {text && <Text>{text}</Text>}
-      </Wrapper>
-    );
-  }
-}
+        {language.toLowerCase()}
+      </Language>
+    )}
+    {!language && topic && (
+      <Tag
+        to={`/search?q=topic:${encodeURIComponent(topic.toLowerCase())}`}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        #{topic.toLowerCase()}
+      </Tag>
+    )}
+    {text && <Text>{text}</Text>}
+  </Wrapper>
+);
 
 Card.propTypes = {
   name: PropTypes.string,
@@ -267,8 +191,6 @@ Card.propTypes = {
   count: PropTypes.number,
   countIcon: PropTypes.node,
   text: PropTypes.node,
-  bookmarkRepo: PropTypes.func,
-  appContext: PropTypes.object.isRequired,
 };
 
 Card.defaultProps = {
@@ -280,7 +202,6 @@ Card.defaultProps = {
   count: 0,
   countIcon: null,
   text: null,
-  bookmarkRepo: () => {},
 };
 
-export default withAppContext(Card);
+export default Card;

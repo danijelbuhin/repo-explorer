@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
@@ -30,7 +30,7 @@ const Header = styled.div`
   user-select: none;
 
   ${ChevronIcon} {
-    transform: rotateZ(${({ isCollapsed }) => isCollapsed ? 180 : 0}deg);
+    transform: rotateZ(${({ isClosed }) => !isClosed ? 180 : 0}deg);
   }
 `;
 
@@ -38,17 +38,19 @@ const Body = styled.div`
   padding: 10px;
 `;
 
-const Panel = ({ title, isClosable, children }) => {
-  const [isCollapsed, setIsCollapsed] = useState(true);
-
+const Panel = ({ title, isClosable, isClosed: isClosedInitial, children }) => {
+  const [isClosed, setIsClosed] = useState(isClosedInitial);
+  useEffect(() => {
+    setIsClosed(isClosedInitial);
+  }, [isClosedInitial]);
   return (
     <Wrapper>
       {title && (
         isClosable ? (
           <Header
             isClosable={isClosable}
-            isCollapsed={isCollapsed}
-            onClick={() => setIsCollapsed(!isCollapsed)}
+            isClosed={isClosed}
+            onClick={() => setIsClosed(!isClosed)}
           >
             {title}
             <ChevronIcon />
@@ -59,7 +61,7 @@ const Panel = ({ title, isClosable, children }) => {
           </Header>
         )
       )}
-      {isCollapsed && (
+      {!isClosed && (
         <Body>
           {children}
         </Body>
@@ -71,12 +73,14 @@ const Panel = ({ title, isClosable, children }) => {
 Panel.propTypes = {
   title: PropTypes.string,
   isClosable: PropTypes.bool,
+  isClosed: PropTypes.bool,
   children: PropTypes.node,
 };
 
 Panel.defaultProps = {
   title: '',
   isClosable: true,
+  isClosed: false,
   children: null,
 };
 

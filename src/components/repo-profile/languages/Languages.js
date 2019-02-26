@@ -66,7 +66,11 @@ const Name = styled.div`
 const totalBytes = data => Object.values(data).reduce((acc, curr) => acc + curr, 0);
 
 const Languages = ({ languages, hasError, isLoading, errorMessage }) => (
-  <Panel title="Languages list">
+  <Panel
+    title="Languages list"
+    isClosed={Object.keys(languages).length === 0}
+    isClosable={Object.keys(languages).length === 0}
+  >
     {!hasError && Object.keys(languages).length === 0 && (
       <Warning>
         This repo does not contain any programming language.
@@ -76,7 +80,7 @@ const Languages = ({ languages, hasError, isLoading, errorMessage }) => (
       <Scrollbars autoHeight>
         <Wrapper>
           {!isLoading && Object.keys(languages).map(language => (
-            <Language key={language} to={`/search?q=${encodeURIComponent(language.toLowerCase())}`}>
+            <Language key={language} to={`/search?q=language:${encodeURIComponent(language.toLowerCase())}`}>
               <Dot background={repoColors[language] && repoColors[language].color} />
               <Name>
                 {language}

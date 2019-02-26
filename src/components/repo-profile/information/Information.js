@@ -113,7 +113,7 @@ const Information = ({ repo }) => (
             return (
               <Tag
                 key={popular}
-                to={`/search?q=${encodeURIComponent(popular.toLowerCase())}`}
+                to={`/search?q=topic:${encodeURIComponent(popular.toLowerCase())}`}
                 style={{ margin: '3px 5px' }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -127,7 +127,7 @@ const Information = ({ repo }) => (
         {repo.topics && repo.topics.length > 0 && repo.topics.map(topic => (
           <Tag
             key={topic}
-            to={`/search?q=${encodeURIComponent(topic.toLowerCase())}`}
+            to={`/search?q=topic:${encodeURIComponent(topic.toLowerCase())}`}
             style={{ margin: 3 }}
             onClick={(e) => {
               e.stopPropagation();

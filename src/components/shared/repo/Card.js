@@ -233,7 +233,7 @@ class Card extends Component {
         <Count>{countIcon} <Number>{count}</Number></Count>
         {language && (
           <Language
-            to={`/search?q=${encodeURIComponent(language.toLowerCase())}`}
+            to={`/search?q=language:${encodeURIComponent(language.toLowerCase())}`}
             color={repoColors[language] ? repoColors[language].color : '#000'}
             onClick={(e) => {
               e.stopPropagation();
@@ -244,7 +244,7 @@ class Card extends Component {
         )}
         {!language && topic && (
           <Tag
-            to={`/search?q=${encodeURIComponent(topic.toLowerCase())}`}
+            to={`/search?q=topic:${encodeURIComponent(topic.toLowerCase())}`}
             onClick={(e) => {
               e.stopPropagation();
             }}

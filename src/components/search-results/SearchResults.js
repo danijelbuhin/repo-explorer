@@ -20,6 +20,12 @@ const SearchResults = (props) => {
   const { location: { search }, appContext } = props;
   const { token, client_id, client_secret, fetchRateLimit } = appContext;
   const { q: result } = qs.parse(search, { ignoreQueryPrefix: true });
+  let listTitle = '';
+  if (result.includes(':')) {
+    listTitle = `Search results for ${result.split(':')[0]}: "${result.split(':')[1]}"`;
+  } else {
+    listTitle = `Search results for query: "${result}"`;
+  }
 
   const [apiState, setApiState] = useApiState();
   const [repos, setRepos] = useState([]);
@@ -54,7 +60,7 @@ const SearchResults = (props) => {
   return (
     <Wrapper>
       <RepoList
-        title={`Search results for ${result} query`}
+        title={listTitle}
         isLoading={apiState.isLoading}
         hasError={apiState.hasError}
         errorMessage={apiState.errorMessage}

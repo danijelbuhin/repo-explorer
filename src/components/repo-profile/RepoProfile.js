@@ -160,6 +160,13 @@ const RepoProfile = (props) => {
       .catch(({ response: { data } }) => {
         setApiState({ isLoading: false, hasError: true, errorMessage: data.message });
       });
+    return () => {
+      setCommits([]);
+      setContributors([]);
+      setLanguages([]);
+      setReadme('');
+      setParticipation([]);
+    };
   }, [id]);
 
   if (apiState.isLoading) {

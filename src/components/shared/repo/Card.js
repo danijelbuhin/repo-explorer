@@ -138,7 +138,7 @@ const Card = ({
   ...rest
 }) => (
   <Wrapper
-    onClick={() => history.push(`/repo/${encodeURIComponent(name)}`)}
+    onClick={() => history.push(`/${name}`)}
     {...rest}
   >
     <Bookmark

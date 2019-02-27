@@ -29,7 +29,8 @@ const Wrapper = styled.div`
 `;
 
 const RepoProfile = (props) => {
-  const { match: { params: { id } }, appContext } = props;
+  const { match, appContext } = props;
+  const repoName = `${match.params.user}/${match.params.repo}`;
 
   const [apiState, setApiState] = useApiState({ isLoading: true, hasError: false });
   const [repo, setRepo] = useState({});
@@ -98,7 +99,7 @@ const RepoProfile = (props) => {
 
   const fetchRepo = () => {
     setApiState({ isLoading: true, hasError: false });
-    return appContext.fetchRepo(decodeURIComponent(id))
+    return appContext.fetchRepo(repoName)
       .then((data) => {
         document.title = `Exploring ${data.full_name} | Repo Explorer`;
         handleView({
@@ -121,7 +122,7 @@ const RepoProfile = (props) => {
 
   const fetchSection = (setHook, setApiHook, apiMethod, initialData, customThen) => {
     setApiHook({ isLoading: true, hasError: false });
-    return appContext[apiMethod](decodeURIComponent(id))
+    return appContext[apiMethod](repoName)
       .then((data) => { // eslint-disable-line
         if (customThen) {
           return data;
@@ -167,10 +168,10 @@ const RepoProfile = (props) => {
       setReadme('');
       setParticipation([]);
     };
-  }, [id]);
+  }, [repoName]);
 
   if (apiState.isLoading) {
-    return <Loader text={`Fetching all information about ${decodeURIComponent(id)}`} />;
+    return <Loader text={`Fetching all information about ${repoName}`} />;
   }
 
   if (apiState.hasError) {

@@ -35,6 +35,9 @@ const RepoProfile = (props) => {
   const [apiState, setApiState] = useApiState({ isLoading: true, hasError: false });
   const [repo, setRepo] = useState({});
 
+  const [, setStatsState] = useApiState();
+  const [stats, setStats] = useState({});
+
   const [commitsState, setCommitsState] = useApiState();
   const [commits, setCommits] = useState([]);
 
@@ -53,6 +56,48 @@ const RepoProfile = (props) => {
   const [topic, setTopic] = useState(null);
 
   const [views, setViews] = useState(0);
+
+  const generateStats = (_repo) => { //eslint-disable-line
+    const user = firebase.auth.currentUser;
+    if (user) {
+      setStatsState({ isLoading: true, hasError: false });
+      return firebase.users.doc(user.uid).get().then((u) => {
+        setStatsState({ isLoading: false, hasError: false });
+        const userStats = u.data().stats;
+        if (userStats.length === 0 || !userStats.filter(r => r.id === _repo.id)[0]) {
+          appContext.updateUser('stats', [...userStats, {
+            id: _repo.id,
+            forks: _repo.forks_count,
+            watchers: _repo.watchers,
+            stars: _repo.stargazers_count,
+            issues: _repo.open_issues_count,
+            subscribers: _repo.subscribers_count,
+          }]);
+          return;
+        }
+        if (userStats.length !== 0 || userStats.filter(r => r.id === _repo.id)[0]) {
+          const index = userStats.findIndex(r => r.id === _repo.id);
+          const old = userStats[index];
+          // console.log(old);
+          setStats(old);
+          appContext
+            .updateUser(
+              'stats',
+              [...userStats.filter(r => r.id !== _repo.id),
+                Object.assign({}, {
+                  id: _repo.id,
+                  forks: _repo.forks_count,
+                  watchers: _repo.watchers,
+                  stars: _repo.stargazers_count,
+                  issues: _repo.open_issues_count,
+                  subscribers: _repo.subscribers_count,
+                }),
+              ],
+            );
+        }
+      });
+    }
+  };
 
   const getRepoViews = (id) => { // eslint-disable-line
     return firebase.views.doc(String(id)).get().then((doc) => {
@@ -155,6 +200,7 @@ const RepoProfile = (props) => {
             fetchSection(setContributors, setContributorsState, 'fetchContributors', []),
             fetchSection(setReadme, setReadmeState, 'fetchReadme', ''),
             getRepoViews(data.id),
+            generateStats(data),
           ])
           .then(() => {
             setApiState({ isLoading: false, hasError: false });
@@ -169,6 +215,7 @@ const RepoProfile = (props) => {
       setLanguages([]);
       setReadme('');
       setParticipation([]);
+      setStats({});
     };
   }, [repoName]);
 
@@ -190,6 +237,7 @@ const RepoProfile = (props) => {
         issues={repo.open_issues_count}
         subscribers={repo.subscribers_count}
         views={views}
+        stats={stats}
       />
       <Languages
         languages={languages}

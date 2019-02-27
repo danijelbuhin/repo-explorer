@@ -34,6 +34,9 @@ const Home = ({ appContext }) => {
   const [viewsState, setViewsState] = useApiState();
   const [views, setViews] = useState([]);
 
+  const [latestViewsState, setLatestViewsState] = useApiState();
+  const [latestViews, setLatestViews] = useState([]);
+
   const [reposState, setReposState] = useApiState();
   const [repos, setRepos] = useState([]);
 
@@ -59,6 +62,26 @@ const Home = ({ appContext }) => {
       });
   };
 
+  const fetchLatestViews = () => {
+    setLatestViewsState({ isLoading: true, hasError: false });
+    firebase.views
+      .orderBy('viewed_at', 'desc')
+      .limit(5)
+      .get()
+      .then(({ docs }) => {
+        const latest = [];
+        docs.forEach(doc => latest.push({
+          id: doc.data().id,
+          ...doc.data(),
+        }));
+        setLatestViews(latest);
+        setLatestViewsState({ isLoading: false, hasError: false });
+      })
+      .catch(() => {
+        setLatestViewsState({ isLoading: false, hasError: true });
+      });
+  };
+
   const fetchRepos = (params = {}, setSubmitting) => {
     const { fetchPopularRepos } = appContext;
     if (setSubmitting) setSubmitting(true);
@@ -77,6 +100,7 @@ const Home = ({ appContext }) => {
 
   useEffect(() => {
     fetchViews();
+    fetchLatestViews();
   }, []);
 
   return (
@@ -125,10 +149,29 @@ const Home = ({ appContext }) => {
             count={repo.views}
             countIcon={<EyeSVG />}
             id={repo.id}
+            language={repo.language}
+            topic={repo.topics && repo.topics[0]}
+          />
+        ))}
+      </RepoList>
+      <RepoList
+        title="Latest viewed repos:"
+        isLoading={latestViewsState.isLoading}
+        hasError={latestViewsState.hasError}
+        hasFilters={false}
+      >
+        {latestViews.map(repo => (
+          <Card
+            key={repo.id}
+            avatar={repo.avatar_url}
+            name={repo.full_name}
+            count={repo.views}
+            countIcon={<EyeSVG />}
+            id={repo.id}
             text={(
               <LastViewText>
                 <strong>Latest view: </strong>
-                {`${moment(repo.viewed_at).format('DD MMM YYYY, HH:mm:ss')}h`} <br />
+                {`${moment(repo.viewed_at).fromNow()}`} <br />
                 <span>From: </span>
                 {(!repo.viewed_from || repo.viewed_from.country === 'Unknown') && (
                   <span>Unknown location</span>

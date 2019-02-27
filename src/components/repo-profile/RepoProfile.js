@@ -108,6 +108,8 @@ const RepoProfile = (props) => {
           id: data.id,
           name: data.name,
           stargazers_count: data.stargazers_count,
+          topics: data.topics,
+          language: data.language,
         });
         setRepo(data);
         setTopic(generateTopic({

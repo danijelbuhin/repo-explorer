@@ -42,46 +42,25 @@ const Home = ({ appContext }) => {
 
   const [page, setPage] = useState(1);
 
-  const fetchViews = () => {
+  const fetchViews = (order, setHook, setApiHook) => {
     setViewsState({ isLoading: true, hasError: false });
     firebase.views
-      .orderBy('views', 'desc')
+      .orderBy(order, 'desc')
       .limit(5)
       .get()
       .then(({ docs }) => {
-        const _views = [];
-        docs.forEach(doc => _views.push({
+        const data = [];
+        docs.forEach(doc => data.push({
           id: doc.data().id,
           ...doc.data(),
         }));
-        setViews(_views);
-        setViewsState({ isLoading: false, hasError: false });
+        setHook(data);
+        setApiHook({ isLoading: false, hasError: false });
       })
       .catch(() => {
-        setViewsState({ isLoading: false, hasError: true });
+        setApiHook({ isLoading: false, hasError: true });
       });
   };
-
-  const fetchLatestViews = () => {
-    setLatestViewsState({ isLoading: true, hasError: false });
-    firebase.views
-      .orderBy('viewed_at', 'desc')
-      .limit(5)
-      .get()
-      .then(({ docs }) => {
-        const latest = [];
-        docs.forEach(doc => latest.push({
-          id: doc.data().id,
-          ...doc.data(),
-        }));
-        setLatestViews(latest);
-        setLatestViewsState({ isLoading: false, hasError: false });
-      })
-      .catch(() => {
-        setLatestViewsState({ isLoading: false, hasError: true });
-      });
-  };
-
   const fetchRepos = (params = {}, setSubmitting) => {
     const { fetchPopularRepos } = appContext;
     if (setSubmitting) setSubmitting(true);
@@ -99,8 +78,8 @@ const Home = ({ appContext }) => {
   };
 
   useEffect(() => {
-    fetchViews();
-    fetchLatestViews();
+    fetchViews('views', setViews, setViewsState);
+    fetchViews('viewed_at', setLatestViews, setLatestViewsState);
   }, []);
 
   return (

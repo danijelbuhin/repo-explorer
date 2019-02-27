@@ -40,6 +40,7 @@ const SearchResults = (props) => {
           access_token: token ? token : undefined,
           sort: 'stars',
           order: 'desc',
+          per_page: 100,
         },
       })
       .then(({ data }) => {

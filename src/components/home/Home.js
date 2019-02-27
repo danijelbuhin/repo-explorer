@@ -34,31 +34,33 @@ const Home = ({ appContext }) => {
   const [viewsState, setViewsState] = useApiState();
   const [views, setViews] = useState([]);
 
+  const [latestViewsState, setLatestViewsState] = useApiState();
+  const [latestViews, setLatestViews] = useState([]);
+
   const [reposState, setReposState] = useApiState();
   const [repos, setRepos] = useState([]);
 
   const [page, setPage] = useState(1);
 
-  const fetchViews = () => {
+  const fetchViews = (order, setHook, setApiHook) => {
     setViewsState({ isLoading: true, hasError: false });
     firebase.views
-      .orderBy('views', 'desc')
+      .orderBy(order, 'desc')
       .limit(5)
       .get()
       .then(({ docs }) => {
-        const _views = [];
-        docs.forEach(doc => _views.push({
+        const data = [];
+        docs.forEach(doc => data.push({
           id: doc.data().id,
           ...doc.data(),
         }));
-        setViews(_views);
-        setViewsState({ isLoading: false, hasError: false });
+        setHook(data);
+        setApiHook({ isLoading: false, hasError: false });
       })
       .catch(() => {
-        setViewsState({ isLoading: false, hasError: true });
+        setApiHook({ isLoading: false, hasError: true });
       });
   };
-
   const fetchRepos = (params = {}, setSubmitting) => {
     const { fetchPopularRepos } = appContext;
     if (setSubmitting) setSubmitting(true);
@@ -76,7 +78,8 @@ const Home = ({ appContext }) => {
   };
 
   useEffect(() => {
-    fetchViews();
+    fetchViews('views', setViews, setViewsState);
+    fetchViews('viewed_at', setLatestViews, setLatestViewsState);
   }, []);
 
   return (
@@ -125,10 +128,29 @@ const Home = ({ appContext }) => {
             count={repo.views}
             countIcon={<EyeSVG />}
             id={repo.id}
+            language={repo.language}
+            topic={repo.topics && repo.topics[0]}
+          />
+        ))}
+      </RepoList>
+      <RepoList
+        title="Latest viewed repos:"
+        isLoading={latestViewsState.isLoading}
+        hasError={latestViewsState.hasError}
+        hasFilters={false}
+      >
+        {latestViews.map(repo => (
+          <Card
+            key={repo.id}
+            avatar={repo.avatar_url}
+            name={repo.full_name}
+            count={repo.views}
+            countIcon={<EyeSVG />}
+            id={repo.id}
             text={(
               <LastViewText>
                 <strong>Latest view: </strong>
-                {`${moment(repo.viewed_at).format('DD MMM YYYY, HH:mm:ss')}h`} <br />
+                {`${moment(repo.viewed_at).fromNow()}`} <br />
                 <span>From: </span>
                 {(!repo.viewed_from || repo.viewed_from.country === 'Unknown') && (
                   <span>Unknown location</span>

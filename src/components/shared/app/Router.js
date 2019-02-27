@@ -8,6 +8,7 @@ import Header from '../header/Header';
 import Home from '../../home/Home';
 import RepoProfile from '../../repo-profile/RepoProfile';
 import SearchResults from '../../search-results/SearchResults';
+import NotFound from '../not-found/NotFound';
 
 const AppRouter = () => (
   <Router history={history}>
@@ -21,7 +22,7 @@ const AppRouter = () => (
           exact
         />
         <ExtendedRoute
-          path="/repo/:id"
+          path="/:user/:repo"
           component={RepoProfile}
           title="Repo Profile | Explore GitHub Repositories"
           exact
@@ -31,6 +32,10 @@ const AppRouter = () => (
           component={SearchResults}
           title="Search results | Explore GitHub Repositories"
           exact
+        />
+        <ExtendedRoute
+          component={NotFound}
+          title="FourOFour | Explore GitHub Repositories"
         />
       </Switch>
     </Fragment>

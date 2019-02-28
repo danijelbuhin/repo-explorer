@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import axios from 'axios';
 import styled from 'styled-components';
+import { Route } from 'react-router-dom';
 
 import firebase from '../../services/firebase';
 
@@ -21,6 +22,7 @@ import Totals from './totals/Totals';
 import Participation from './participation/Participation';
 import Readme from './readme/Readme';
 import Views from './views/Views';
+import Navbar from './navbar/Navbar';
 
 const Wrapper = styled.div`
   max-width: 1100px;
@@ -57,7 +59,6 @@ const RepoProfile = (props) => {
   const [topic, setTopic] = useState(null);
 
   const [views, setViews] = useState(0);
-  const [isShowingViews, setIsShowingViews] = useState(false);
 
   const generateStats = (_repo) => { //eslint-disable-line
     const user = firebase.auth.currentUser;
@@ -80,7 +81,6 @@ const RepoProfile = (props) => {
         if (userStats.length !== 0 || userStats.filter(r => r.id === _repo.id)[0]) {
           const index = userStats.findIndex(r => r.id === _repo.id);
           const old = userStats[index];
-          // console.log(old);
           setStats(old);
           appContext
             .updateUser(
@@ -266,70 +266,86 @@ const RepoProfile = (props) => {
   return (
     <Wrapper>
       <Information repo={repo} count={repo.stargazers_count} />
-      <Totals
-        forks={repo.forks_count}
-        watchers={repo.watchers}
-        stars={repo.stargazers_count}
-        issues={repo.open_issues_count}
-        subscribers={repo.subscribers_count}
-        views={views}
-        stats={stats}
-        toggleViews={() => setIsShowingViews(!isShowingViews)}
+      <Navbar />
+      <Route
+        path="/:user/:repo/(overview)?"
+        exact
+        render={() => (
+          <React.Fragment>
+            <Totals
+              forks={repo.forks_count}
+              watchers={repo.watchers}
+              stars={repo.stargazers_count}
+              issues={repo.open_issues_count}
+              subscribers={repo.subscribers_count}
+              views={views}
+              stats={stats}
+            />
+            <Languages
+              languages={languages}
+              isLoading={languagesState.isLoading}
+              hasError={languagesState.hasError}
+              errorMessage={languagesState.errorMessage}
+            />
+            <Contributors
+              contributors={contributors}
+              isLoading={contributorsState.isLoading}
+              hasError={contributorsState.hasError}
+              errorMessage={contributorsState.errorMessage}
+            />
+            <SimilarRepos
+              id={repo.id}
+              topic={topic}
+              searchRepo={appContext.searchRepo}
+            />
+            <Readme
+              readme={readme}
+              isLoading={readmeState.isLoading}
+              hasError={readmeState.hasError}
+              errorMessage={readmeState.errorMessage}
+            />
+          </React.Fragment>
+        )}
       />
-      {isShowingViews && (
-        <Views id={repo.id} />
-      )}
-      {!isShowingViews && (
-        <React.Fragment>
-          <Languages
-            languages={languages}
-            isLoading={languagesState.isLoading}
-            hasError={languagesState.hasError}
-            errorMessage={languagesState.errorMessage}
-          />
-          <Contributors
-            contributors={contributors}
-            isLoading={contributorsState.isLoading}
-            hasError={contributorsState.hasError}
-            errorMessage={contributorsState.errorMessage}
-          />
-          <Commits
-            commits={commits}
-            isLoading={commitsState.isLoading}
-            hasError={commitsState.hasError}
-            errorMessage={commitsState.errorMessage}
-            fetchCommits={() => {
-              fetchSection(setCommits, setCommitsState, 'fetchCommits', [], true).then((items) => {
-                setCommitsState({ isLoading: false, hasError: false });
-                setCommits(items);
-              });
-            }}
-          />
-          <Participation
-            participation={participation}
-            isLoading={participationState.isLoading}
-            hasError={participationState.hasError}
-            errorMessage={participationState.errorMessage}
-            fetchParticipation={() => {
-              fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [], true).then((items) => {
-                setParticipationState({ isLoading: false, hasError: false });
-                setParticipation(items);
-              });
-            }}
-          />
-          <SimilarRepos
-            id={repo.id}
-            topic={topic}
-            searchRepo={appContext.searchRepo}
-          />
-          <Readme
-            readme={readme}
-            isLoading={readmeState.isLoading}
-            hasError={readmeState.hasError}
-            errorMessage={readmeState.errorMessage}
-          />
-        </React.Fragment>
-      )}
+      <Route
+        path="/:user/:repo/stats"
+        exact
+        render={() => (
+          <React.Fragment>
+            <Commits
+              commits={commits}
+              isLoading={commitsState.isLoading}
+              hasError={commitsState.hasError}
+              errorMessage={commitsState.errorMessage}
+              fetchCommits={() => {
+                fetchSection(setCommits, setCommitsState, 'fetchCommits', [], true).then((items) => {
+                  setCommitsState({ isLoading: false, hasError: false });
+                  setCommits(items);
+                });
+              }}
+            />
+            <Participation
+              participation={participation}
+              isLoading={participationState.isLoading}
+              hasError={participationState.hasError}
+              errorMessage={participationState.errorMessage}
+              fetchParticipation={() => {
+                fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [], true).then((items) => {
+                  setParticipationState({ isLoading: false, hasError: false });
+                  setParticipation(items);
+                });
+              }}
+            />
+          </React.Fragment>
+        )}
+      />
+      <Route
+        path="/:user/:repo/views"
+        exact
+        render={() => (
+          <Views id={repo.id} />
+        )}
+      />
     </Wrapper>
   );
 };

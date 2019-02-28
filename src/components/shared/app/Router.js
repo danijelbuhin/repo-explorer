@@ -22,7 +22,7 @@ const AppRouter = () => (
           exact
         />
         <ExtendedRoute
-          path="/:user/:repo/(overview|stats|views)?"
+          path="/:user/:repo/(stats|views)?"
           component={RepoProfile}
           title="Repo Profile | Repo Explorer - Explore Github Repositories"
           exact

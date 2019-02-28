@@ -105,8 +105,9 @@ const RepoProfile = (props) => {
     return firebase.views.doc(String(id)).get().then((doc) => {
       if (doc.exists) {
         setViews(doc.data().views + 1);
+        return;
       }
-      return 0;
+      setViews(1);
     });
   };
 

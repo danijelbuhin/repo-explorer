@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import Panel from '../panel/Panel';
 import { ReactComponent as TrendingUpSVG } from './assets/TrendingUp.svg';
 import { ReactComponent as TrendingDownSVG } from './assets/TrendingDown.svg';
+import Button from '../../shared/button/Button';
 
 const Wrapper = styled.div`
   display: flex;
@@ -56,6 +57,7 @@ const Totals = ({
   issues,
   views,
   stats,
+  toggleViews,
 }) => (
   <Panel>
     <Wrapper>
@@ -171,6 +173,7 @@ const Totals = ({
         Explorer Views
         <Count>
           {views}
+          <Button onClick={toggleViews}>Toggle</Button>
         </Count>
       </Total>
     </Wrapper>

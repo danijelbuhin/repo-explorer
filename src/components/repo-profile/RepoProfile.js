@@ -20,6 +20,7 @@ import Error from '../shared/error/Error';
 import Totals from './totals/Totals';
 import Participation from './participation/Participation';
 import Readme from './readme/Readme';
+import Views from './views/Views';
 
 const Wrapper = styled.div`
   max-width: 1100px;
@@ -56,6 +57,7 @@ const RepoProfile = (props) => {
   const [topic, setTopic] = useState(null);
 
   const [views, setViews] = useState(0);
+  const [isShowingViews, setIsShowingViews] = useState(false);
 
   const generateStats = (_repo) => { //eslint-disable-line
     const user = firebase.auth.currentUser;
@@ -134,11 +136,43 @@ const RepoProfile = (props) => {
     });
   };
 
+  const storeCountry = (repo_id, country_name, country_code) => {
+    firebase.viewsBreakdown.doc(String(repo_id)).get().then((doc) => {
+      if (doc.exists) {
+        firebase.viewsBreakdown.doc(String(repo_id)).get().then((item) => {
+          const count = item.data().countries[country_code].views;
+          firebase.viewsBreakdown.doc(String(repo_id)).update({
+            countries: {
+              ...item.data().countries,
+              [country_code]: {
+                country_name,
+                country_code,
+                views: !isNaN(count) ? count + 1 : 1, // eslint-disable-line
+              },
+            },
+          });
+        });
+      } else {
+        firebase.viewsBreakdown.doc(String(repo_id)).set({
+          countries: {
+            [country_code]: {
+              country_name,
+              country_code,
+              views: 1,
+            },
+          },
+        });
+      }
+    });
+  };
+
   const handleView = (params) => {
     axios.get('https://json.geoiplookup.io/').then(({ data }) => {
       storeView(params, data.country_name, data.country_code);
+      storeCountry(params.id, data.country_name, data.country_code);
     }).catch(() => {
-      storeView(params, 'Unknown', '');
+      storeView(params, 'Unknown', 'UNKNOWN');
+      storeCountry(params.id, 'Unknown', 'UNKNOWN');
     });
   };
 
@@ -216,6 +250,7 @@ const RepoProfile = (props) => {
       setReadme('');
       setParticipation([]);
       setStats({});
+      setViews(0);
     };
   }, [repoName]);
 
@@ -238,54 +273,62 @@ const RepoProfile = (props) => {
         subscribers={repo.subscribers_count}
         views={views}
         stats={stats}
+        toggleViews={() => setIsShowingViews(!isShowingViews)}
       />
-      <Languages
-        languages={languages}
-        isLoading={languagesState.isLoading}
-        hasError={languagesState.hasError}
-        errorMessage={languagesState.errorMessage}
-      />
-      <Contributors
-        contributors={contributors}
-        isLoading={contributorsState.isLoading}
-        hasError={contributorsState.hasError}
-        errorMessage={contributorsState.errorMessage}
-      />
-      <Commits
-        commits={commits}
-        isLoading={commitsState.isLoading}
-        hasError={commitsState.hasError}
-        errorMessage={commitsState.errorMessage}
-        fetchCommits={() => {
-          fetchSection(setCommits, setCommitsState, 'fetchCommits', [], true).then((items) => {
-            setCommitsState({ isLoading: false, hasError: false });
-            setCommits(items);
-          });
-        }}
-      />
-      <Participation
-        participation={participation}
-        isLoading={participationState.isLoading}
-        hasError={participationState.hasError}
-        errorMessage={participationState.errorMessage}
-        fetchParticipation={() => {
-          fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [], true).then((items) => {
-            setParticipationState({ isLoading: false, hasError: false });
-            setParticipation(items);
-          });
-        }}
-      />
-      <SimilarRepos
-        id={repo.id}
-        topic={topic}
-        searchRepo={appContext.searchRepo}
-      />
-      <Readme
-        readme={readme}
-        isLoading={readmeState.isLoading}
-        hasError={readmeState.hasError}
-        errorMessage={readmeState.errorMessage}
-      />
+      {isShowingViews && (
+        <Views id={repo.id} />
+      )}
+      {!isShowingViews && (
+        <React.Fragment>
+          <Languages
+            languages={languages}
+            isLoading={languagesState.isLoading}
+            hasError={languagesState.hasError}
+            errorMessage={languagesState.errorMessage}
+          />
+          <Contributors
+            contributors={contributors}
+            isLoading={contributorsState.isLoading}
+            hasError={contributorsState.hasError}
+            errorMessage={contributorsState.errorMessage}
+          />
+          <Commits
+            commits={commits}
+            isLoading={commitsState.isLoading}
+            hasError={commitsState.hasError}
+            errorMessage={commitsState.errorMessage}
+            fetchCommits={() => {
+              fetchSection(setCommits, setCommitsState, 'fetchCommits', [], true).then((items) => {
+                setCommitsState({ isLoading: false, hasError: false });
+                setCommits(items);
+              });
+            }}
+          />
+          <Participation
+            participation={participation}
+            isLoading={participationState.isLoading}
+            hasError={participationState.hasError}
+            errorMessage={participationState.errorMessage}
+            fetchParticipation={() => {
+              fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [], true).then((items) => {
+                setParticipationState({ isLoading: false, hasError: false });
+                setParticipation(items);
+              });
+            }}
+          />
+          <SimilarRepos
+            id={repo.id}
+            topic={topic}
+            searchRepo={appContext.searchRepo}
+          />
+          <Readme
+            readme={readme}
+            isLoading={readmeState.isLoading}
+            hasError={readmeState.hasError}
+            errorMessage={readmeState.errorMessage}
+          />
+        </React.Fragment>
+      )}
     </Wrapper>
   );
 };

@@ -43,7 +43,7 @@ const Home = ({ appContext }) => {
   const [page, setPage] = useState(1);
 
   const fetchViews = (order, setHook, setApiHook) => {
-    setViewsState({ isLoading: true, hasError: false });
+    setApiHook({ isLoading: true, hasError: false });
     firebase.views
       .orderBy(order, 'desc')
       .limit(5)

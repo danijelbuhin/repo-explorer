@@ -54,7 +54,7 @@ const Readme = ({ id }) => {
   }, []);
 
   return (
-    <Panel title="Views breakdown" isClosable={false}>
+    <Panel title="Views breakdown (In progress)" isClosable={false}>
       {countriesState.isLoading && (
         <div>Loading countries...</div>
       )}

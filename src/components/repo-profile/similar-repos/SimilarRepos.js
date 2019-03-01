@@ -12,12 +12,11 @@ import Panel from '../panel/Panel';
 const SimilarRepos = (props) => {
   const { topic, searchRepo } = props;
 
-  const [apiState, setApiState] = useApiState();
+  const [apiState, setApiState] = useApiState({ isLoading: true, hasError: false });
   const [similarRepos, setSimilarRepos] = useState([]);
 
   useEffect(() => {
     if (topic) {
-      setApiState({ isLoading: true, hasError: false });
       searchRepo(
         {
           q: `topic:${topic}`,
@@ -33,7 +32,7 @@ const SimilarRepos = (props) => {
         })
         .catch(({ response: { data } }) => setApiState({ isLoading: false, hasError: true, errorMessage: data.message }));
     }
-  }, [topic]);
+  }, []);
 
   return (
     <Panel

@@ -293,11 +293,6 @@ const RepoProfile = (props) => {
               hasError={contributorsState.hasError}
               errorMessage={contributorsState.errorMessage}
             />
-            <SimilarRepos
-              id={repo.id}
-              topic={topic}
-              searchRepo={appContext.searchRepo}
-            />
             <Readme
               readme={readme}
               isLoading={readmeState.isLoading}
@@ -344,6 +339,17 @@ const RepoProfile = (props) => {
         exact
         render={() => (
           <Views id={repo.id} />
+        )}
+      />
+      <Route
+        path="/:user/:repo/similar"
+        exact
+        render={() => (
+          <SimilarRepos
+            id={repo.id}
+            topic={topic}
+            searchRepo={appContext.searchRepo}
+          />
         )}
       />
     </Wrapper>

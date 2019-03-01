@@ -174,7 +174,7 @@ class AppProvider extends Component {
         if (excludeId) {
           return {
             ...data,
-            items: data.items.filter(r => r.id !== excludeId).filter((_, i) => i < 5),
+            items: data.items.filter(r => r.id !== excludeId).filter((_, i) => i < params.per_page),
           };
         }
         return data;

@@ -70,7 +70,7 @@ const Participation = ({
         <Warning>
           <span>No commits have been found.</span>
           <span>
-            Note: GitHub sometimes returns empty results. If you think that this might be the case,
+            Note: GitHub may return empty results if statistics calculation was not finished.
           </span>
           <Button onClick={fetchParticipation} disabled={isLoading}>{isLoading ? 'Fetching commits...' : 'Fetch commits again'}</Button>
         </Warning>

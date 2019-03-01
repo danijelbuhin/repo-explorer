@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 import { ReactComponent as ChevronSVG } from './assets/Chevron.svg';
 
-const Wrapper = styled.div`
+export const Wrapper = styled.div`
   width: 100%;
   margin-bottom: 10px;
 

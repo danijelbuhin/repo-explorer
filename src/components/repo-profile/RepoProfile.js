@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import axios from 'axios';
 import styled from 'styled-components';
+import { Route } from 'react-router-dom';
 
 import firebase from '../../services/firebase';
 
@@ -20,6 +21,8 @@ import Error from '../shared/error/Error';
 import Totals from './totals/Totals';
 import Participation from './participation/Participation';
 import Readme from './readme/Readme';
+import Views from './views/Views';
+import Navbar from './navbar/Navbar';
 
 const Wrapper = styled.div`
   max-width: 1100px;
@@ -78,7 +81,6 @@ const RepoProfile = (props) => {
         if (userStats.length !== 0 || userStats.filter(r => r.id === _repo.id)[0]) {
           const index = userStats.findIndex(r => r.id === _repo.id);
           const old = userStats[index];
-          // console.log(old);
           setStats(old);
           appContext
             .updateUser(
@@ -103,8 +105,9 @@ const RepoProfile = (props) => {
     return firebase.views.doc(String(id)).get().then((doc) => {
       if (doc.exists) {
         setViews(doc.data().views + 1);
+        return;
       }
-      return 0;
+      setViews(1);
     });
   };
 
@@ -134,11 +137,43 @@ const RepoProfile = (props) => {
     });
   };
 
+  const storeCountry = (repo_id, country_name, country_code) => {
+    firebase.viewsBreakdown.doc(String(repo_id)).get().then((doc) => {
+      if (doc.exists) {
+        firebase.viewsBreakdown.doc(String(repo_id)).get().then((item) => {
+          const count = item.data().countries[country_code].views;
+          firebase.viewsBreakdown.doc(String(repo_id)).update({
+            countries: {
+              ...item.data().countries,
+              [country_code]: {
+                country_name,
+                country_code,
+                views: !isNaN(count) ? count + 1 : 1, // eslint-disable-line
+              },
+            },
+          });
+        });
+      } else {
+        firebase.viewsBreakdown.doc(String(repo_id)).set({
+          countries: {
+            [country_code]: {
+              country_name,
+              country_code,
+              views: 1,
+            },
+          },
+        });
+      }
+    });
+  };
+
   const handleView = (params) => {
     axios.get('https://json.geoiplookup.io/').then(({ data }) => {
       storeView(params, data.country_name, data.country_code);
+      storeCountry(params.id, data.country_name, data.country_code);
     }).catch(() => {
-      storeView(params, 'Unknown', '');
+      storeView(params, 'Unknown', 'UNKNOWN');
+      storeCountry(params.id, 'Unknown', 'UNKNOWN');
     });
   };
 
@@ -216,6 +251,7 @@ const RepoProfile = (props) => {
       setReadme('');
       setParticipation([]);
       setStats({});
+      setViews(0);
     };
   }, [repoName]);
 
@@ -230,61 +266,91 @@ const RepoProfile = (props) => {
   return (
     <Wrapper>
       <Information repo={repo} count={repo.stargazers_count} />
-      <Totals
-        forks={repo.forks_count}
-        watchers={repo.watchers}
-        stars={repo.stargazers_count}
-        issues={repo.open_issues_count}
-        subscribers={repo.subscribers_count}
-        views={views}
-        stats={stats}
+      <Navbar />
+      <Route
+        path="/:user/:repo/(overview)?"
+        exact
+        render={() => (
+          <React.Fragment>
+            <Totals
+              forks={repo.forks_count}
+              watchers={repo.watchers}
+              stars={repo.stargazers_count}
+              issues={repo.open_issues_count}
+              subscribers={repo.subscribers_count}
+              views={views}
+              stats={stats}
+            />
+            <Languages
+              languages={languages}
+              isLoading={languagesState.isLoading}
+              hasError={languagesState.hasError}
+              errorMessage={languagesState.errorMessage}
+            />
+            <Contributors
+              contributors={contributors}
+              isLoading={contributorsState.isLoading}
+              hasError={contributorsState.hasError}
+              errorMessage={contributorsState.errorMessage}
+            />
+            <Readme
+              readme={readme}
+              isLoading={readmeState.isLoading}
+              hasError={readmeState.hasError}
+              errorMessage={readmeState.errorMessage}
+            />
+          </React.Fragment>
+        )}
       />
-      <Languages
-        languages={languages}
-        isLoading={languagesState.isLoading}
-        hasError={languagesState.hasError}
-        errorMessage={languagesState.errorMessage}
+      <Route
+        path="/:user/:repo/stats"
+        exact
+        render={() => (
+          <React.Fragment>
+            <Commits
+              commits={commits}
+              isLoading={commitsState.isLoading}
+              hasError={commitsState.hasError}
+              errorMessage={commitsState.errorMessage}
+              fetchCommits={() => {
+                fetchSection(setCommits, setCommitsState, 'fetchCommits', [], true).then((items) => {
+                  setCommitsState({ isLoading: false, hasError: false });
+                  setCommits(items);
+                });
+              }}
+            />
+            <Participation
+              participation={participation}
+              isLoading={participationState.isLoading}
+              hasError={participationState.hasError}
+              errorMessage={participationState.errorMessage}
+              fetchParticipation={() => {
+                fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [], true).then((items) => {
+                  setParticipationState({ isLoading: false, hasError: false });
+                  setParticipation(items);
+                });
+              }}
+            />
+          </React.Fragment>
+        )}
       />
-      <Contributors
-        contributors={contributors}
-        isLoading={contributorsState.isLoading}
-        hasError={contributorsState.hasError}
-        errorMessage={contributorsState.errorMessage}
+      <Route
+        path="/:user/:repo/views"
+        exact
+        render={() => (
+          <Views id={repo.id} />
+        )}
       />
-      <Commits
-        commits={commits}
-        isLoading={commitsState.isLoading}
-        hasError={commitsState.hasError}
-        errorMessage={commitsState.errorMessage}
-        fetchCommits={() => {
-          fetchSection(setCommits, setCommitsState, 'fetchCommits', [], true).then((items) => {
-            setCommitsState({ isLoading: false, hasError: false });
-            setCommits(items);
-          });
-        }}
-      />
-      <Participation
-        participation={participation}
-        isLoading={participationState.isLoading}
-        hasError={participationState.hasError}
-        errorMessage={participationState.errorMessage}
-        fetchParticipation={() => {
-          fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [], true).then((items) => {
-            setParticipationState({ isLoading: false, hasError: false });
-            setParticipation(items);
-          });
-        }}
-      />
-      <SimilarRepos
-        id={repo.id}
-        topic={topic}
-        searchRepo={appContext.searchRepo}
-      />
-      <Readme
-        readme={readme}
-        isLoading={readmeState.isLoading}
-        hasError={readmeState.hasError}
-        errorMessage={readmeState.errorMessage}
+      <Route
+        path="/:user/:repo/similar"
+        exact
+        render={() => (
+          <SimilarRepos
+            id={repo.id}
+            topic={topic}
+            searchRepo={appContext.searchRepo}
+          />
+        )}
       />
     </Wrapper>
   );

@@ -22,20 +22,20 @@ const AppRouter = () => (
           exact
         />
         <ExtendedRoute
-          path="/:user/:repo"
+          path="/:user/:repo/(stats|views|similar)?"
           component={RepoProfile}
-          title="Repo Profile | Explore GitHub Repositories"
+          title="Repo Profile | Repo Explorer - Explore Github Repositories"
           exact
         />
         <ExtendedRoute
           path="/search"
           component={SearchResults}
-          title="Search results | Explore GitHub Repositories"
+          title="Search results | Repo Explorer - Explore Github Repositories"
           exact
         />
         <ExtendedRoute
           component={NotFound}
-          title="FourOFour | Explore GitHub Repositories"
+          title="FourOFour | Repo Explorer - Explore Github Repositories"
         />
       </Switch>
     </Fragment>

@@ -20,6 +20,7 @@ class Firebase {
 
     this.users = this.db.collection('users');
     this.views = this.db.collection('views');
+    this.viewsBreakdown = this.db.collection('views-breakdown');
   }
 
   authenticate() {

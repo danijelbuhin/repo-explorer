@@ -19,9 +19,10 @@ const Warning = styled.div`
 
   span {
     display: block;
-    max-width: 300px;
+    max-width: 420px;
     width: 100%;
     margin: 10px auto;
+    text-align: center;
   }
 `;
 

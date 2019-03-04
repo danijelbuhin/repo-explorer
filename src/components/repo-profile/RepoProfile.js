@@ -141,17 +141,30 @@ const RepoProfile = (props) => {
     firebase.viewsBreakdown.doc(String(repo_id)).get().then((doc) => {
       if (doc.exists) {
         firebase.viewsBreakdown.doc(String(repo_id)).get().then((item) => {
-          const count = item.data().countries[country_code].views;
-          firebase.viewsBreakdown.doc(String(repo_id)).update({
-            countries: {
-              ...item.data().countries,
-              [country_code]: {
-                country_name,
-                country_code,
-                views: !isNaN(count) ? count + 1 : 1, // eslint-disable-line
+          if (item.data().countries[country_code]) {
+            const count = item.data().countries[country_code].views;
+            firebase.viewsBreakdown.doc(String(repo_id)).update({
+              countries: {
+                ...item.data().countries,
+                [country_code]: {
+                  country_name,
+                  country_code,
+                  views: !isNaN(count) ? count + 1 : 1, // eslint-disable-line
+                },
               },
-            },
-          });
+            });
+          } else {
+            firebase.viewsBreakdown.doc(String(repo_id)).set({
+              countries: {
+                ...item.data().countries,
+                [country_code]: {
+                  country_name,
+                  country_code,
+                  views: 1,
+                },
+              },
+            });
+          }
         });
       } else {
         firebase.viewsBreakdown.doc(String(repo_id)).set({

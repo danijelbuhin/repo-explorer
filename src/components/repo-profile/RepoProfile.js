@@ -137,7 +137,7 @@ const RepoProfile = (props) => {
     });
   };
 
-  const storeCountry = (repo_id, country_name, country_code) => {
+  const storeCountry = (repo_id, country_name, country_code, coords) => {
     firebase.viewsBreakdown.doc(String(repo_id)).get().then((doc) => {
       if (doc.exists) {
         firebase.viewsBreakdown.doc(String(repo_id)).get().then((item) => {
@@ -149,6 +149,7 @@ const RepoProfile = (props) => {
                 [country_code]: {
                   country_name,
                   country_code,
+                  coords,
                   views: !isNaN(count) ? count + 1 : 1, // eslint-disable-line
                 },
               },
@@ -160,6 +161,7 @@ const RepoProfile = (props) => {
                 [country_code]: {
                   country_name,
                   country_code,
+                  coords,
                   views: 1,
                 },
               },
@@ -172,6 +174,7 @@ const RepoProfile = (props) => {
             [country_code]: {
               country_name,
               country_code,
+              coords,
               views: 1,
             },
           },
@@ -183,7 +186,7 @@ const RepoProfile = (props) => {
   const handleView = (params) => {
     axios.get('https://json.geoiplookup.io/').then(({ data }) => {
       storeView(params, data.country_name, data.country_code);
-      storeCountry(params.id, data.country_name, data.country_code);
+      storeCountry(params.id, data.country_name, data.country_code, [Number(data.longitude), Number(data.latitude)]);
     }).catch(() => {
       storeView(params, 'Unknown', 'UNKNOWN');
       storeCountry(params.id, 'Unknown', 'UNKNOWN');

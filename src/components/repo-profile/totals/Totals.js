@@ -48,6 +48,26 @@ const Trending = styled.span`
   }
 `;
 
+const showTrending = (newStat, oldStat) => {
+  if (newStat === oldStat) return null;
+  return (
+    <Trending trend={newStat > oldStat ? 'rising' : 'falling'}>
+      {newStat > oldStat && (
+        <React.Fragment>
+          <TrendingUpSVG />
+          +{newStat - oldStat}
+        </React.Fragment>
+      )}
+      {newStat < oldStat && (
+        <React.Fragment>
+          <TrendingDownSVG />
+          -{oldStat - newStat}
+        </React.Fragment>
+      )}
+    </Trending>
+  );
+};
+
 const Totals = ({
   stars,
   watchers,
@@ -62,40 +82,14 @@ const Totals = ({
       <Total>
         <Label>
           Stars
-          <Trending trend={stars > stats.stars ? 'rising' : 'falling'}>
-            {stars > stats.stars && (
-              <React.Fragment>
-                <TrendingUpSVG />
-                +{stars - stats.stars}
-              </React.Fragment>
-            )}
-            {stars < stats.stars && (
-              <React.Fragment>
-                <TrendingDownSVG />
-                -{stats.stars - stars}
-              </React.Fragment>
-            )}
-          </Trending>
+          {showTrending(stars, stats.stars)}
         </Label>
         <Count>{stars}</Count>
       </Total>
       <Total>
         <Label>
           Watchers
-          <Trending trend={watchers > stats.watchers ? 'rising' : 'falling'}>
-            {watchers > stats.watchers && (
-              <React.Fragment>
-                <TrendingUpSVG />
-                +{watchers - stats.watchers}
-              </React.Fragment>
-            )}
-            {watchers < stats.watchers && (
-              <React.Fragment>
-                <TrendingDownSVG />
-                -{stats.watchers - watchers}
-              </React.Fragment>
-            )}
-          </Trending>
+          {showTrending(watchers, stats.watchers)}
         </Label>
         <Count>
           {watchers}
@@ -104,20 +98,7 @@ const Totals = ({
       <Total>
         <Label>
           Subscribers
-          <Trending trend={subscribers > stats.subscribers ? 'rising' : 'falling'}>
-            {subscribers > stats.subscribers && (
-              <React.Fragment>
-                <TrendingUpSVG />
-                +{subscribers - stats.subscribers}
-              </React.Fragment>
-            )}
-            {subscribers < stats.subscribers && (
-              <React.Fragment>
-                <TrendingDownSVG />
-                -{stats.subscribers - subscribers}
-              </React.Fragment>
-            )}
-          </Trending>
+          {showTrending(subscribers, stats.subscribers)}
         </Label>
         <Count>
           {subscribers}
@@ -126,20 +107,7 @@ const Totals = ({
       <Total>
         <Label>
           Forks
-          <Trending trend={forks > stats.forks ? 'rising' : 'falling'}>
-            {forks > stats.forks && (
-              <React.Fragment>
-                <TrendingUpSVG />
-                +{forks - stats.forks}
-              </React.Fragment>
-            )}
-            {forks < stats.forks && (
-              <React.Fragment>
-                <TrendingDownSVG />
-                -{stats.forks - forks}
-              </React.Fragment>
-            )}
-          </Trending>
+          {showTrending(forks, stats.forks)}
         </Label>
         <Count>
           {forks}
@@ -148,20 +116,7 @@ const Totals = ({
       <Total>
         <Label>
           Open Issues
-          <Trending trend={issues > stats.issues ? 'rising' : 'falling'}>
-            {issues > stats.issues && (
-              <React.Fragment>
-                <TrendingUpSVG />
-                +{issues - stats.issues}
-              </React.Fragment>
-            )}
-            {issues < stats.issues && (
-              <React.Fragment>
-                <TrendingDownSVG />
-                -{stats.issues - issues}
-              </React.Fragment>
-            )}
-          </Trending>
+          {showTrending(issues, stats.issues)}
         </Label>
         <Count>
           {issues}

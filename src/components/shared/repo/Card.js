@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
@@ -7,6 +7,7 @@ import repoColors from '../../../utils/repoColors.json';
 
 import history from '../../../history';
 import Bookmark, { BookmarkIcon } from './Bookmark';
+import placeholder from '../header/user/assets/user.png';
 
 export const Wrapper = styled.div`
   position: relative;
@@ -136,51 +137,62 @@ const Card = ({
   text,
   id,
   ...rest
-}) => (
-  <Wrapper
-    onClick={() => history.push(`/${name}`)}
-    {...rest}
-  >
-    <Bookmark
-      id={id}
-      name={name}
-      avatar={avatar}
-      count={count}
-      language={language}
-      topic={topic}
-      style={{
-        position: 'absolute',
-        top: 5,
-        right: 5,
-      }}
-    />
-    <Image src={avatar} alt={name} />
-    <Name title={name}>{name}</Name>
-    <Count>{countIcon} <Number>{count}</Number></Count>
-    {language && (
-      <Language
-        to={`/search?q=language:${encodeURIComponent(language.toLowerCase())}`}
-        color={repoColors[language] ? repoColors[language].color : '#000'}
-        onClick={(e) => {
-          e.stopPropagation();
+}) => {
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  return (
+    <Wrapper
+      onClick={() => history.push(`/${name}`)}
+      {...rest}
+    >
+      <Bookmark
+        id={id}
+        name={name}
+        avatar={avatar}
+        count={count}
+        language={language}
+        topic={topic}
+        style={{
+          position: 'absolute',
+          top: 5,
+          right: 5,
         }}
-      >
-        {language.toLowerCase()}
-      </Language>
-    )}
-    {!language && topic && (
-      <Tag
-        to={`/search?q=topic:${encodeURIComponent(topic.toLowerCase())}`}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        #{topic.toLowerCase()}
-      </Tag>
-    )}
-    {text && <Text>{text}</Text>}
-  </Wrapper>
-);
+      />
+      {isImageLoading ? (
+        <Image src={placeholder} alt="Loading profile image..." />
+      ) : null}
+      <Image
+        src={avatar}
+        alt={name}
+        style={isImageLoading ? { visibility: 'hidden', display: 'none' } : {}}
+        onLoad={() => setIsImageLoading(false)}
+      />
+      <Name title={name}>{name}</Name>
+      <Count>{countIcon} <Number>{count}</Number></Count>
+      {language && (
+        <Language
+          to={`/search?q=language:${encodeURIComponent(language.toLowerCase())}`}
+          color={repoColors[language] ? repoColors[language].color : '#000'}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          {language.toLowerCase()}
+        </Language>
+      )}
+      {!language && topic && (
+        <Tag
+          to={`/search?q=topic:${encodeURIComponent(topic.toLowerCase())}`}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          #{topic.toLowerCase()}
+        </Tag>
+      )}
+      {text && <Text>{text}</Text>}
+    </Wrapper>
+  );
+};
 
 Card.propTypes = {
   name: PropTypes.string,

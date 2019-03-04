@@ -140,9 +140,9 @@ const Readme = ({ id }) => {
               y: 20,
             }}
             style={{
-              zoom: spring(_zoom, { stiffness: 150, damping: 20 }),
-              x: spring(center[0], { stiffness: 250, damping: 20 }),
-              y: spring(center[1], { stiffness: 250, damping: 20 }),
+              zoom: spring(_zoom, { stiffness: 320, damping: 45 }),
+              x: spring(center[0], { stiffness: 320, damping: 45 }),
+              y: spring(center[1], { stiffness: 320, damping: 45 }),
             }}
           >
             {({ zoom, x, y }) => (

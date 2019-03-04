@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Scrollbars } from 'react-custom-scrollbars';
 
 import Panel from '../panel/Panel';
 import Error from '../../shared/error/Error';
+
+import placeholder from '../../shared/header/user/assets/user.png';
 
 const Wrapper = styled.div`
   display: flex;
@@ -41,28 +43,39 @@ const Name = styled.strong`
   }
 `;
 
-const Contributors = ({ contributors, isLoading, hasError, errorMessage }) => (
-  <Panel title="Contributors">
-    {hasError && (
-      <Error message={errorMessage} source="GitHub" />
-    )}
-    {!hasError && (
-      <Scrollbars autoHeight>
-        <Wrapper>
-          {!isLoading && contributors.map(contributor => (
-            <Contributor key={contributor.id}>
-              <Avatar src={contributor.avatar_url} />
-              <Name>
-                {contributor.login}
-                <span>{contributor.contributions} contributions</span>
-              </Name>
-            </Contributor>
-          ))}
-        </Wrapper>
-      </Scrollbars>
-    )}
-  </Panel>
-);
+const Contributors = ({ contributors, isLoading, hasError, errorMessage }) => {
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  return (
+    <Panel title="Contributors">
+      {hasError && (
+        <Error message={errorMessage} source="GitHub" />
+      )}
+      {!hasError && (
+        <Scrollbars autoHeight>
+          <Wrapper>
+            {!isLoading && contributors.map(contributor => (
+              <Contributor key={contributor.id}>
+                {isImageLoading ? (
+                  <Avatar src={placeholder} alt="Loading profile image..." />
+                ) : null}
+                <Avatar
+                  src={contributor.avatar_url}
+                  alt={contributor.login}
+                  style={isImageLoading ? { visibility: 'hidden', display: 'none' } : {}}
+                  onLoad={() => setIsImageLoading(false)}
+                />
+                <Name>
+                  {contributor.login}
+                  <span>{contributor.contributions} contributions</span>
+                </Name>
+              </Contributor>
+            ))}
+          </Wrapper>
+        </Scrollbars>
+      )}
+    </Panel>
+  );
+};
 
 Contributors.propTypes = {
   errorMessage: PropTypes.string,

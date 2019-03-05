@@ -195,19 +195,19 @@ const Readme = ({ id }) => {
                             default: {
                               fill: generateColor(country && country.views) || '#ECEFF1',
                               stroke: country && country.views > 0 ? '#ECEFF1' : '#95a5ad',
-                              strokeWidth: zoom / 2.75,
+                              strokeWidth: 0.25,
                               outline: 'none',
                             },
                             hover: {
                               fill: '#2b8cff',
                               stroke: '#ECEFF1',
-                              strokeWidth: zoom / 2.75,
+                              strokeWidth: 0.25,
                               outline: 'none',
                             },
                             pressed: {
                               fill: '#1e83fc',
                               stroke: '#1e83fc',
-                              strokeWidth: zoom / 2.75,
+                              strokeWidth: 0.25,
                               outline: 'none',
                             },
                           }}

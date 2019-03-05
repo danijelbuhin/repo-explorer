@@ -88,8 +88,8 @@ const Readme = ({ id }) => {
   };
 
   const generateColor = scaleLinear()
-    .domain([0, maxViews / 2, maxViews])
-    .range(['#a5cfff', '#63abff', '#3E97FF']);
+    .domain([0, maxViews / 3, maxViews / 2, maxViews])
+    .range(['#bdd9f9', '#91bef2', '#63abff', '#3E97FF']);
 
   useEffect(() => {
     firebase.viewsBreakdown.doc(String(id)).get().then((doc) => {

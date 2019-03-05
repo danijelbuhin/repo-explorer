@@ -9,6 +9,7 @@ import {
   Geographies,
   Geography,
 } from 'react-simple-maps';
+import { scaleLinear } from 'd3-scale';
 
 import Panel from '../panel/Panel';
 import Button from '../../shared/button/Button';
@@ -57,6 +58,7 @@ const UnknownFlag = styled.div`
   background: #333;
 `;
 
+
 const Readme = ({ id }) => {
   const [countriesState, setCountriesState] = useApiState({ isLoading: true, hasError: false });
   const [countries, setCountries] = useState({});
@@ -64,9 +66,12 @@ const Readme = ({ id }) => {
   const [zoom, setZoom] = useState(1);
   const [center, setCenter] = useState([10, 20]);
 
+  const [maxViews, setMaxViews] = useState(0);
+
   const map = document.querySelector('.views-breakdown-map');
 
   const handleScroll = (e) => {
+    e.preventDefault();
     if (zoom <= 1 && e.deltaY > 0) {
       setZoom(1);
       setCenter([10, 20]);
@@ -82,10 +87,17 @@ const Readme = ({ id }) => {
     }
   };
 
+  const generateColor = scaleLinear()
+    .domain([0, maxViews / 2, maxViews])
+    .range(['#a5cfff', '#63abff', '#3E97FF']);
+
   useEffect(() => {
     firebase.viewsBreakdown.doc(String(id)).get().then((doc) => {
+      const _countries = doc.data().countries;
+      const topCountry = Object.keys(_countries).reduce((prev, curr) => _countries[prev].views > _countries[curr].views ? prev : curr);
+      setMaxViews(_countries[topCountry].views);
       setCountriesState({ isLoading: false, hasError: false });
-      setCountries(doc.data().countries);
+      setCountries(_countries);
     });
   }, []);
 
@@ -181,14 +193,14 @@ const Readme = ({ id }) => {
                           data-tip={`${geography.properties.NAME_LONG} - ${(country && country.views) || 0}`}
                           style={{
                             default: {
-                              fill: country && country.views > 0 ? '#3E97FF' : '#ECEFF1',
-                              stroke: country && country.views > 0 ? '#3E97FF' : '#607D8B',
+                              fill: generateColor(country && country.views) || '#ECEFF1',
+                              stroke: country && country.views > 0 ? '#ECEFF1' : '#95a5ad',
                               strokeWidth: zoom / 2.75,
                               outline: 'none',
                             },
                             hover: {
                               fill: '#2b8cff',
-                              stroke: '#2b8cff',
+                              stroke: '#ECEFF1',
                               strokeWidth: zoom / 2.75,
                               outline: 'none',
                             },

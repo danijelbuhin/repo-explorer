@@ -61,17 +61,24 @@ const Readme = ({ id }) => {
   const [countriesState, setCountriesState] = useApiState({ isLoading: true, hasError: false });
   const [countries, setCountries] = useState({});
 
-  const [_zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(1);
   const [center, setCenter] = useState([10, 20]);
 
   const map = document.querySelector('.views-breakdown-map');
 
   const handleScroll = (e) => {
-    if (_zoom === 1 && e.deltaY > 0) return;
+    if (zoom <= 1 && e.deltaY > 0) {
+      setZoom(1);
+      setCenter([10, 20]);
+      return;
+    }
+    if (zoom >= 7 && e.deltaY < 0) {
+      return;
+    }
     if (e.deltaY > 0) {
-      setZoom(_zoom / 2);
+      setZoom(zoom / 2);
     } else {
-      setZoom(_zoom * 2);
+      setZoom(zoom * 2);
     }
   };
 
@@ -91,7 +98,7 @@ const Readme = ({ id }) => {
         map.removeEventListener('wheel', handleScroll);
       }
     };
-  }, [map, _zoom]);
+  }, [map, zoom]);
 
   return (
     <Panel title="Views breakdown (In progress)" isClosable={false}>
@@ -140,12 +147,12 @@ const Readme = ({ id }) => {
               y: 20,
             }}
             style={{
-              zoom: spring(_zoom, { stiffness: 320, damping: 45 }),
-              x: spring(center[0], { stiffness: 320, damping: 45 }),
-              y: spring(center[1], { stiffness: 320, damping: 45 }),
+              zoom: spring(zoom, { stiffness: 100, damping: 20 }),
+              x: spring(center[0], { stiffness: 100, damping: 20 }),
+              y: spring(center[1], { stiffness: 100, damping: 20 }),
             }}
           >
-            {({ zoom, x, y }) => (
+            {({ zoom: _zoom, x, y }) => (
               <ComposableMap
                 projectionConfig={{
                   scale: 220,
@@ -160,7 +167,7 @@ const Readme = ({ id }) => {
               >
                 <ZoomableGroup
                   center={[x, y]}
-                  zoom={zoom}
+                  zoom={_zoom}
                 >
                   <Geographies geography={geoMap}>
                     {(geographies, projection) => geographies.map((geography, i) => {

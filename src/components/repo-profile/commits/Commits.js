@@ -86,7 +86,7 @@ const Commits = ({
               monthLegendOffset={10}
               dayBorderWidth={2}
               dayBorderColor="#ffffff"
-              tooltip={({ day, value }) => <div>{value} commits on {moment(day).format('MMMM Do, YYYY')}</div>}
+              tooltip={({ day, value }) => <div>{value} commits on {moment(day).format('dddd, DD/MM/YYYY')}</div>}
             />
           )}
         </Scrollbars>

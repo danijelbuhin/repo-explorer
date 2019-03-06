@@ -16,6 +16,7 @@ const Wrapper = styled.div`
 
     .views-country {
       cursor: pointer;
+      transition: all .2s ease-in-out;
     }
 
     ${({ focusedCountry }) => focusedCountry && `
@@ -46,12 +47,26 @@ const Country = styled.div`
 
   cursor: pointer;
 
-  background: ${({ isFocused }) => isFocused ? '#f0f1f6' : 'transparent'};
+  background: transparent;
+
+  transition: all .2s ease-in-out;
 
   span {
     display: inline-block;
     margin-right: 5px;
   }
+
+  &:hover {
+    background: #f0f1f6;
+    box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
+    transform: translate3d(0, -5px, 0);
+  }
+
+  ${({ isFocused }) => isFocused && `
+    background: #f0f1f6;
+    box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
+    transform: translate3d(0, -5px, 0);
+  `};
 `;
 
 const UnknownFlag = styled.div`
@@ -132,7 +147,7 @@ const Views = ({ id }) => {
   }, [map, zoom]);
 
   return (
-    <Panel title="Views breakdown (In progress)" isClosable={false}>
+    <Panel title="Views breakdown" isClosable={false}>
       {countriesState.isLoading && (
         <div>Loading countries...</div>
       )}

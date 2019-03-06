@@ -21,6 +21,11 @@ const Wrapper = styled.button`
 };
 
   transition: all .2s ease-in-out;
+
+  outline: none;
+  &:focus {
+    outline: none;
+  }
 `;
 
 const Button = ({

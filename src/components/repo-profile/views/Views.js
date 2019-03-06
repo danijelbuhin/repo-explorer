@@ -1,27 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import ReactTooltip from 'react-tooltip';
-import { Motion, spring } from 'react-motion';
-import {
-  ComposableMap,
-  ZoomableGroup,
-  Geographies,
-  Geography,
-} from 'react-simple-maps';
 
 import Panel from '../panel/Panel';
-import Button from '../../shared/button/Button';
 
-import geoMap from './world-110m.json';
 import firebase from '../../../services/firebase';
 import useApiState from '../../../hooks/useApiState';
+import Globe from './globe/Globe';
 
 const Wrapper = styled.div`
   padding: 10px;
 
   .views-breakdown-map {
     border: 1px solid #f0f1f6;
+
+    .views-country {
+      cursor: pointer;
+      transition: all .2s ease-in-out;
+    }
+
+    ${({ focusedCountry }) => focusedCountry && `
+      .views-country-${focusedCountry} {
+        fill: #89E051 !important;
+      }
+    `};
   }
 `;
 
@@ -37,15 +39,34 @@ const Countries = styled.div`
 `;
 
 const Country = styled.div`
-  width: 15%;
+  width: 19%;
   padding: 10px;
+  margin: 1% 0.5%;
+
+  border: 1px solid #f0f1f6;
 
   cursor: pointer;
+
+  background: transparent;
+
+  transition: all .2s ease-in-out;
 
   span {
     display: inline-block;
     margin-right: 5px;
   }
+
+  &:hover {
+    background: #f0f1f6;
+    box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
+    transform: translate3d(0, -5px, 0);
+  }
+
+  ${({ isFocused }) => isFocused && `
+    background: #f0f1f6;
+    box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
+    transform: translate3d(0, -5px, 0);
+  `};
 `;
 
 const UnknownFlag = styled.div`
@@ -57,28 +78,60 @@ const UnknownFlag = styled.div`
   background: #333;
 `;
 
-const Readme = ({ id }) => {
+const Name = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+`;
+
+const Count = styled.strong`
+  font-size: 24px;
+`;
+
+
+const Views = ({ id }) => {
   const [countriesState, setCountriesState] = useApiState({ isLoading: true, hasError: false });
   const [countries, setCountries] = useState({});
 
-  const [_zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(1);
   const [center, setCenter] = useState([10, 20]);
+
+  const [maxViews, setMaxViews] = useState(0);
+  const [focusedCountry, setFocusedCountry] = useState('');
 
   const map = document.querySelector('.views-breakdown-map');
 
   const handleScroll = (e) => {
-    if (_zoom === 1 && e.deltaY > 0) return;
-    if (e.deltaY > 0) {
-      setZoom(_zoom / 2);
-    } else {
-      setZoom(_zoom * 2);
+    e.preventDefault();
+    if (zoom <= 1 && e.deltaY > 0) {
+      setZoom(1);
+      setCenter([10, 20]);
+      return;
     }
+    if (zoom >= 7 && e.deltaY < 0) {
+      return;
+    }
+    if (e.deltaY > 0) {
+      setZoom(zoom / 2);
+    } else {
+      setZoom(zoom * 2);
+    }
+  };
+
+  const zoomToCountry = (country) => {
+    if (!countries[country]) return;
+    setZoom(6);
+    setCenter(countries[country].coords);
+    setFocusedCountry(country);
   };
 
   useEffect(() => {
     firebase.viewsBreakdown.doc(String(id)).get().then((doc) => {
+      const _countries = doc.data().countries;
+      const topCountry = Object.keys(_countries).reduce((prev, curr) => _countries[prev].views > _countries[curr].views ? prev : curr);
+      setMaxViews(_countries[topCountry].views);
       setCountriesState({ isLoading: false, hasError: false });
-      setCountries(doc.data().countries);
+      setCountries(_countries);
     });
   }, []);
 
@@ -91,128 +144,63 @@ const Readme = ({ id }) => {
         map.removeEventListener('wheel', handleScroll);
       }
     };
-  }, [map, _zoom]);
+  }, [map, zoom]);
 
   return (
-    <Panel title="Views breakdown (In progress)" isClosable={false}>
+    <Panel title="Views breakdown" isClosable={false}>
       {countriesState.isLoading && (
         <div>Loading countries...</div>
       )}
       {!countriesState.hasError
       && !countriesState.isLoading
       && Object.keys(countries).length > 0 && (
-        <Wrapper>
+        <Wrapper focusedCountry={focusedCountry}>
           <Countries>
             {Object.keys(countries).map(c => (
               <Country
                 key={countries[c].country_code}
+                isFocused={c === focusedCountry}
                 onClick={() => {
                   if (countries[c].country_code === 'UNKNOWN') return;
-                  setZoom(6);
-                  setCenter(countries[c].coords || [0, 20]);
+                  zoomToCountry(c);
                 }}
               >
-                {countries[c].country_code === 'UNKNOWN' ? (
-                  <UnknownFlag />
-                ) : (
-                  <span
-                    className={`flag-icon flag-icon-${countries[c].country_code.toLowerCase()}`}
-                  />
-                )}
-                {countries[c].country_name} <br />
-                {countries[c].views}
+                <Name>
+                  {countries[c].country_code === 'UNKNOWN' ? (
+                    <UnknownFlag />
+                  ) : (
+                    <span
+                      className={`flag-icon flag-icon-${countries[c].country_code.toLowerCase()}`}
+                    />
+                  )}
+                  <span>{countries[c].country_name}</span>
+                </Name>
+                <Count>{countries[c].views}</Count>
               </Country>
             ))}
           </Countries>
-          <Button
-            style={{ marginBottom: 20 }}
-            onClick={() => {
-              setZoom(1);
-              setCenter([10, 20]);
-            }}
-          >
-            Reset map
-          </Button>
-          <Motion
-            defaultStyle={{
-              zoom: 1,
-              x: 10,
-              y: 20,
-            }}
-            style={{
-              zoom: spring(_zoom, { stiffness: 320, damping: 45 }),
-              x: spring(center[0], { stiffness: 320, damping: 45 }),
-              y: spring(center[1], { stiffness: 320, damping: 45 }),
-            }}
-          >
-            {({ zoom, x, y }) => (
-              <ComposableMap
-                projectionConfig={{
-                  scale: 220,
-                }}
-                width={980}
-                height={600}
-                style={{
-                  width: '100%',
-                  height: 'auto',
-                }}
-                className="views-breakdown-map"
-              >
-                <ZoomableGroup
-                  center={[x, y]}
-                  zoom={zoom}
-                >
-                  <Geographies geography={geoMap}>
-                    {(geographies, projection) => geographies.map((geography, i) => {
-                      if (geography.properties.ISO_A2 === 'AQ') return null;
-                      const country = countries[geography.properties.ISO_A2];
-                      return (
-                        <Geography
-                          key={`views-country-${i.toString()}`}
-                          geography={geography}
-                          projection={projection}
-                          data-tip={`${geography.properties.NAME_LONG} - ${(country && country.views) || 0}`}
-                          style={{
-                            default: {
-                              fill: country && country.views > 0 ? '#3E97FF' : '#ECEFF1',
-                              stroke: country && country.views > 0 ? '#3E97FF' : '#607D8B',
-                              strokeWidth: zoom / 2.75,
-                              outline: 'none',
-                            },
-                            hover: {
-                              fill: '#2b8cff',
-                              stroke: '#2b8cff',
-                              strokeWidth: zoom / 2.75,
-                              outline: 'none',
-                            },
-                            pressed: {
-                              fill: '#1e83fc',
-                              stroke: '#1e83fc',
-                              strokeWidth: zoom / 2.75,
-                              outline: 'none',
-                            },
-                          }}
-                        />
-                      );
-                    })}
-                  </Geographies>
-                </ZoomableGroup>
-              </ComposableMap>
-            )}
-          </Motion>
-          <ReactTooltip />
+          <Globe
+            maxViews={maxViews}
+            setZoom={setZoom}
+            setCenter={setCenter}
+            setFocusedCountry={setFocusedCountry}
+            zoomToCountry={zoomToCountry}
+            zoom={zoom}
+            center={center}
+            countries={countries}
+          />
         </Wrapper>
       )}
     </Panel>
   );
 };
 
-Readme.propTypes = {
+Views.propTypes = {
   id: PropTypes.number,
 };
 
-Readme.defaultProps = {
+Views.defaultProps = {
   id: 0,
 };
 
-export default Readme;
+export default Views;

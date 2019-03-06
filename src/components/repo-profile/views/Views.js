@@ -6,7 +6,7 @@ import Panel from '../panel/Panel';
 
 import firebase from '../../../services/firebase';
 import useApiState from '../../../hooks/useApiState';
-import Map from './map/Map';
+import Globe from './globe/Globe';
 
 const Wrapper = styled.div`
   padding: 10px;
@@ -179,7 +179,7 @@ const Views = ({ id }) => {
               </Country>
             ))}
           </Countries>
-          <Map
+          <Globe
             maxViews={maxViews}
             setZoom={setZoom}
             setCenter={setCenter}

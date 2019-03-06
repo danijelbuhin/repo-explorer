@@ -14,7 +14,7 @@ import Button from '../../../shared/button/Button';
 
 import geoMap from '../world-110m.json';
 
-const Map = ({
+const Globe = ({
   maxViews,
   setZoom,
   setCenter,
@@ -114,7 +114,7 @@ const Map = ({
   );
 };
 
-Map.propTypes = {
+Globe.propTypes = {
   maxViews: PropTypes.number.isRequired,
   zoom: PropTypes.number.isRequired,
   setZoom: PropTypes.func.isRequired,
@@ -125,4 +125,4 @@ Map.propTypes = {
   center: PropTypes.arrayOf(PropTypes.number).isRequired,
 };
 
-export default Map;
+export default Globe;

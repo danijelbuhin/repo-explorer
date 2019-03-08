@@ -189,7 +189,7 @@ const RepoProfile = (props) => {
       storeCountry(params.id, data.country_name, data.country_code, [Number(data.longitude), Number(data.latitude)]);
     }).catch(() => {
       storeView(params, 'Unknown', 'UNKNOWN');
-      storeCountry(params.id, 'Unknown', 'UNKNOWN');
+      storeCountry(params.id, 'Unknown', 'UNKNOWN', [10, 20]);
     });
   };
 

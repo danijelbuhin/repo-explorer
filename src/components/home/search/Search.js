@@ -214,7 +214,7 @@ class Search extends Component {
             Display all results for {'"'}{search}{'"'}
           </SearchQuery>
           {shouldRenderRepo && repos.length > 0 && repos.map(repo => (
-            <Repo key={repo.id} to={`/repo/${encodeURIComponent(repo.full_name)}`}>
+            <Repo key={repo.id} to={`/${repo.full_name}`}>
               <Avatar src={repo.owner.avatar_url} alt={repo.full_name} />
               <Name>{repo.full_name}</Name>
             </Repo>

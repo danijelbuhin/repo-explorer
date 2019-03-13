@@ -5,12 +5,13 @@ import withClickOutside from 'react-click-outside';
 import { debounce } from 'lodash';
 import { Link } from 'react-router-dom';
 
-import withAppContext from '../../shared/app/withAppContext';
+import withAppContext from '../../app/withAppContext';
 
 import { ReactComponent as SearchSVG } from './assets/Search.svg';
-import history from '../../../history';
+import { ReactComponent as ClearSVG } from './assets/Clear.svg';
+import history from '../../../../history';
 
-import Dropdown, { Wrapper as DropdownWrapper } from '../../shared/dropdown/Dropdown';
+import Dropdown, { Wrapper as DropdownWrapper } from '../../dropdown/Dropdown';
 
 const Wrapper = styled.form`
   display: flex;
@@ -32,13 +33,12 @@ const Wrapper = styled.form`
 const Input = styled.input`
   width: 100%;
 
-  padding: 18px 45px 18px 18px;
+  padding: 13px 40px 13px 13px;
 
-  background: #FFFFFF;
+  background: #F7F7F7;
   color: #AEB6CB;
   font-size: 16px;
   border: 1px solid rgba(212, 221, 237, 0.25);
-  box-shadow: 0px 2px 4px rgba(212, 221, 237, 0.25);
   border-radius: 3px;
 
   transition: all .3s ease-in-out;
@@ -49,12 +49,34 @@ const Input = styled.input`
   }
 `;
 
-const Icon = styled(SearchSVG)`
+const SearchIcon = styled(SearchSVG)`
   position: absolute;
   top: 50%;
-  right: 25px;
+  right: 20px;
 
-  transform: translateY(-50%);
+  transform: translateY(-50%) scale(1);
+
+  transition: all .3s ease-in-out;
+
+  &.is-hidden {
+    transform: translateY(-50%) scale(0);
+  }
+`;
+
+const ClearIcon = styled(ClearSVG)`
+  position: absolute;
+  top: 50%;
+  right: 20px;
+
+  transform: translateY(-50%) scale(1);
+
+  transition: all .3s ease-in-out;
+
+  cursor: pointer;
+
+  &.is-hidden {
+    transform: translateY(-50%) scale(0);
+  }
 `;
 
 const Repo = styled(Link)`
@@ -188,6 +210,16 @@ class Search extends Component {
     });
   }
 
+  handleClear = () => {
+    this.setState(() => ({
+      search: '',
+      isDropdownActive: false,
+      isSearching: false,
+      shouldRenderRepo: false,
+      repos: [],
+    }));
+  }
+
   handleSearch = (e) => {
     e.preventDefault();
     history.push(`/search?q=${this.state.search}`);
@@ -203,7 +235,11 @@ class Search extends Component {
           onClick={this.toggleDropdown}
           onChange={this.handleChange}
         />
-        <Icon />
+        <SearchIcon className={this.state.search.length > 0 ? 'is-hidden' : ''} />
+        <ClearIcon
+          className={this.state.search.length === 0 ? 'is-hidden' : ''}
+          onClick={this.handleClear}
+        />
         <Dropdown isActive={isDropdownActive} className={isDropdownActive && 'is-active'}>
           {isSearching && (
             <SpinnerWrapper>
@@ -214,7 +250,13 @@ class Search extends Component {
             Display all results for {'"'}{search}{'"'}
           </SearchQuery>
           {shouldRenderRepo && repos.length > 0 && repos.map(repo => (
-            <Repo key={repo.id} to={`/${repo.full_name}`}>
+            <Repo
+              key={repo.id}
+              to={`/${repo.full_name}`}
+              onClick={() => {
+                this.setState({ search: repo.full_name });
+              }}
+            >
               <Avatar src={repo.owner.avatar_url} alt={repo.full_name} />
               <Name>{repo.full_name}</Name>
             </Repo>

@@ -15,7 +15,6 @@ import { ReactComponent as EyeSVG } from './assets/Eye.svg';
 import RepoList from '../shared/repo/List';
 import Card from '../shared/repo/Card';
 import Pagination from '../shared/pagination/Pagination';
-import Search from './search/Search';
 
 import useApiState from '../../hooks/useApiState';
 
@@ -84,7 +83,6 @@ const Home = ({ appContext }) => {
 
   return (
     <Wrapper>
-      <Search />
       <RepoList
         title="Most popular repos:"
         isLoading={reposState.isLoading}

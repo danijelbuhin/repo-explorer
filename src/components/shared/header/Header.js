@@ -5,6 +5,11 @@ import { Link } from 'react-router-dom';
 import { ReactComponent as LogoSVG } from './assets/Logo.svg';
 
 import UserInfo from './user/User';
+import Search from './search/Search';
+
+const Logo = styled(LogoSVG)`
+  width: 140px;
+`;
 
 const Wrapper = styled.div`
   position: fixed;
@@ -25,20 +30,14 @@ const Wrapper = styled.div`
   padding: 10px;
 
   z-index: 100;
-
-  svg {
-    width: 140px;
-    @media (min-width: 550px) {
-      width: 175px;
-    }
-  }
 `;
 
 const Header = () => (
   <Wrapper>
     <Link to="/">
-      <LogoSVG />
+      <Logo />
     </Link>
+    <Search />
     <UserInfo />
   </Wrapper>
 );

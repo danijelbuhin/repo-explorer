@@ -218,13 +218,10 @@ const RepoProfile = (props) => {
       });
   };
 
-  const fetchSection = (setHook, setApiHook, apiMethod, initialData, customThen) => {
+  const fetchSection = (setHook, setApiHook, apiMethod, initialData) => {
     setApiHook({ isLoading: true, hasError: false });
     return appContext[apiMethod](repoName)
       .then((data) => { // eslint-disable-line
-        if (customThen) {
-          return data;
-        }
         setApiHook({ isLoading: false, hasError: false });
         setHook(data);
       })
@@ -239,14 +236,8 @@ const RepoProfile = (props) => {
       .then((data) => {
         axios
           .all([
-            fetchSection(setCommits, setCommitsState, 'fetchCommits', [], true).then((items) => {
-              setCommitsState({ isLoading: false, hasError: false });
-              setCommits(items);
-            }),
-            fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [], true).then((items) => {
-              setParticipationState({ isLoading: false, hasError: false });
-              setParticipation(items);
-            }),
+            fetchSection(setCommits, setCommitsState, 'fetchCommits', []),
+            fetchSection(setParticipation, setParticipationState, 'fetchParticipation', []),
             fetchSection(setLanguages, setLanguagesState, 'fetchLanguages', []),
             fetchSection(setContributors, setContributorsState, 'fetchContributors', []),
             fetchSection(setReadme, setReadmeState, 'fetchReadme', ''),

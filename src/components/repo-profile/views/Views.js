@@ -99,7 +99,7 @@ const Views = ({ id }) => {
   const [maxViews, setMaxViews] = useState(0);
   const [focusedCountry, setFocusedCountry] = useState('');
 
-  const map = document.querySelector('.views-breakdown-map');
+  const [map, setMap] = useState(null);
 
   const handleScroll = (e) => {
     e.preventDefault();
@@ -132,6 +132,7 @@ const Views = ({ id }) => {
       setMaxViews(_countries[topCountry].views);
       setCountriesState({ isLoading: false, hasError: false });
       setCountries(_countries);
+      setMap(document.querySelector('.views-breakdown-map'));
     });
   }, []);
 

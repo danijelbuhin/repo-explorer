@@ -20,8 +20,6 @@ const Wrapper = styled.form`
   width: 100%;
   position: relative;
 
-  margin: 70px auto;
-
   ${DropdownWrapper} {
     width: 100%;
     bottom: -3px;
@@ -234,6 +232,7 @@ class Search extends Component {
           value={search}
           onClick={this.toggleDropdown}
           onChange={this.handleChange}
+          onKeyDown={this.handleKeyDown}
         />
         <SearchIcon className={this.state.search.length > 0 ? 'is-hidden' : ''} />
         <ClearIcon
@@ -247,7 +246,7 @@ class Search extends Component {
             </SpinnerWrapper>
           )}
           <SearchQuery to={`/search?q=${encodeURIComponent(search)}`}>
-            Display all results for {'"'}{search}{'"'}
+            Hit enter or click here to display all results for {'"'}{search}{'"'}
           </SearchQuery>
           {shouldRenderRepo && repos.length > 0 && repos.map(repo => (
             <Repo
@@ -255,6 +254,7 @@ class Search extends Component {
               to={`/${repo.full_name}`}
               onClick={() => {
                 this.setState({ search: repo.full_name });
+                this.handleClickOutside();
               }}
             >
               <Avatar src={repo.owner.avatar_url} alt={repo.full_name} />

@@ -319,24 +319,14 @@ const RepoProfile = (props) => {
               isLoading={commitsState.isLoading}
               hasError={commitsState.hasError}
               errorMessage={commitsState.errorMessage}
-              fetchCommits={() => {
-                fetchSection(setCommits, setCommitsState, 'fetchCommits', [], true).then((items) => {
-                  setCommitsState({ isLoading: false, hasError: false });
-                  setCommits(items);
-                });
-              }}
+              fetchCommits={() => fetchSection(setCommits, setCommitsState, 'fetchCommits', [])}
             />
             <Participation
               participation={participation}
               isLoading={participationState.isLoading}
               hasError={participationState.hasError}
               errorMessage={participationState.errorMessage}
-              fetchParticipation={() => {
-                fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [], true).then((items) => {
-                  setParticipationState({ isLoading: false, hasError: false });
-                  setParticipation(items);
-                });
-              }}
+              fetchParticipation={() => fetchSection(setParticipation, setParticipationState, 'fetchParticipation', [])}
             />
           </React.Fragment>
         )}

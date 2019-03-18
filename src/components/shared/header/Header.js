@@ -9,6 +9,7 @@ import Search from './search/Search';
 
 const Logo = styled(LogoSVG)`
   width: 140px;
+  margin-right: 10px;
 `;
 
 const Wrapper = styled.div`
